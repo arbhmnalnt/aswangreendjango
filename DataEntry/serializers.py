@@ -10,14 +10,14 @@ class ContractSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contract
-        # fields = '__all__'
-        fields = ('serialNum', 'created_at_date', 'client',)
+        fields = '__all__'
+        # fields = ('serialNum', 'created_at_date', 'client',)
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        # fields = '__all__'
-        fields = ('name', 'created_at_date', 'price',)
+        fields = '__all__'
+        # fields = ('name', 'created_at_date', 'price',)
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:

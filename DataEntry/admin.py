@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Departement, Employee, Service, Client, Contract, FollowContractServices
+from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area
 
 class DepartementAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -11,6 +11,9 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('id','name','typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
+
+class AreaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'counter')
 
 class ClientAdmin(admin.ModelAdmin):
     list_display = ('id','name','phone','addressArea','created_at')
@@ -27,12 +30,13 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class FollowContractServicesAdmin(admin.ModelAdmin):
-    list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatus','remain_amount','created_by','created_at_date')
+    list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','remain_amount','created_by','created_at_date')
 
 # Register your models here.
 admin.site.register(Departement, DepartementAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(Service, ServiceAdmin)
+admin.site.register(Area, AreaAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Contract, ContractAdmin)
 admin.site.register(FollowContractServices, FollowContractServicesAdmin)

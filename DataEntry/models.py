@@ -28,7 +28,8 @@ class TimeStampMixin(models.Model):
             return str(self.title)
         elif hasattr(self, 'COLLECT_STATUS'):
             return str(self.service)
-
+        elif hasattr(self, 'client'):
+                return str(self.client)
 class Departement(TimeStampMixin,models.Model):
     name  = models.CharField(max_length=50)
     notes = models.TextField(max_length=50,null=True, blank=True)
@@ -56,6 +57,7 @@ class Employee(TimeStampMixin,models.Model):
     departement  = models.ForeignKey('Departement', on_delete=models.CASCADE,  null=True, blank=True)
     jobTitle     = models.CharField(max_length=50, null=True, blank=True)
     dateOfEmployment  = models.DateField(null=True, blank=True, verbose_name="تاريخ التعيين")
+    created_prev_date = models.DateField(null=True, blank=True)
     dateOfBirth  = models.DateField(null=True, blank=True)
     naId         = models.CharField(max_length=14, null=True, blank=True)
     typee        = models.CharField(max_length=50 , null=True, blank=True, choices=CHOICES_EMP) # will be get front as [ employee or worker ]
@@ -82,40 +84,36 @@ class Area(TimeStampMixin,models.Model):
 
 class Client(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom client number for future us as like his id in company or any use else
-    name            = models.CharField(max_length=50,null=True, blank=True)
+    name            = models.CharField(max_length=50,null=True, blank=True, db_index=True)
     phone           = models.CharField(max_length=11, null=True, blank=True, db_index=True)
-    addressArea     = models.CharField(max_length=50,null=True, blank=True)
-    addressBuilding = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
+    addressArea     = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True)
+    addressBuilding = models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
     addressApartment= models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل الشقه")
-    addressDetails  = models.CharField(max_length=50,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
+    addressDetails  = models.TextField(max_length=50,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
+    created_prev_date = models.DateField(null=True, blank=True)
     notes           = models.TextField(max_length=50,null=True, blank=True)
+
 
 
 class Contract(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(help_text="رقم سريال متفرد لكل تعاقد",unique=True,null=True, blank=True,db_index=True)
     client          = models.ForeignKey('Client', related_name='contract_client', on_delete=models.CASCADE,null=True, blank=True)
     services        = models.ManyToManyField('Service',related_name='services')
+    belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
+    created_prev_date = models.DateField(null=True, blank=True)
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
     notes           = models.TextField(max_length=50,null=True, blank=True)
 
 class FollowContractServices(TimeStampMixin,models.Model):
-    PAID = 'تم الدفع'
-    PAYMENT_REQUIRED = 'مطلوب الدفع'
-    COLLECTING_DATE = 'فى انتظار ميعاد التحصيل'  # Waiting for collection date
-    COLLECT_STATUS= [
-        (PAID, 'Service has been paid already'),
-        (PAYMENT_REQUIRED, 'Payment required for the service'),
-        (COLLECTING_DATE, 'Waiting for collection date'),
-    ]
     #
     PAID_NUM = 1
     PAYMENT_REQUIRED_NUM = 2
     COLLECTING_DATE_NUM = 3
     COLLECT_STATUS_NUM = (
-        (PAID_NUM, 'Service has been paid already'),
-        (PAYMENT_REQUIRED_NUM, 'Payment required for the service'),
-        (COLLECTING_DATE_NUM, 'Waiting for collection date'),
+        (PAID_NUM, 'تم الدفع'),
+        (PAYMENT_REQUIRED_NUM, 'مطلوب الدفع'),
+        (COLLECTING_DATE_NUM, 'فى انتار ميعاد التحصيل'),
     )
     #
     DONE = "تم اداء الخدمة"
@@ -130,11 +128,11 @@ class FollowContractServices(TimeStampMixin,models.Model):
     startingDate         = models.DateField(null=True, blank=True)
     serviceDueDate       = models.DateField(null=True, blank=True, verbose_name="تاريخ اداء الخدمه")
     serviceDueStatus     = models.CharField(max_length=50,null=True, blank=True, choices=CHOICES_SERV, default=NOT_DONE, verbose_name="حالة اداء الخدمة")
-    collcetStatus        = models.CharField(max_length=50,null=True, blank=True, choices=COLLECT_STATUS, default=COLLECTING_DATE,db_index=True)
     collcetStatusNums    = models.IntegerField(null=True, blank=True, choices=COLLECT_STATUS_NUM, default=COLLECTING_DATE_NUM,db_index=True)
     total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
     collected_amount     = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
     remain_amount        = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     created_by           = models.ForeignKey('Employee', related_name='employee', on_delete=models.CASCADE,null=True, blank=True)
+    created_prev_date    = models.DateField(null=True, blank=True)
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
 
