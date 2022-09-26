@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'DataEntry',
 ]
 
 MIDDLEWARE = [
@@ -76,10 +77,10 @@ WSGI_APPLICATION = 'aswangreen.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'learndjango100$data',
-        'USER': 'learndjango100',
-        'PASSWORD': 'aswangreen',
-        'HOST': 'learndjango100.mysql.pythonanywhere-services.com',
+        'NAME': 'aswangreen$data',
+        'USER': 'aswangreen',
+        'PASSWORD': 'ahmed123!',
+        'HOST': 'aswangreen.mysql.pythonanywhere-services.com',
         'OPTIONS': {
             'sql_mode': 'traditional',
         }
@@ -122,6 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
