@@ -75,8 +75,14 @@ WSGI_APPLICATION = 'aswangreen.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'learndjango100$data',
+        'USER': 'learndjango100',
+        'PASSWORD': 'aswangreen',
+        'HOST': 'learndjango100.mysql.pythonanywhere-services.com',
+        'OPTIONS': {
+            'sql_mode': 'traditional',
+        }
     }
 }
 
