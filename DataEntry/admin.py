@@ -16,7 +16,7 @@ class AreaAdmin(admin.ModelAdmin):
     list_display = ('name', 'counter')
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('id','name','phone','addressArea','created_at')
+    list_display = ('serialNum','name','phone','addressArea','created_at')
 
 class ContractAdmin(admin.ModelAdmin):
     list_display = ('id','client','get_services','serialNum','created_at')

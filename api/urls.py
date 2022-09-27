@@ -8,8 +8,8 @@ app_name = "api"
 urlpatterns = [
     path('', index, name='index'),
     path('addClient', addClient.as_view(),name="addClient"),
-    path('viewClients', getClients.as_view(), name="viewClients")
-
+    path('viewClients', getClients.as_view(), name="viewClients"),
+    path('viewClientBySerialNum/<int:serialNum>', getClientBySerialNum.as_view(), name="viewClientBySerialNum")
     # path('addClient', addClient.as_view()),
-
+    #<int:service_id>'
 ]
