@@ -1,5 +1,15 @@
 # aswangreendjango
-### what need to be made today 27-09-2022
+### what need to be made today 28-09-2022
+- make the table api with a key to retuen one of the [ fifth tables typess available ] [main-table/ another-type-table/ another-type-table/ another-type-table/ another-type-table]
+
+- make the crud operations in the client table  
+- make the crud operations in the contract table 
+- note that all realted to others like:
+- need to create the client first then create it's contract then create it's followContract
+
+
+
+#### what has been made in ** 27-09-2022
 - make the client view api specific client data with any of [serialNumber or name or phone]
 - make the client update api 
 - make the client delete api 
