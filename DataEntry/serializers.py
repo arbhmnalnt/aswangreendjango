@@ -4,6 +4,9 @@ from rest_framework.serializers import ModelSerializer,SerializerMethodField, Re
 
 from .models import *
 
+
+
+
 class ContractSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source='client.name')
     # client = ClientSerializer(read_only=True)

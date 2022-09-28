@@ -5,6 +5,7 @@ from django.db import models
 
 # Create your models here.
 class TimeStampMixin(models.Model):
+    is_deleted      = models.BooleanField (default=False)
     created_at      = models.DateTimeField(auto_now_add=True,null=True)
     created_at_date = models.DateField(auto_now_add=True,null=True)
     updated_at      = models.DateTimeField(auto_now=True,null=True)
@@ -107,13 +108,13 @@ class Contract(TimeStampMixin,models.Model):
 
 class FollowContractServices(TimeStampMixin,models.Model):
     #
-    PAID_NUM = 1
-    PAYMENT_REQUIRED_NUM = 2
-    COLLECTING_DATE_NUM = 3
+    PAID_NUM = 'تم الدفع'
+    PAYMENT_REQUIRED_NUM = 'مطلوب الدفع'
+    COLLECTING_DATE_NUM = 'فى انتظار ميعاد التحصيل'
     COLLECT_STATUS_NUM = (
         (PAID_NUM, 'تم الدفع'),
         (PAYMENT_REQUIRED_NUM, 'مطلوب الدفع'),
-        (COLLECTING_DATE_NUM, 'فى انتار ميعاد التحصيل'),
+        (COLLECTING_DATE_NUM, 'فى انتظار ميعاد التحصيل'),
     )
     #
     DONE = "تم اداء الخدمة"
@@ -128,7 +129,7 @@ class FollowContractServices(TimeStampMixin,models.Model):
     startingDate         = models.DateField(null=True, blank=True)
     serviceDueDate       = models.DateField(null=True, blank=True, verbose_name="تاريخ اداء الخدمه")
     serviceDueStatus     = models.CharField(max_length=50,null=True, blank=True, choices=CHOICES_SERV, default=NOT_DONE, verbose_name="حالة اداء الخدمة")
-    collcetStatusNums    = models.IntegerField(null=True, blank=True, choices=COLLECT_STATUS_NUM, default=COLLECTING_DATE_NUM,db_index=True)
+    collcetStatusNums    = models.CharField(max_length=50,null=True, blank=True, choices=COLLECT_STATUS_NUM, default=COLLECTING_DATE_NUM,db_index=True)
     total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
     collected_amount     = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
     remain_amount        = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
