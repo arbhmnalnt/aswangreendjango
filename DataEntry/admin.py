@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area
+from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder
 
 class DepartementAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -30,9 +30,14 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class FollowContractServicesAdmin(admin.ModelAdmin):
-    list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','remain_amount','created_by','created_at_date')
+    list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
+
+class CollectOrderAdmin(admin.ModelAdmin):
+    list_display = ('collector', 'created_at')
+
 
 # Register your models here.
+
 admin.site.register(Departement, DepartementAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(Service, ServiceAdmin)
@@ -40,6 +45,8 @@ admin.site.register(Area, AreaAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Contract, ContractAdmin)
 admin.site.register(FollowContractServices, FollowContractServicesAdmin)
+admin.site.register(CollectOrder, CollectOrderAdmin)
+
 
 
 

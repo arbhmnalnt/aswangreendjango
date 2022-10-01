@@ -29,8 +29,12 @@ class TimeStampMixin(models.Model):
             return str(self.title)
         elif hasattr(self, 'COLLECT_STATUS'):
             return str(self.service)
+        elif hasattr(self, 'collector'):
+            return str(self.collector)
         elif hasattr(self, 'client'):
                 return str(self.client)
+
+
 class Departement(TimeStampMixin,models.Model):
     name  = models.CharField(max_length=50)
     notes = models.TextField(max_length=50,null=True, blank=True)
@@ -74,6 +78,8 @@ class Service(TimeStampMixin,models.Model):
     priceType                = models.CharField(max_length=50,null=True, blank=True)
     providers                = models.ManyToManyField('Employee',related_name='providers')
     supervisor               = models.ForeignKey('Employee', related_name='supervisor', on_delete=models.CASCADE,null=True, blank=True)
+    billSerial               = models.IntegerField(null=True, blank=True, unique=True)
+    billed_at                = models.DateField(null=True, blank=True)
     fixedDeliveryDate        = models.IntegerField(default=1,null=True, blank=True) # check that the day nuumber is between 1-30 in api insert
     fixedPriceCollectDate    = models.IntegerField(default=1,null=True, blank=True) # check that the day nnumber is between 1-30 in api insert
     fixedPriceCollectDate_more    = models.DateField(null=True, blank=True) # may neeed in future use
@@ -132,8 +138,14 @@ class FollowContractServices(TimeStampMixin,models.Model):
     collcetStatusNums    = models.CharField(max_length=50,null=True, blank=True, choices=COLLECT_STATUS_NUM, default=COLLECTING_DATE_NUM,db_index=True)
     total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
     collected_amount     = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
+    collected_month      = models.IntegerField(null=True, blank=True, verbose_name="رقم الشهر")
+    collected_date      = models.DateField(null=True, blank=True)
     remain_amount        = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     created_by           = models.ForeignKey('Employee', related_name='employee', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date    = models.DateField(null=True, blank=True)
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
 
+class CollectOrder (TimeStampMixin,models.Model):
+    collector            = models.ForeignKey('Employee', related_name='collector_employee', on_delete=models.CASCADE,null=True, blank=True, verbose_name="المحصل")
+    clients              = models.ManyToManyField('Client',related_name='orders_clients')
+    required             = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
