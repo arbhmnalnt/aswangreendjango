@@ -16,7 +16,11 @@ class TimeStampMixin(models.Model):
 
     def __str__(self):
         if hasattr(self, 'name'):
-            return self.name
+            if self.name != None:
+                return str(self.name)
+            else:
+                return str("object")
+            # return self.name
         elif hasattr(self, 'image'):
             return str(self.id)
 
@@ -33,6 +37,8 @@ class TimeStampMixin(models.Model):
             return str(self.collector)
         elif hasattr(self, 'client'):
                 return str(self.client)
+        else:
+            return str("object_")
 
 
 class Departement(TimeStampMixin,models.Model):
@@ -93,13 +99,16 @@ class Client(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom client number for future us as like his id in company or any use else
     name            = models.CharField(max_length=50,null=True, blank=True, db_index=True)
     phone           = models.CharField(max_length=11, null=True, blank=True, db_index=True)
-    addressArea     = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True)
+    password        = models.CharField(max_length=150, null=True, blank=True, db_index=True)
+    nationalId      = models.CharField(max_length=14, null=True, blank=True, db_index=True)
+    area            = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True)
+    streetName      = models.CharField(max_length=150, null=True, blank=True)
     addressBuilding = models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
     addressApartment= models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل الشقه")
     addressDetails  = models.TextField(max_length=50,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     created_prev_date = models.DateField(null=True, blank=True)
+    activation_request= models.BooleanField(default=False)
     notes           = models.TextField(max_length=50,null=True, blank=True)
-
 
 
 class Contract(TimeStampMixin,models.Model):
@@ -149,3 +158,23 @@ class CollectOrder (TimeStampMixin,models.Model):
     collector            = models.ForeignKey('Employee', related_name='collector_employee', on_delete=models.CASCADE,null=True, blank=True, verbose_name="المحصل")
     clients              = models.ManyToManyField('Client',related_name='orders_clients')
     required             = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
+
+class SimpleService(TimeStampMixin,models.Model):
+    name = models.CharField(max_length=100,null=True, blank=True)
+    eNum = models.IntegerField(default=0,null=True, blank=True)
+
+class RequestSimpleService(TimeStampMixin,models.Model):
+    client = models.ForeignKey('Client', related_name='request_simple_service_client', on_delete=models.CASCADE,null=True, blank=True)
+    service = models.ForeignKey('SimpleService', related_name='simple_service', on_delete=models.CASCADE,null=True, blank=True)
+
+class Offers(TimeStampMixin,models.Model):
+    name = models.CharField(max_length=100,null=True, blank=True)
+    image = models.ImageField(upload_to='images/')
+
+class ContactRequestTypes(models.Model):
+    name = models.CharField(max_length=100,null=True, blank=True)
+    eNum = models.IntegerField(default=0,null=True, blank=True)
+
+class ContactRequest(TimeStampMixin,models.Model):
+    client = models.ForeignKey('Client', related_name='contact_request_client', on_delete=models.CASCADE,null=True, blank=True)
+    contactRequest = models.ForeignKey('ContactRequest', related_name='contact_request', on_delete=models.CASCADE,null=True, blank=True)

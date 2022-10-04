@@ -1,5 +1,32 @@
 from django.contrib import admin
-from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder
+from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder,ContactRequest, ContactRequestTypes,Offers,RequestSimpleService,SimpleService
+
+class ContactRequestTypesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'eNum')
+
+class ContactRequestAdmin(admin.ModelAdmin):
+    list_display = ('client', 'contactRequest')
+
+class ContactRequestTypesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'eNum')
+
+class OffersAdmin(admin.ModelAdmin):
+    list_display = ('name', 'image')
+
+class SimpleServiceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'eNum')
+
+class RequestSimpleServiceAdmin(admin.ModelAdmin):
+    list_display = ('client', 'service')
+
+# ///
+admin.site.register(ContactRequestTypes, ContactRequestTypesAdmin)
+admin.site.register(ContactRequest, ContactRequestAdmin)
+admin.site.register(Offers, OffersAdmin)
+admin.site.register(SimpleService, SimpleServiceAdmin)
+admin.site.register(RequestSimpleService, RequestSimpleServiceAdmin)
+
+# ///
 
 class DepartementAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -16,7 +43,7 @@ class AreaAdmin(admin.ModelAdmin):
     list_display = ('name', 'counter')
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('serialNum','name','phone','addressArea','created_at')
+    list_display = ('id','serialNum','name','phone','area','created_at')
 
 class ContractAdmin(admin.ModelAdmin):
     list_display = ('id','client','get_services','serialNum','created_at')

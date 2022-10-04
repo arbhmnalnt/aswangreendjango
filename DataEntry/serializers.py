@@ -9,12 +9,15 @@ from .models import *
 
 class ContractSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source='client.name')
+
+    class Meta:
+        fields = ('id', 'name', 'phone','nationalId', 'area', 'streetName', 'addressBuilding','addressApartment','addressDetails','created_at_date')
     # client = ClientSerializer(read_only=True)
 
     class Meta:
         model = Contract
         fields = '__all__'
-        # fields = ('serialNum', 'created_at_date', 'client',)
+
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:

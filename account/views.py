@@ -9,19 +9,175 @@ from DataEntry.serializers import ContractSerializer, ServiceSerializer, ClientS
 from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
-# Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the account index.")
 def collectionDay(request):
     return HttpResponse(collection_day)
 
-class register(APIView):
+def clientDataForMobile(clientId):
+    user = Client.objects.get(id=clientId)
+    data = {"responseStatusId":"1","clientId":user.id,"name":user.name , "phone":user.phone , "nationalId":user.nationalId , "area":str(user.area.name) ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
+    return data
+
+def validateFirstRegisterData(name,nationalId,phone,password):
+    data_good     = True
+    erorr_message = ""
+    data          = {}
+    # tobe done later
+    if data_good == True:
+        data["valid"] = True
+    else:
+        data["valid"]      = False
+        data["erorr_message"] = erorr_message
+    return data
+
+
+def mobileErorrResponse(responseStatusId,message):
+    data = {"responseStatusId":str(responseStatusId), "message":message}
+    return data
+
+temp_service={
+    "1": "نجار",
+    "2": "نقاش"
+}
+
+
+class request_service(APIView):
     def post(self, request):
-        data = {'resgister request has been recieved'}
+        data = {'request service api is working'}
+        return Response(data)
+
+
+class contact_us(APIView):
+    def post(self, request):
+        data = {'contact us api is working'}
+        return Response(data)
+
+class offers(APIView):
+    def get(self, request):
+        offers = Offers.objects.all()
+        offersData = []
+        for offer in offers:
+            offersData.append(offer.image.url)
+            # offer.image.url
+        data = offersData
+        return Response(data)
+
+class activate(APIView):
+    def post(self, request):
+        data2=json.loads(request.body)
+        client_id   = data2["id"] if 'id' in data2 else None
+        if client_id:
+            client=Client.objects.get(id=client_id)
+            client.activation_request = True
+            client.save()
+            data = {'message':'تم تفعيل الخدمة'}
+        else:
+            data = {'message':'erorr happens'}
+        return Response(data)
+
+class profile_edit(APIView):
+    def post(self, request):
+        data2       = json.loads(request.body)
+        client_id   = data2["id"]
+        if client_id:
+                client=Client.objects.get(id=client_id)
+                area = Area.objects.filter(name=data2["area"])
+                client.area= client.area
+                client.password=data2["password"]              if 'password' in data2 else client.password
+                client.streetName=data2["streetName"]          if 'streetName' in data2 else client.password
+                client.phone=data2["phone"]                    if 'phone' in data2 else client.phone
+                client.addressBuilding=data2["buildingNumber"] if 'buildingNumber' in data2 else client.addressBuilding
+                client.addressApartment=data2["apartementNumber"] if 'apartementNumber' in data2 else client.addressApartment
+                client.addressDetails=data2["addressDetails"]     if 'addressDetails' in data2 else client.addressDetails
+                client.save()
+                data ={'id':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
+        else:
+            data = {'message':'erorr happens'}
+        return Response(data)
+
+
+class profile_view(APIView):
+    def get(self, request):
+        data2       = json.loads(request.body)
+        client_id   = data2["id"]
+        if client_id:
+                client=Client.objects.get(id=client_id)
+
+                data ={'id':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
+        else:
+            data = {'message':'erorr happens'}
+        return Response(data)
+
+
+
+import json
+class registerFirstStep(APIView):
+    # check if user is regitered before or not
+    def post(self, request):
+        data2            = json.loads(request.body)
+        phone            = data2["phone"]
+        nationalId       =  data2["nationalId"]
+        password         = data2["password"]
+        phoneRight       = Client.objects.filter(phone=phone).count()
+        nationalIdRight  = Client.objects.filter(nationalId=nationalId).count()
+        client = Client.objects.filter(phone=phone,password=password)
+        if phoneRight>0:
+            data = mobileErorrResponse(2, "رقم التليفون مرتبط بحساب, الرجاء تسجيل الدخول")
+        elif nationalIdRight>0:
+            data = mobileErorrResponse(3,"برجاء مراجعة الرقم القومى مرة إخرى, او التواصل مع خدمة العملاء")
+        else:
+            name             =  data2["name"]
+            nationalId       =  data2["nationalId"]
+            validateData = validateFirstRegisterData(name,nationalId,phone,password)
+            isValid = validateData["valid"]
+            if isValid:
+                client   = Client.objects.create(name=name,phone=phone,nationalId=nationalId)
+                clientId = client.id
+                data = {"responseStatusId":"1", "clientId":clientId}
+        return Response(data)
+
+class registerFinal(APIView):
+    # ,area,streetName,buildingNumber,apartementNumber,addressDetails
+    #  get user record by id
+    #  validate data
+    #  return response
+    def post(self, request):
+        data2       = json.loads(request.body)
+        client_id   = data2["clientId"]
+        userc       = Client.objects.filter(id=client_id).count()
+        if int(userc) == 1:
+            client                  =  Client.objects.get(id=client_id)
+            client.area             =  Area.objects.filter(name=str(data2["area"])).first()
+            client.streetName       =  data2["streetName"] if 'streetName' in data2 else ''
+            client.addressBuilding  =  data2["buildingNumber"] if 'buildingNumber' in data2 else ''
+            client.addressApartment =  data2["apartementNumber"] if 'apartementNumber' in data2 else ''
+            client.addressDetails   =  data2["addressDetails"] if 'addressDetails' in data2 else ''
+#  area=area, streetName=streetName, addressBuilding=buildingNumber, addressApartment=apartementNumber)
+            client.save()
+            data = clientDataForMobile(client_id)
+            return Response(data)
+        elif int(userc) == 0:
+            data = mobileErorrResponse(2, "برجاء إعادة عملية التسجيل, أو التواصل مع خدمة العملاء")
+            return Response(data)
+        else:
+            data = {"erorr":int(userc)}
         return Response(data)
 
 class login(APIView):
     def post(self, request):
-        data = {'login request has been recieved'}
-        return Response(data)
+        data2       = json.loads(request.body)
+        phone       = data2["phone"]
+        password    = data2["password"]
 
+        PhoneRight = Client.objects.filter(phone=phone)
+        users      = Client.objects.filter(phone=phone, password=password)
+        if users.count()>0:
+            user=users.first()
+            userId=user.id
+            data = clientDataForMobile(userId)
+        elif PhoneRight.count()>0:
+            data = mobileErorrResponse(2,"هذا الهاتف مسجل من قبل, اذا كنت نسيت كلمة السر ,الرجاء التواصل مع خدمة العملاء")
+        else:
+            data = mobileErorrResponse(3,"هذا الرقم غير مسجل , الرجاء التسجيل ")
+        return Response(data)
