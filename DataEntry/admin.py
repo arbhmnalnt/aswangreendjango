@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder,ContactRequest, ContactRequestTypes,Offers,RequestSimpleService,SimpleService
+from import_export.admin import ImportExportModelAdmin
 
 class ContactRequestTypesAdmin(admin.ModelAdmin):
     list_display = ('name', 'eNum')
@@ -39,10 +40,10 @@ class EmployeeAdmin(admin.ModelAdmin):
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('id','name','typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
 
-class AreaAdmin(admin.ModelAdmin):
+class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
 
-class ClientAdmin(admin.ModelAdmin):
+class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('id','serialNum','name','phone','area','created_at')
 
 class ContractAdmin(admin.ModelAdmin):

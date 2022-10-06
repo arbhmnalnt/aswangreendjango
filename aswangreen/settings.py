@@ -25,6 +25,7 @@ SECRET_KEY = 'django-insecure--j-ju4!8bu(d)n*z!)_=8#sk@g39#8d4tc^66*ny%-%*sj%8%z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# DEBUG = False
 ALLOWED_HOSTS = ['aswangreen.pythonanywhere.com']
 
 
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'account',
     'api',
     'DataEntry',
+    'import_export',
 ]
 
 MIDDLEWARE = [

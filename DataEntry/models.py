@@ -105,9 +105,13 @@ class Client(TimeStampMixin,models.Model):
     streetName      = models.CharField(max_length=150, null=True, blank=True)
     addressBuilding = models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
     addressApartment= models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل الشقه")
-    addressDetails  = models.TextField(max_length=50,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
+    addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     created_prev_date = models.DateField(null=True, blank=True)
     activation_request= models.BooleanField(default=False)
+    activation_request_accepted = models.BooleanField(default=False)
+    is_test= models.BooleanField(default=True)
+    contactMe       = models.CharField(max_length=50,null=True, blank=True, default=0)
+    image = models.ImageField(upload_to='images/clients/', default='user_profile_image_placeholer.png')
     notes           = models.TextField(max_length=50,null=True, blank=True)
 
 

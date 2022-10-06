@@ -14,9 +14,16 @@ def index(request):
 def collectionDay(request):
     return HttpResponse(collection_day)
 
-def clientDataForMobile(clientId):
+def clientDataForMobile(clientId, key):
+    if key == "login":
+        msg = "تم تسجيل الدخول بنجاح"
+    else:
+        msg = "تم التسجيل بنجاح"
+
     user = Client.objects.get(id=clientId)
-    data = {"responseStatusId":"1","clientId":user.id,"name":user.name , "phone":user.phone , "nationalId":user.nationalId , "area":str(user.area.name) ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
+    client_name = str(user.name)
+    # data = {"temp", str(client_name)}
+    data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"اختبار" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
     return data
 
 def validateFirstRegisterData(name,nationalId,phone,password):
@@ -31,26 +38,66 @@ def validateFirstRegisterData(name,nationalId,phone,password):
         data["erorr_message"] = erorr_message
     return data
 
+def validateFinalRegisterData(name,nationalId,phone,password):
+    data_good     = True
+    erorr_message = ""
+    data          = {}
+    # tobe done later
+    if data_good == True:
+        data["valid"] = True
+    else:
+        data["valid"]      = False
+        data["erorr_message"] = erorr_message
+    return data
+
+
 
 def mobileErorrResponse(responseStatusId,message):
     data = {"responseStatusId":str(responseStatusId), "message":message}
     return data
 
-temp_service={
-    "1": "نجار",
-    "2": "نقاش"
-}
-
-
 class request_service(APIView):
     def post(self, request):
-        data = {'request service api is working'}
+        data2=json.loads(request.body)
+        client_id   = data2["clientId"]
+        service_id   = data2["serviceId"]
+        try:
+            client  = Client.objects.get(id=client_id)
+            service = SimpleService.objects.get(eNum=service_id)
+            x       = RequestSimpleService.objects.create(client=client, service=service)
+            data = {"responseStatusId":"1", "message":"تم استقبال طلبك, سيتم التواصل معك قريبا"}
+        except Exception as e:
+            data = {"responseStatusId":"2", "message":"erorr happens"}
         return Response(data)
-
 
 class contact_us(APIView):
     def post(self, request):
-        data = {'contact us api is working'}
+        data2=json.loads(request.body)
+        client_id   = data2["clientId"]
+        requestTypeId   = data2["serviceId"]
+        # typee = request_service
+        # requestType = checkReuestType(url)
+        if requestTypeId   == "3" : # " suggest":
+            msg = "اقتراحك"
+        elif requestTypeId ==  "2" : #   ask":
+            msg = "استفسارك"
+        elif requestTypeId ==  "1" : #   complaint":
+            msg = "شكواك"
+        data = {"responseStatusId":"1","message":f"تم تلقى {msg}, ستم التواصل معك قريبا"}
+        return Response(data)
+
+class profileImage(APIView):
+    def get(self, request):
+        data2=json.loads(request.body)
+        client_id   = data2["clientId"]
+        image = Client.objects.get(id=client_id).image
+        data = {"responseStatusId":"1" , "image":image.url}
+        return Response(data)
+
+    def post(self, request):
+        data2=json.loads(request.body)
+        client_id   = data2["clientId"]
+        image1      = request.FILES.get
         return Response(data)
 
 class offers(APIView):
@@ -66,12 +113,12 @@ class offers(APIView):
 class activate(APIView):
     def post(self, request):
         data2=json.loads(request.body)
-        client_id   = data2["id"] if 'id' in data2 else None
+        client_id   = data2["clientId"] if 'clientId' in data2 else None
         if client_id:
             client=Client.objects.get(id=client_id)
             client.activation_request = True
             client.save()
-            data = {'message':'تم تفعيل الخدمة'}
+            data = {"responseStatusId": "1",'message':'تم تفعيل الخدمة'}
         else:
             data = {'message':'erorr happens'}
         return Response(data)
@@ -91,7 +138,7 @@ class profile_edit(APIView):
                 client.addressApartment=data2["apartementNumber"] if 'apartementNumber' in data2 else client.addressApartment
                 client.addressDetails=data2["addressDetails"]     if 'addressDetails' in data2 else client.addressDetails
                 client.save()
-                data ={'id':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
+                data ={'clientId':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
         else:
             data = {'message':'erorr happens'}
         return Response(data)
@@ -104,7 +151,7 @@ class profile_view(APIView):
         if client_id:
                 client=Client.objects.get(id=client_id)
 
-                data ={'id':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
+                data ={'clientId':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
         else:
             data = {'message':'erorr happens'}
         return Response(data)
@@ -116,6 +163,8 @@ class registerFirstStep(APIView):
     # check if user is regitered before or not
     def post(self, request):
         data2            = json.loads(request.body)
+        print(f"data from front is ${data2}")
+        print(f"password from front is ${data2['password']}")
         phone            = data2["phone"]
         nationalId       =  data2["nationalId"]
         password         = data2["password"]
@@ -134,32 +183,26 @@ class registerFirstStep(APIView):
             if isValid:
                 client   = Client.objects.create(name=name,phone=phone,nationalId=nationalId)
                 clientId = client.id
-                data = {"responseStatusId":"1", "clientId":clientId}
+                data = {"responseStatusId":"1", "clientId":str(clientId)}
         return Response(data)
 
 class registerFinal(APIView):
-    # ,area,streetName,buildingNumber,apartementNumber,addressDetails
-    #  get user record by id
-    #  validate data
-    #  return response
     def post(self, request):
         data2       = json.loads(request.body)
         client_id   = data2["clientId"]
         userc       = Client.objects.filter(id=client_id).count()
         if int(userc) == 1:
             client                  =  Client.objects.get(id=client_id)
-            client.area             =  Area.objects.filter(name=str(data2["area"])).first()
+            client.area             =  Area.objects.filter(name=(data2["area"])).first()
             client.streetName       =  data2["streetName"] if 'streetName' in data2 else ''
             client.addressBuilding  =  data2["buildingNumber"] if 'buildingNumber' in data2 else ''
             client.addressApartment =  data2["apartementNumber"] if 'apartementNumber' in data2 else ''
             client.addressDetails   =  data2["addressDetails"] if 'addressDetails' in data2 else ''
-#  area=area, streetName=streetName, addressBuilding=buildingNumber, addressApartment=apartementNumber)
             client.save()
-            data = clientDataForMobile(client_id)
-            return Response(data)
+            client_id = client.id
+            data = clientDataForMobile(client_id, 'register')
         elif int(userc) == 0:
             data = mobileErorrResponse(2, "برجاء إعادة عملية التسجيل, أو التواصل مع خدمة العملاء")
-            return Response(data)
         else:
             data = {"erorr":int(userc)}
         return Response(data)
@@ -175,7 +218,7 @@ class login(APIView):
         if users.count()>0:
             user=users.first()
             userId=user.id
-            data = clientDataForMobile(userId)
+            data = clientDataForMobile(userId, 'login')
         elif PhoneRight.count()>0:
             data = mobileErorrResponse(2,"هذا الهاتف مسجل من قبل, اذا كنت نسيت كلمة السر ,الرجاء التواصل مع خدمة العملاء")
         else:
