@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="تواصل مع خدمة عملاء اسوان جرين" />
     <title>اسوان جرين - تواصل معنا</title>
+
+    <link rel="stylesheet" href="./static/stylesheets/index.css" />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -23,14 +25,25 @@
       sizes="16x16"
       href="./static/assets/images/favicon-16x16.png"
     />
+    <link
+      rel="stylesheet"
+      href="./static/stylesheets/vendors/splide-core.min.css"
+    />
     <link rel="stylesheet" href="./static/stylesheets/index.css" />
+    <link
+      rel="preload"
+      fetchpriority="high"
+      as="image"
+      href="./static/assets/images/hero-image-1.webp"
+      type="image/webp"
+    />
   </head>
   <body>
     <header class="navbar">
       <a href="index.html">
         <img
           class="navbar__logo"
-          src="./static/assets/images/logo.png"
+          src="./static/assets/images/logo.webp"
           alt="logo"
         />
       </a>
@@ -68,11 +81,11 @@
     </header>
 
     <main>
-      <section class="section section--grey">
+      <section class="section section--grey section--first">
         <form class="form form--step1">
           <img
             class="form__img"
-            src="./static/assets/images/logo.png"
+            src="./static/assets/images/logo.webp"
             alt="لوجو اسوان جرين"
           />
 
@@ -99,7 +112,7 @@
             <label class="form__label">كلمة المرور</label>
             <input name="password" type="password" required />
             <span class="form__validation-msg"
-              >كلمة المرور يجب الا تقل عن 8 حرف و رقم</span
+              >كلمة المرور يجب الا تقل عن 8 احرف و ارقام</span
             >
           </div>
           <button class="btn btn--green" type="submit">التالي</button>
@@ -107,7 +120,7 @@
         <form class="form form--step2 hidden">
           <img
             class="form__img"
-            src="./static/assets/images/logo.png"
+            src="./static/assets/images/logo.webp"
             alt="لوجو اسوان جرين"
           />
 
