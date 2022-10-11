@@ -26,7 +26,7 @@ def clientDataForMobile(clientId, key):
     user = Client.objects.get(id=clientId)
     client_name = str(user.name)
     # data = {"temp", str(client_name)}
-    data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"اختبار" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
+    data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"مدينة ناصر" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
     return data
 
 def validateFirstRegisterData(name,nationalId,phone,password):
