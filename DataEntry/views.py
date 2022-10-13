@@ -8,8 +8,12 @@ from django.core import serializers as core_serializers
 from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 
 
+
+class filters(APIView):
+    def get(self, request):
+        data = {'status':'filter is working'}
+        return Response(data)
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
-
-# create

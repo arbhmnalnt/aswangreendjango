@@ -61,7 +61,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_CREDENTIALS = False
 
-ROOT_URLCONF = 'aswangreen2.urls'
+ROOT_URLCONF = 'aswangreen.urls'
 
 TEMPLATES = [
     {

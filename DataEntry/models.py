@@ -82,12 +82,11 @@ class Service(TimeStampMixin,models.Model):
     typee                    = models.CharField(max_length=50,null=True, blank=True)
     price                    = models.IntegerField(null=True, blank=True)
     priceType                = models.CharField(max_length=50,null=True, blank=True)
-    providers                = models.ManyToManyField('Employee',related_name='providers')
     supervisor               = models.ForeignKey('Employee', related_name='supervisor', on_delete=models.CASCADE,null=True, blank=True)
     billSerial               = models.IntegerField(null=True, blank=True, unique=True)
     billed_at                = models.DateField(null=True, blank=True)
     fixedDeliveryDate        = models.IntegerField(default=1,null=True, blank=True) # check that the day nuumber is between 1-30 in api insert
-    fixedPriceCollectDate    = models.IntegerField(default=1,null=True, blank=True) # check that the day nnumber is between 1-30 in api insert
+    fixedPriceCollectDate    = models.IntegerField(default=25,null=True, blank=True) # check that the day nnumber is between 1-30 in api insert
     fixedPriceCollectDate_more    = models.DateField(null=True, blank=True) # may neeed in future use
     notes                    = models.TextField(max_length=50,null=True, blank=True)
 
@@ -108,7 +107,8 @@ class Client(TimeStampMixin,models.Model):
     addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     created_prev_date = models.DateField(null=True, blank=True)
     activation_request= models.BooleanField(default=False)
-    activation_request_accepted = models.BooleanField(default=False)
+    outsource         = models.BooleanField(default=False)
+    activation_request_accepted = models.BooleanField(default=False)  # is user registered from the interface of web or app or from dataentry person
     is_test= models.BooleanField(default=True)
     contactMe       = models.CharField(max_length=50,null=True, blank=True, default=0)
     image = models.ImageField(upload_to='images/clients/', default='user_profile_image_placeholer.png')
