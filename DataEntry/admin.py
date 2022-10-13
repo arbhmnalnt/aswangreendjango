@@ -2,22 +2,22 @@ from django.contrib import admin
 from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder,ContactRequest, ContactRequestTypes,Offers,RequestSimpleService,SimpleService
 from import_export.admin import ImportExportModelAdmin
 
-class ContactRequestTypesAdmin(admin.ModelAdmin):
+class ContactRequestTypesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'eNum')
 
-class ContactRequestAdmin(admin.ModelAdmin):
+class ContactRequestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'contactRequest')
 
-class ContactRequestTypesAdmin(admin.ModelAdmin):
+class ContactRequestTypesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'eNum')
 
-class OffersAdmin(admin.ModelAdmin):
+class OffersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'image')
 
-class SimpleServiceAdmin(admin.ModelAdmin):
+class SimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'eNum')
 
-class RequestSimpleServiceAdmin(admin.ModelAdmin):
+class RequestSimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'service')
 
 # ///
@@ -29,15 +29,15 @@ admin.site.register(RequestSimpleService, RequestSimpleServiceAdmin)
 
 # ///
 
-class DepartementAdmin(admin.ModelAdmin):
+class DepartementAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name',)
 
-class EmployeeAdmin(admin.ModelAdmin):
+class EmployeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('eNum', 'name', 'departement','jobTitle','salaryType')
     def get_employees(self, obj):
         return " - ".join([employee.name for employee in obj.employees.all()])
 
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id','name','typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
 
 class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
@@ -46,7 +46,7 @@ class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
 class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('id','serialNum','name','phone','area','created_at')
 
-class ContractAdmin(admin.ModelAdmin):
+class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id','client','get_services','serialNum','created_at')
     # optimizing the query for each service
     def get_queryset(self, request):
@@ -57,10 +57,10 @@ class ContractAdmin(admin.ModelAdmin):
         return " - ".join([service.name for service in obj.services.all()])
 
 
-class FollowContractServicesAdmin(admin.ModelAdmin):
+class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
 
-class CollectOrderAdmin(admin.ModelAdmin):
+class CollectOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('collector', 'created_at')
 
 
