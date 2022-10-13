@@ -8,7 +8,7 @@ from .views import *
 urlpatterns = [
     path('', index, name='index'),
     path('filters' ,filters.as_view(), name='filters'),
-    # path('addClient', addClient.as_view()),
+    # path('modifyClientData', addClient.as_view()),
 
 ]
 

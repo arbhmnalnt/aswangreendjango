@@ -217,6 +217,7 @@ class registerFinal(APIView):
                 client.addressBuilding  =  data2["buildingNumber"] if 'buildingNumber' in data2 else ''
                 client.addressApartment =  data2["apartementNumber"] if 'apartementNumber' in data2 else ''
                 client.addressDetails   =  data2["addressDetails"] if 'addressDetails' in data2 else ''
+                client.outsource        = True
                 client.save()
                 client_id = client.id
                 data = clientDataForMobile(client_id, 'register')
