@@ -3,10 +3,23 @@ from django.http import HttpResponse,JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
+from rest_framework.authentication import get_authorization_header
+
 from DataEntry.models import *
 from django.core import serializers as core_serializers
 from DataEntry.serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 from django.core.exceptions import ObjectDoesNotExist
+from .authentication import *
+
+
+
+
+
+class UserAPIView(APIView):
+    def get(self, request):
+        auth = get_authoriziation_header(request).split()
+
+        return Response(auth)
 
 # Create your views here.
 def index(request):
@@ -242,9 +255,18 @@ class login(APIView):
         if users.count()>0:
             user=users.first()
             userId=user.id
+            access_token  = create_access_token(userId)
+            refresh_token = create_refresh_token(userId)
+
             data = clientDataForMobile(userId, 'login')
+            response = Response()
+            response.data = data
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+            return response
+
         elif PhoneRight.count()>0:
             data = mobileErorrResponse(2,"هذا الهاتف مسجل من قبل, اذا كنت نسيت كلمة السر ,الرجاء التواصل مع خدمة العملاء")
+            return Response(data)
         else:
             data = mobileErorrResponse(3,"هذا الرقم غير مسجل , الرجاء التسجيل ")
-        return Response(data)
+            return Response(data)

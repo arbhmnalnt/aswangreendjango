@@ -11,10 +11,6 @@ class ContractSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source='client.name')
 
     class Meta:
-        fields = ('id', 'name', 'phone','nationalId', 'area', 'streetName', 'addressBuilding','addressApartment','addressDetails','created_at_date')
-    # client = ClientSerializer(read_only=True)
-
-    class Meta:
         model = Contract
         fields = '__all__'
 
@@ -32,4 +28,16 @@ class ServiceSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = '__all__'
+        fields = ('id', 'name', 'phone','password','nationalId', 'area', 'streetName', 'addressBuilding','addressApartment','addressDetails','created_at_date')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validate_data):
+        password = validate_data.pop('password', None)
+        instance = self.Meta.model(**validate_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+        # fields = '__all__'

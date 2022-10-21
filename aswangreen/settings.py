@@ -58,9 +58,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-
 ROOT_URLCONF = 'aswangreen.urls'
 
 TEMPLATES = [
@@ -147,3 +144,12 @@ MEDIA_ROOT = '/home/aswangreen2/aswangreen/media'
 MEDIA_URL = '/media/'
 STATIC_ROOT = '/home/aswangreen2/aswangreen/static'
 STATIC_URL = '/static/'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+
+# \\\\\\\\\\\\\\\\\\\
+# AUTH_USER_MODEL = 'DataEntry.Client'
+
+# AUTH_USER_MODEL = 'core.User'

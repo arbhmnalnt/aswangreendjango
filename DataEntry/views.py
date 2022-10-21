@@ -9,28 +9,28 @@ from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 
 
 # first make the authorizations
-class addNewContract(APIView)
-    def get(self, request):
-        data2=json.loads(request.body)
-        clientName           = data2["clientName"]
-        clientPhone          = data2["clientPhone"]
-        clientArea           = data2["clientArea"]
-        clientAddressDetails = data2["clientAddressDetails"]
-        clientBuilding       = data2["clientBuilding"]
-        clientApartment      = data2["clientApartment"]
-        ClientReferer        = data2["ClientReferer"]
-        clientServices       = data2["clientServices"]
-        contractSerial       = data2["contractSerial"]
-        contractDate         = data2["contractDate"]
-        user                 = userID
+# class addNewContract(APIView)
+#     def get(self, request):
+#         data2=json.loads(request.body)
+#         clientName           = data2["clientName"]
+#         clientPhone          = data2["clientPhone"]
+#         clientArea           = data2["clientArea"]
+#         clientAddressDetails = data2["clientAddressDetails"]
+#         clientBuilding       = data2["clientBuilding"]
+#         clientApartment      = data2["clientApartment"]
+#         ClientReferer        = data2["ClientReferer"]
+#         clientServices       = data2["clientServices"]
+#         contractSerial       = data2["contractSerial"]
+#         contractDate         = data2["contractDate"]
+#         user                 = userID
 
 
 
 
-        addNewAll = {clientName,clientPhone,clientArea,clientAddressDetails,clientBuilding,clientApartment,ClientReferer,clientServices,
-        contractSerial,contractDate}
-        data = {'status','done'}
-        return Response(data)
+#         addNewAll = {clientName,clientPhone,clientArea,clientAddressDetails,clientBuilding,clientApartment,ClientReferer,clientServices,
+#         contractSerial,contractDate}
+#         data = {'status','done'}
+#         return Response(data)
 
 
 class filters(APIView):
