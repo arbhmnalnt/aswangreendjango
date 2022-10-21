@@ -36,8 +36,8 @@ urlpatterns = [
 
     #  just for testing
     # path('testing2', testing2, name="testing2"),
-    path('collection_stats', collectionStatsTest.as_view(), name='collection_stats'),
-    path('contractTables', contractTables.as_view(), name='collection_stats'),
+    # path('collection_stats', collectionStatsTest.as_view(), name='collection_stats'),
+
     path('authUser',authUser.as_view(), name="auth_user_system")
     # url ?key=value
     # path('viewClientBySerialNum/<int:serialNum>', getClientBySerialNum.as_view(), name="viewClientBySerialNum"),

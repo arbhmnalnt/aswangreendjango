@@ -8,8 +8,13 @@ from .views import *
 urlpatterns = [
     path('', index, name='index'),
     path('filters' ,filters.as_view(), name='filters'),
-    # path('modifyClientData', addClient.as_view()),
+    path('contractTables', contractTables.as_view(), name='collection_stats'),
+    path('getServices' ,getServices.as_view(), name='getServices'),
+    path('getRegions' ,getRegions.as_view(), name='getRegions'),
 
+
+# +++++++++++
+   path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
 ]
 
 

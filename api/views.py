@@ -79,90 +79,90 @@ class getClientByKey(APIView):
             data = {'erorr':'erorr occured here'}
         return Response(data)
 
-class collection_stats(APIView):
-    def get(self, request):
-        curr_count = Client.objects.filter(is_deleted=False).count()
-        follows =  FollowContractServices.objects.filter(collcetStatusNums='مطلوب الدفع',is_deleted=False)
-        req_counter = 0
-        req_clients_list = []
-        for follow in follows:
-            if follow.client not in req_clients_list:
-                req_counter +=1
-                client=follow.client
-                req_clients_list.append(client)
-            else:
-                continue
-        req_count  = req_counter
-        coll_count  = curr_count-req_count
-        collectors = Employee.objects.filter(jobTitle="موظف تحصيل").count()
-        data = {'currentClients': curr_count, 'remainingCollections': req_count, 'collected': coll_count, 'collectors':collectors}
-        return Response(data)
+# class collection_stats(APIView):
+#     def get(self, request):
+#         curr_count = Client.objects.filter(is_deleted=False).count()
+#         follows =  FollowContractServices.objects.filter(collcetStatusNums='مطلوب الدفع',is_deleted=False)
+#         req_counter = 0
+#         req_clients_list = []
+#         for follow in follows:
+#             if follow.client not in req_clients_list:
+#                 req_counter +=1
+#                 client=follow.client
+#                 req_clients_list.append(client)
+#             else:
+#                 continue
+#         req_count  = req_counter
+#         coll_count  = curr_count-req_count
+#         collectors = Employee.objects.filter(jobTitle="موظف تحصيل").count()
+#         data = {'currentClients': curr_count, 'remainingCollections': req_count, 'collected': coll_count, 'collectors':collectors}
+#         return Response(data)
 
-def collect_statue(service,client, current_month):
-    follow = FollowContractServices.objects.filter(client=client, service=service)[0]
-    if follow.collected_month  < current_month-1:
-        statue = "لم يتم التحصيل"
-    elif follow.collected_month  == current_month:
-        statue = 'مطلوب التحصيل'
-    else:
-        statue = 'متأخر'
-    return statue
+# def collect_statue(service,client, current_month):
+#     follow = FollowContractServices.objects.filter(client=client, service=service)[0]
+#     if follow.collected_month  < current_month-1:
+#         statue = "لم يتم التحصيل"
+#     elif follow.collected_month  == current_month:
+#         statue = 'مطلوب التحصيل'
+#     else:
+#         statue = 'متأخر'
+#     return statue
 
-def get_main_follow_current_contract_table():
-    start=20
-    contracts = Contract.objects.filter(is_deleted=False)[:start]
-    row_list = []
-    temp_list = []
-    res_servs_name = []
-    late = False
-    for contract in contracts:
-        contract_serial       = contract.serialNum
-        client               = contract.client
-        client_name         = contract.client.name
-        client_phone        = contract.client.phone
-        client_area         = contract.client.addressArea.name
-        contract_services   = contract.services.all()
-        for service in contract_services:
-            res_servs_name.append(service.name)
-            collectStatue = collect_statue(service, client, current_month+1)
-        temp_list.append(contract_serial)
-        temp_list.append(client_name)
-        temp_list.append(client_phone)
-        temp_list.append(client_area)
-        temp_list.append(res_servs_name)
-        temp_list.append(collectStatue)
-        row_list.append(temp_list)
+# def get_main_follow_current_contract_table():
+#     start=20
+#     contracts = Contract.objects.filter(is_deleted=False)[:start]
+#     row_list = []
+#     temp_list = []
+#     res_servs_name = []
+#     late = False
+#     for contract in contracts:
+#         contract_serial       = contract.serialNum
+#         client               = contract.client
+#         client_name         = contract.client.name
+#         client_phone        = contract.client.phone
+#         client_area         = contract.client.addressArea.name
+#         contract_services   = contract.services.all()
+#         for service in contract_services:
+#             res_servs_name.append(service.name)
+#             collectStatue = collect_statue(service, client, current_month+1)
+#         temp_list.append(contract_serial)
+#         temp_list.append(client_name)
+#         temp_list.append(client_phone)
+#         temp_list.append(client_area)
+#         temp_list.append(res_servs_name)
+#         temp_list.append(collectStatue)
+#         row_list.append(temp_list)
 
-        temp_list = []
-        res_servs_name = []
-    rows  = row_list
-    data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات","حالة التحصيل","سريال الفاتورة"],"rows":rows}
-    return data
+#         temp_list = []
+#         res_servs_name = []
+#     rows  = row_list
+#     data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات","حالة التحصيل","سريال الفاتورة"],"rows":rows}
+#     return data
 
-def latestTable():
-    contracts = Contract.objects.filter(is_deleted=False)[:20]
-    row_list = []
-    temp_list = []
-    res_servs_name = []
-    for contract in contracts:
-        contract_serial       = contract.serialNum
-        client_name         = contract.client.name
-        client_phone        = contract.client.phone
-        client_area         = contract.client.addressArea.name
-        contract_services   = contract.services.all()
-        for service in contract_services:
-            res_servs_name.append(service.name)
-        temp_list.append(contract_serial)
-        temp_list.append(client_name)
-        temp_list.append(client_phone)
-        temp_list.append(client_area)
-        temp_list.append(res_servs_name)
-        row_list.append(temp_list)
-        temp_list = []
-        res_servs_name = []
-    rows  = row_list
-    data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات"],"rows":rows}
-    return data
+# def latestTable():
+#     contracts = Contract.objects.filter(is_deleted=False)[:20]
+#     row_list = []
+#     temp_list = []
+#     res_servs_name = []
+#     for contract in contracts:
+#         contract_serial       = contract.serialNum
+#         client_name         = contract.client.name
+#         client_phone        = contract.client.phone
+#         client_area         = contract.client.addressArea.name
+#         contract_services   = contract.services.all()
+#         for service in contract_services:
+#             res_servs_name.append(service.name)
+#         temp_list.append(contract_serial)
+#         temp_list.append(client_name)
+#         temp_list.append(client_phone)
+#         temp_list.append(client_area)
+#         temp_list.append(res_servs_name)
+#         row_list.append(temp_list)
+#         temp_list = []
+#         res_servs_name = []
+#     rows  = row_list
+#     data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات"],"rows":rows}
+#     return data
 
 # class contractTables(APIView):
 #     def get(self, request):
@@ -189,20 +189,20 @@ def latestTable():
 #         return Response(data)
 
 #for testing
-class collectionStatsTest(APIView):
-    def get(self, request):
-        data ={"currentClients": 1200, "remainingCollections": 200, "collected": 1000, "collectors": 5}
-        return Response(data)
+# class collectionStatsTest(APIView):
+#     def get(self, request):
+#         data ={"currentClients": 1200, "remainingCollections": 200, "collected": 1000, "collectors": 5}
+#         return Response(data)
 
-def currentContractsTest():
-    rows = [ "32", "على حسن على", "01012355695", "المقاولون", "جمع منزلى", "مطلوب التحصيل", "8965" ], [ "1", "ايمن محمد السيد", "01554899523", "المحمودية", "نظافة داخلى ", "شتم التحصيل", "9856" ], [ "321", "على أبو العينين محمد", "01155322892", "العقاد", "رش وتعقيم", "تم التحصيل", "8564" ], [ "231", "مصطفى محمد السعيد", "01254886231", "عمائر الاستاد", "جمع منزلى", "تم التحصيل", "4565" ], [ "56", "محمدين على هاشم", "01145888752", "عمائر التأمين الصحى", "جمع منزلى ", "مطلوب التحصيل", "2345" ], [ "98", "محمود السيد بكرى", "01054684565", "المقاولون", "نظافة داخلى ", "مطلوب التحصيل", "4785" ], [ "12", "سيد على محمد", "01078953322", "المحمودية", "رش وتعقيم", "مطلوب التحصيل", "9855" ], [ "45", "حسن محمد مصطفى", "01568756523", "العقاد", "جمع منزلى", "مطلوب التحصيل", "7412" ], [ "65", "محمود حسين السيد", "01265498566", "المقاولون", "نظافة داخلى ", "متأخر", "9632" ], [ "89", "على محمد مختار", "01287986645", "المحمودية", "رش وتعقيم", "تم التحصيل", "8526" ], [ "78", "ايمن طه عبد الكريم", "01256849874", "العقاد", "جمع منزلى", "متأخر", "4587" ], [ "12", "محمد عبد الرحيم على", "01005464684", "المقاولون", "جمع منزلى ", "تم التحصيل", "6589" ]
-    data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات","حالة التحصيل","سريال الفاتورة"],"rows":rows}
-    return data
+# def currentContractsTest():
+#     rows = [ "32", "على حسن على", "01012355695", "المقاولون", "جمع منزلى", "مطلوب التحصيل", "8965" ], [ "1", "ايمن محمد السيد", "01554899523", "المحمودية", "نظافة داخلى ", "شتم التحصيل", "9856" ], [ "321", "على أبو العينين محمد", "01155322892", "العقاد", "رش وتعقيم", "تم التحصيل", "8564" ], [ "231", "مصطفى محمد السعيد", "01254886231", "عمائر الاستاد", "جمع منزلى", "تم التحصيل", "4565" ], [ "56", "محمدين على هاشم", "01145888752", "عمائر التأمين الصحى", "جمع منزلى ", "مطلوب التحصيل", "2345" ], [ "98", "محمود السيد بكرى", "01054684565", "المقاولون", "نظافة داخلى ", "مطلوب التحصيل", "4785" ], [ "12", "سيد على محمد", "01078953322", "المحمودية", "رش وتعقيم", "مطلوب التحصيل", "9855" ], [ "45", "حسن محمد مصطفى", "01568756523", "العقاد", "جمع منزلى", "مطلوب التحصيل", "7412" ], [ "65", "محمود حسين السيد", "01265498566", "المقاولون", "نظافة داخلى ", "متأخر", "9632" ], [ "89", "على محمد مختار", "01287986645", "المحمودية", "رش وتعقيم", "تم التحصيل", "8526" ], [ "78", "ايمن طه عبد الكريم", "01256849874", "العقاد", "جمع منزلى", "متأخر", "4587" ], [ "12", "محمد عبد الرحيم على", "01005464684", "المقاولون", "جمع منزلى ", "تم التحصيل", "6589" ]
+#     data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات","حالة التحصيل","سريال الفاتورة"],"rows":rows}
+#     return data
 
-def latestTableTest():
-    rows = ["25135","احمد حسن محمد","01145955231","العقاد","جمع منزلى",]
-    data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات"],"rows":rows}
-    return data
+# def latestTableTest():
+#     rows = ["25135","احمد حسن محمد","01145955231","العقاد","جمع منزلى",]
+#     data={"thead":  ["سريال التعاقد","اسم العميل","رقم الهاتف","المنطقة","الخدمات"],"rows":rows}
+#     return data
 
 import json
 class authUser(APIView):
@@ -227,31 +227,7 @@ def requiredOnContracts():
   ],"rows": rows}
     return data
 
-class contractTables(APIView):
-    def get(self, request):
-            # try :
-        tableType   = request.GET.get('tableType' , '0')
-        if tableType != '0':
-            if tableType == "currentContracts":
-                # data = get_main_follow_current_contract_table()
-                data = currentContractsTest()
-            elif tableType == "latestContracts":
-                # data = latestTableTest()
-                data = latestTable()
 
-            elif tableType == "requiredOnContracts":
-                data = requiredOnContracts()
-            elif tableType == "fourth_table_type":
-                data = fourth_table_function()
-            elif tableType == "fifth_table_type":
-                data = fifth_table_function()
-            else:
-                data = {'erorr':f'table type {tableType} selected is not supported'}
-        else:
-            data = {'erorr':'not table type selected'}
-        # except:
-        #     data = {'erorr':'erorr occured here'}
-        return Response(data)
 
 
 

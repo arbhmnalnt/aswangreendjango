@@ -156,6 +156,7 @@ class FollowContractServices(TimeStampMixin,models.Model):
     remain_amount        = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     created_by           = models.ForeignKey('Employee', related_name='employee', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date    = models.DateField(null=True, blank=True)
+    # source_outside       = models.BooleanField(default=False)   # not for any use just for a conflict
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
 
 class CollectOrder (TimeStampMixin,models.Model):
