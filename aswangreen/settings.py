@@ -79,16 +79,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'aswangreen2.wsgi.application'
 
 
+# =======
+# WSGI_APPLICATION = 'aswangreen.wsgi.application'
+
+# # variables to be changed to work on localhost or online in pythonanywhere
+dataBaseName = "aswangreen2$data"
+dataBaseUser = "aswangreen2"
+password     = "ahmed123!"
+host         = "aswangreen2.mysql.pythonanywhere-services.com"
+# port         = "3306"
+
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aswangreen2$data',
-        'USER': 'aswangreen2',
-        'PASSWORD': 'ahmed123!',
-        'HOST': 'aswangreen2.mysql.pythonanywhere-services.com',
+        'NAME': dataBaseName,
+        'USER': dataBaseUser,
+        'PASSWORD': password,
+        'HOST': host,
+        # 'PORT': port,
         'OPTIONS': {
             'sql_mode': 'traditional',
         }
@@ -114,6 +125,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'account.exceptions.status_code_handler'
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

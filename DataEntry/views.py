@@ -8,8 +8,8 @@ from django.core import serializers as core_serializers
 from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 
 
-first make the authorizations
-class addNewContract(APIView)
+# first make the authorizations
+class addNewContract(APIView):
     def get(self, request):
         client_data_dict = {}
         data2=json.loads(request.body)
@@ -28,12 +28,12 @@ class addNewContract(APIView)
         serviceDueStatus     = "لم يتم اداء الخدمة"
         collcetStatusNums    = "فى انتظار ميعاد التحصيل"
         # total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
-        collected_amount     =
-        collected_month      =
-        collected_date       =
-        remain_amount        =
-        created_by           =
-        created_prev_date    =
+        collected_amount     = ""
+        collected_month      = ""
+        collected_date       = ""
+        remain_amount        = ""
+        created_by           = ""
+        created_prev_date    = ""
 
 
 
@@ -43,6 +43,17 @@ class addNewContract(APIView)
 #         data = {'status','done'}
 #         return Response(data)
 
+
+class HandleClients(APIView):
+    def get(self, request):
+        # add all employess to client table for make them able to login
+        # addEmployeesToClientTable()
+
+        # # add missing info check to all Clients with missing info like:
+        # # name is not length [complete name] ot missing serial num
+        # # phone is not 11 digit length or missing area or missing details in address
+        # checkmissingClientsInfo()
+        return Response({"msg": "done"})
 
 class filters(APIView):
     def get(self, request):
@@ -108,6 +119,19 @@ def index(request):
 
 
 ####################  FUNCTIONS PART #################################3
+def create_new_client(dict):
+    Client.objects.create(
+        name=dict["clientName"],phone=dict["phone"],nationalId=dict["nationalId"], password="",
+    )
+    #     client_data_dict["clientName"]           = data2["clientName"]
+    #     client_data_dict["clientPhone"]          = data2["clientPhone"]
+    #     client_data_dict["clientArea"]           = data2["clientArea"]
+    #     client_data_dict["clientAddressDetails"] = data2["clientAddressDetails"]
+    #     client_data_dict["clientBuilding"]       = data2["clientBuilding"]
+    #     client_data_dict["clientApartment"]      = data2["clientApartment"]
+    return clientId
+
+
 def currentContracts():
     list = ['تاريخ التعاقد','اسم العميل','رقم الهاتف','المنطقة','المسستحق','الخيارات']
     bigRows_list = []
@@ -134,14 +158,42 @@ def currentContracts():
     data = f"thead:{list}, rows:{bigRows_list}"
     return data
 
-def create_new_client(dict):
-    Client.objects.create(
-        name=dict["clientName"],phone=dict["phone"],nationalId=nationalId, password=password
-    )
-    #     client_data_dict["clientName"]           = data2["clientName"]
-    #     client_data_dict["clientPhone"]          = data2["clientPhone"]
-    #     client_data_dict["clientArea"]           = data2["clientArea"]
-    #     client_data_dict["clientAddressDetails"] = data2["clientAddressDetails"]
-    #     client_data_dict["clientBuilding"]       = data2["clientBuilding"]
-    #     client_data_dict["clientApartment"]      = data2["clientApartment"]
-    return clientId
+def addEmployeesToClientTable():
+    employees = Employee.objects.all()
+    for employe in employees:
+        name     = employe.name
+        phone    = employe.phone
+        naId     = employe.naId
+        Client.objects.create(name=name,phone=phone,nationalId=naId
+        ,is_employee=True)
+
+def checkmissingClientsInfo():
+    clients = Client.objects.all()
+    temp = 0
+    for cl in clients:
+        notes = ""
+        cl.notes = ""
+        cl.save()
+
+        if cl.area or  cl.name or cl.password or  cl.serialNum or cl.nationalId or cl.phone == "-" or cl.area or cl.password or cl.name or  cl.serialNum or cl.nationalId or cl.phone is None or cl.area or cl.password  or cl.serialNum or cl.nationalId or cl.name  or cl.phone == "":
+            temp += 1
+            cl.missing_info = True
+            if cl.area == "-" or cl.area is None or cl.area == "":
+                notes += "المنطقة غير محددة\n"
+            if cl.name == "-" or cl.name is None or cl.name == "":
+                notes += "الإسم غير كامل أو غير مكتوب\n"
+            if cl.serialNum == "-" or cl.serialNum is None or cl.serialNum == "":
+                notes += "خطأ برقم السريال\n"
+            if cl.nationalId == "-" or cl.nationalId is None or cl.nationalId == "" or len(str(cl.nationalId)) != 14:
+                notes += "خطأ بالرقم القومى\n"
+            if cl.phone == "-" or cl.name is None or cl.name == "" or len(str(cl.phone)) != 11:
+                notes += "خطأ بالرقم التليفونى \n"
+            if cl.password == "-" or cl.password is None or cl.password == "":
+                notes += "كلمة السر فارغة"
+            print(f'client id --> {cl.id} is missing area')
+            cl.notes = notes
+            print(f"client notes ==> {notes}")
+            cl.save()
+        else:
+            continue
+    print(f"total {temp} clients // done all clients check")

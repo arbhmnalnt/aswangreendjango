@@ -108,6 +108,10 @@ class Client(TimeStampMixin,models.Model):
     created_prev_date = models.DateField(null=True, blank=True)
     activation_request= models.BooleanField(default=False)
     outsource         = models.BooleanField(default=False)
+    #
+    is_employee       = models.BooleanField(default=False)
+    missing_info      = models.BooleanField(default=False)
+    #
     activation_request_accepted = models.BooleanField(default=False)  # is user registered from the interface of web or app or from dataentry person
     is_test= models.BooleanField(default=True)
     contactMe       = models.CharField(max_length=50,null=True, blank=True, default=0)

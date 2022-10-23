@@ -10,6 +10,7 @@ from rest_framework import viewsets, status
 
 app_name = "account"
 
+
 urlpatterns = [
     path('activate', activate.as_view(), name='activate'),
     path('request_service', request_service.as_view(), name='request_service'),
@@ -24,5 +25,8 @@ urlpatterns = [
     path('registerFinal', registerFinal.as_view(), name='registerFinal'),
     path('login', login.as_view(), name='login'),
     # ///
-    path('user', UserAPIView.as_view(), name='UserAPIView')
+    path('user', UserAPIView.as_view(), name='UserAPIView'),
+    path('user', UserAPIView.as_view(), name='UserAPIView'),
+    path('refresh', RefreshAPIView.as_view(), name='refresh'),
+    path('logout', LogoutAPIView.as_view(), name='logout')
 ]

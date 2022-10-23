@@ -1,9 +1,12 @@
+from lib2to3.pgen2 import token
+from urllib import request, response
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse,JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.authentication import get_authorization_header
+from rest_framework.exceptions import APIException, AuthenticationFailed
 
 from DataEntry.models import *
 from django.core import serializers as core_serializers
@@ -21,16 +24,39 @@ class UserAPIView(APIView):
 
         return Response(auth)
 
+class LogoutAPIView(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie(key='refresh_token')
+        response.data= {'message':'success'}
+        return response
+
+class RefreshAPIView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        id = decode_refresh_token(refresh_token)
+        access_token = create_access_token(id)
+        return Response({'token': access_token})
+
+class UserAPIView(APIView):
+    def get(self, request):
+        auth = get_authorization_header(request).split()
+        if auth and len(auth) == 2:
+            token = auth[1].decode('utf-8')
+            id = decode_access_token(token)
+
+            user = Client.objects.filter(pk=id).first()
+            return Response(ClientSerializer(user).data)
+        raise AuthenticationFailed("unauthenticated")
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the account index.")
 def collectionDay(request):
+    collection_day = "test"
     return HttpResponse(collection_day)
 
-
-
-
-def clientDataForMobile(clientId, key):
+def clientDataForMobile(clientId, key, access_token):
     if key == "login":
         msg = "تم تسجيل الدخول بنجاح"
     else:
@@ -38,8 +64,7 @@ def clientDataForMobile(clientId, key):
 
     user = Client.objects.get(id=clientId)
     client_name = str(user.name)
-    # data = {"temp", str(client_name)}
-    data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"مدينة ناصر" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment}
+    data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"مدينة ناصر" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment, "token":access_token}
     return data
 
 def validateFirstRegisterData(name,nationalId,phone,password):
@@ -122,7 +147,7 @@ class profileImage(APIView):
         data2=json.loads(request.body)
         client_id   = data2["clientId"]
         image1      = request.FILES.get
-        return Response(data)
+        return Response(data2)
 
 class offers(APIView):
     def get(self, request):
@@ -233,7 +258,8 @@ class registerFinal(APIView):
                 client.outsource        = True
                 client.save()
                 client_id = client.id
-                data = clientDataForMobile(client_id, 'register')
+                access_token  = create_access_token(client_id)
+                data = clientDataForMobile(client_id, 'register', access_token)
         except:
             data = mobileErorrResponse(2, "مشكلة بالبيانات المرسلة")
             print(f"cliet data getting erorr")
@@ -258,7 +284,7 @@ class login(APIView):
             access_token  = create_access_token(userId)
             refresh_token = create_refresh_token(userId)
 
-            data = clientDataForMobile(userId, 'login')
+            data = clientDataForMobile(userId, 'login', access_token)
             response = Response()
             response.data = data
             response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)

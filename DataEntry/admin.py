@@ -44,6 +44,7 @@ class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
 
 class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
+    search_fields = ['name', 'serialNum','nationalId']
     list_display = ('id','serialNum','name','phone','area','created_at')
 
 class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
