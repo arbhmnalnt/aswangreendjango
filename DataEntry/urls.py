@@ -14,7 +14,7 @@ urlpatterns = [
 
 
 # +++++++++++
-#   path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
+  path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
 ]
 
 

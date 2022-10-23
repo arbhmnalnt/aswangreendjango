@@ -8,21 +8,32 @@ from django.core import serializers as core_serializers
 from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 
 
-# first make the authorizations
-# class addNewContract(APIView)
-#     def get(self, request):
-#         data2=json.loads(request.body)
-#         clientName           = data2["clientName"]
-#         clientPhone          = data2["clientPhone"]
-#         clientArea           = data2["clientArea"]
-#         clientAddressDetails = data2["clientAddressDetails"]
-#         clientBuilding       = data2["clientBuilding"]
-#         clientApartment      = data2["clientApartment"]
-#         ClientReferer        = data2["ClientReferer"]
-#         clientServices       = data2["clientServices"]
-#         contractSerial       = data2["contractSerial"]
-#         contractDate         = data2["contractDate"]
-#         user                 = userID
+first make the authorizations
+class addNewContract(APIView)
+    def get(self, request):
+        client_data_dict = {}
+        data2=json.loads(request.body)
+        newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
+        # client contract data
+        ClientReferer        = data2["ClientReferer"]
+        clientServices       = data2["clientServices"]
+        contractSerial       = data2["contractSerial"]
+        contractDate         = data2["contractDate"]
+        created_by           = Client.objects.get(pk=data2["userId"])
+        # follow Services
+        client               = Client.objects.get(pk=newClientId)
+        services_list        = newClientId
+        startingDate         = contractDate
+        serviceDueDate       = ""
+        serviceDueStatus     = "لم يتم اداء الخدمة"
+        collcetStatusNums    = "فى انتظار ميعاد التحصيل"
+        # total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
+        collected_amount     =
+        collected_month      =
+        collected_date       =
+        remain_amount        =
+        created_by           =
+        created_prev_date    =
 
 
 
@@ -123,47 +134,14 @@ def currentContracts():
     data = f"thead:{list}, rows:{bigRows_list}"
     return data
 
-
-
-
-# "thead": [
-#     "تاريخ التعاقد",
-#     "اسم العميل",
-#     "رقم الهاتف",
-#     "المنطقة",
-#     "المستحق",
-#     "الخيارات"
-#   ],
-# "rows": [
-#     {
-#       "date": "12/2/2022",
-#       "clientName": {
-#         "value": "محمد حسين",
-#         "route": ""
-#       },
-#       "phone": "01233326751",
-#       "area": "العقاد",
-#       "المستحق": 1200,
-#       "nestedTable": {
-#         "thead": [
-#           "تاريخ التعاقد",
-#           "اسم العميل",
-#           "رقم الهاتف",
-#           "المنطقة",
-#           "المستحق"
-#         ],
-#         "rows": [
-#           {
-#             "date": "12/2/2022",
-#             "clientName": {
-#               "value": "محمد حسين",
-#               "route": ""
-#             },
-#             "phone": "01233326751",
-#             "area": "العقاد",
-#             "المستحق": 1200
-#           }
-#         ]
-#       }
-#     }
-#   ]
+def create_new_client(dict):
+    Client.objects.create(
+        name=dict["clientName"],phone=dict["phone"],nationalId=nationalId, password=password
+    )
+    #     client_data_dict["clientName"]           = data2["clientName"]
+    #     client_data_dict["clientPhone"]          = data2["clientPhone"]
+    #     client_data_dict["clientArea"]           = data2["clientArea"]
+    #     client_data_dict["clientAddressDetails"] = data2["clientAddressDetails"]
+    #     client_data_dict["clientBuilding"]       = data2["clientBuilding"]
+    #     client_data_dict["clientApartment"]      = data2["clientApartment"]
+    return clientId
