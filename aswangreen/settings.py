@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'account',
     'api',
     'DataEntry',
+    'collection',
     'import_export',
 ]
 

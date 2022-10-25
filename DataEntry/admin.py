@@ -59,6 +59,7 @@ class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ['client__name', 'client__area__name']
     list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
 
 class CollectOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
