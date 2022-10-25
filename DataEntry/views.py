@@ -7,42 +7,22 @@ from .models import *
 from django.core import serializers as core_serializers
 from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 
+import datetime
+from datetime import datetime
+import json
 
 # first make the authorizations
 class addNewContract(APIView):
-    def get(self, request):
+    def post(self, request):
         client_data_dict = {}
         data2=json.loads(request.body)
         newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
         # client contract data
-        ClientReferer        = data2["ClientReferer"]
-        clientServices       = data2["clientServices"]
-        contractSerial       = data2["contractSerial"]
-        contractDate         = data2["contractDate"]
-        created_by           = Client.objects.get(pk=data2["userId"])
+        newContractId = create_new_contract(data2, newClientId)
         # follow Services
-        client               = Client.objects.get(pk=newClientId)
-        services_list        = newClientId
-        startingDate         = contractDate
-        serviceDueDate       = ""
-        serviceDueStatus     = "لم يتم اداء الخدمة"
-        collcetStatusNums    = "فى انتظار ميعاد التحصيل"
-        # total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
-        collected_amount     = ""
-        collected_month      = ""
-        collected_date       = ""
-        remain_amount        = ""
-        created_by           = ""
-        created_prev_date    = ""
+        make_new_contract_service_followers(data2, newContractId, newClientId)
 
-
-
-
-#         addNewAll = {clientName,clientPhone,clientArea,clientAddressDetails,clientBuilding,clientApartment,ClientReferer,clientServices,
-#         contractSerial,contractDate}
-#         data = {'status','done'}
-#         return Response(data)
-
+        return Response({"msg": "done"})
 
 class HandleClients(APIView):
     def get(self, request):
@@ -117,18 +97,60 @@ class getRegions(APIView):
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
+def test2(request):
+    return HttpResponse("test")
 
-####################  FUNCTIONS PART #################################3
-def create_new_client(dict):
-    Client.objects.create(
-        name=dict["clientName"],phone=dict["phone"],nationalId=dict["nationalId"], password="",
+####################  FUNCTIONS PART #################################
+def make_new_contract_service_followers(data2, newContractId, newClientId):
+    def get_month(date):
+        # if day>25 and day>15: then maked the month is the next month else make it current month
+        date_formatted = datetime.strptime(date, '%Y-%m-%d')
+        if date_formatted.day > 15:
+            if date_formatted.month != 12:
+                month = date_formatted.month + 1
+            else:
+                month = 1
+        return month
+    client                  =   Client.objects.get(pk=newClientId)
+    contract                =   Contract.objects.get(pk=newContractId)
+    service_objects_list    =   data2["services"]
+    for service in service_objects_list:
+        service_self = Service.objects.get(pk=service["id"])
+
+        follow_contract_services = FollowContractServices.objects.create(
+            client=client, service=service_self, total_amount=service_self.price, remain_amount=service_self.price,
+            collected_month=get_month(data2['date']),created_by=Employee.objects.get(pk=data2['userId'])
+        )
+
+        follow_contract_services.save()
+
+def create_new_contract(data, newClientId):
+    services_list = data["services"]
+    services_id_list = []
+    services_set = set()
+
+    for service in services_list:
+        serv = Service.objects.get(pk=service["id"])
+        services_set.add(serv)
+
+    contract = Contract.objects.create(
+        serialNum=data["Serial"],client=Client.objects.get(pk=newClientId),belong_to=Employee.objects.get(pk=data['referer']),
+        created_prev_date=data['date'],created_by=Employee.objects.get(pk=data['userId'])
     )
-    #     client_data_dict["clientName"]           = data2["clientName"]
-    #     client_data_dict["clientPhone"]          = data2["clientPhone"]
-    #     client_data_dict["clientArea"]           = data2["clientArea"]
-    #     client_data_dict["clientAddressDetails"] = data2["clientAddressDetails"]
-    #     client_data_dict["clientBuilding"]       = data2["clientBuilding"]
-    #     client_data_dict["clientApartment"]      = data2["clientApartment"]
+    contract.services.set(services_set)
+    contract.save()
+    contract_id = contract.id
+    return contract_id
+
+def create_new_client(dictt):
+    client=Client.objects.create(
+        name=dictt["name"],phone=dictt["phone"],nationalId=dictt["nationalId"], password="",
+        serialNum=dictt["Serial"],area=Area.objects.filter(name=dictt["area"])[0],streetName=dictt["streetName"],addressBuilding=dict["addressBuilding"],
+        addressApartment=dictt["addressApartment"],addressDetails=dictt["addressDetails"],created_prev_date=dictt["date"],
+        created_by=Employee.objects.get(pk=dictt['userId'])
+    )
+    client.save()
+    clientId=client.id
     return clientId
 
 

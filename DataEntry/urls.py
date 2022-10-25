@@ -11,8 +11,12 @@ urlpatterns = [
     path('contractTables', contractTables.as_view(), name='collection_stats'),
     path('getServices' ,getServices.as_view(), name='getServices'),
     path('getRegions' ,getRegions.as_view(), name='getRegions'),
+    # --
     path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
     path('handleClients' ,HandleClients.as_view(), name='HandleClients'),
+
+    # test 2
+    path('test2', test2)
 ]
 
 
