@@ -193,14 +193,39 @@ class profile_edit(APIView):
         return Response(data)
 
 
+def getStatus(client):
+    follows = FollowContractServices.objects.filter(client=client)
+    for follow in  follows:
+        if follow.collcetStatusNums == "مطلوب الدفع":
+            status = "مطلوب الدفع"
+        else:
+            statue = follow.collcetStatusNums
+    return statue
+
+def getContractServices(client):
+    services_list=[]
+    follows = FollowContractServices.objects.filter(client=client)
+    for follow in  follows:
+        service_name = follow.service.name
+        services_list.append(service_name)
+    return services_list
+
 class profile_view(APIView):
     def get(self, request):
         data2       = json.loads(request.body)
         client_id   = data2["id"]
         if client_id:
-                client=Client.objects.get(id=client_id)
-
-                data ={'clientId':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId, 'area':client.area.name, 'streetName':client.streetName, 'buildingNumber':client.addressBuilding,'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
+                client=Client.objects.get(pk=client_id)
+                if "source" in data2:
+                    contract = Contract.objects.get(client=client)
+                    data ={'clientName':client.name, 'phone':client.phone,'nationalId':client.nationalId,
+                    'area':client.area.name,
+                    'addressDetails':client.addressDetails, 'services':getContractServices(client),
+                    'contractSerial':contract.serialNum,'contractDate':contract.created_at_date, 'collectionStatus': getStatus(client)}
+                else:
+                    data ={'clientId':client.id, 'name':client.name, 'phone':client.phone,'nationalId':client.nationalId,
+                    'area':client.area.name,'streetName':client.streetName, 'buildingNumber':client.addressBuilding,
+                    'apartementNumber':client.addressApartment,'addressDetails':client.addressDetails,'registerd_at':client.created_at_date}
         else:
             data = {'message':'erorr happens'}
         return Response(data)

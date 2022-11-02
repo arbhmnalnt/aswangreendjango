@@ -52,10 +52,10 @@ def get_client_to_collect_from(area):
                 temp["id"] = follow.client.id
                 temp['contractDate'] = Contract.objects.get(client=follow.client).created_at_date
                 temp["area"]   = area
-                temp["name"]   = follow.client.name
+                temp["clientName"]   = follow.client.name
                 temp["phone"]  = follow.client.phone
                 temp["serial"] = follow.client.serialNum
-                temp["price"]  = follow.service.price
+                temp["deserved"]  = follow.service.price
                 data_list.append(temp)
             else:
                 continue

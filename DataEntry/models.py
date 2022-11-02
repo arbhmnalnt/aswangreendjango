@@ -171,6 +171,8 @@ class FollowContractServices(TimeStampMixin,models.Model):
 class CollectOrder (TimeStampMixin,models.Model):
     collector            = models.ForeignKey('Employee', related_name='collector_employee', on_delete=models.CASCADE,null=True, blank=True, verbose_name="المحصل")
     clients              = models.ManyToManyField('Client',related_name='orders_clients')
+    areas                = models.ManyToManyField('Area',related_name='orders_areas')
+    month                = models.IntegerField(null=True, blank=True, verbose_name="الشهر")
     required             = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
 
 class SimpleService(TimeStampMixin,models.Model):

@@ -15,8 +15,10 @@ urlpatterns = [
     path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
     path('handleClients' ,HandleClients.as_view(), name='HandleClients'),
 
-    # test 2
-    path('test2', test2)
+    # main_page_apis
+    path('mainPageStatsFirst', mainPageStatsFirst.as_view()),
+    path('mainPageStatsSecond', mainPageStatsSecond.as_view()),
+    path('mainPageStatsThird', mainPageStatsThird.as_view()),
 ]
 
 

@@ -11,6 +11,59 @@ import datetime
 from datetime import datetime
 import json
 
+today = datetime.now()
+month = today.month
+
+
+class mainPageStatsThird(APIView):
+    def get(self, request):
+        dataList = []
+        count = Contract.objects.all().count()
+        if count > 0:
+            contracts=Contract.objects.all().order_by('-id')[:20]
+            thead = {"serial":"#", "clientName":"اسم العميل","phone":"رقم الهاتف","area":"المنطقة","services":"الخدمات"}
+            for contract in contracts:
+                temp = {}
+                temp["serialNumber"] = contract.serialNum
+                temp["clientName"]   = contract.client.name
+                temp["phone"]        = contract.client.phone
+                temp["services"]     = [service.name for service in contract.services.all()]
+                temp["area"]         = contract.client.area.name
+                dataList.append(temp)
+            data = {"thead":thead, "rows":dataList}
+        else:
+            data = {}
+        return Response(data)
+
+
+# start main page apis
+class mainPageStatsSecond(APIView):
+    # طلبات التحصيل الحالية
+    def get(self, request):
+        is_orders = CollectOrder.objects.filter(month=10).count()
+        dataList = []
+        if is_orders >0:
+            orders = CollectOrder.objects.filter(month=10)
+            for order in orders:
+                temp = {}
+                temp["collector"] = order.collector.name
+                temp["clientsNum"]= order.clients.count()
+                temp["areas"]     = [area.name for area in order.areas.all()]
+                temp["date"]      = order.created_at_date
+                dataList.append(temp)
+            data = dataList
+        else:
+            data = {}
+        return Response(data)
+
+
+class mainPageStatsFirst(APIView):
+    def get(self, request):
+        data = {"peopleTocollectFrom":len(peopleTocollectFrom()), "peopleCollectedFrom":len(peopleCollectedFrom()), "currentClients":Contract.objects.all().count(),
+        "collectersNum":Employee.objects.filter(jobTitle="موظف تحصيل").count()}
+        return Response(data)
+# end of main page apis
+
 # first make the authorizations
 class addNewContract(APIView):
     def post(self, request):
@@ -101,6 +154,27 @@ def test2(request):
     return HttpResponse("test")
 
 ####################  FUNCTIONS PART #################################
+def peopleCollectedFrom():
+    names_list = []
+    follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+    for follow in follows:
+        client = follow.client
+        is_count = FollowContractServices.objects.filter(client=client,collcetStatusNums="مطلوب الدفع").count()
+        if is_count == 0:
+            names_list.append(follow.client.name)
+        else:
+            pass
+    client_names =  sorted(set(names_list))
+    return client_names
+
+def peopleTocollectFrom():
+    names_list = []
+    follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+    for follow in follows:
+        names_list.append(follow.client.name)
+    client_names =  sorted(set(names_list))
+    return client_names
+
 def make_new_contract_service_followers(data2, newContractId, newClientId):
     def get_month(date):
         # if day>25 and day>15: then maked the month is the next month else make it current month
