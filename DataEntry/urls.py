@@ -19,6 +19,17 @@ urlpatterns = [
     path('mainPageStatsFirst', mainPageStatsFirst.as_view()),
     path('mainPageStatsSecond', mainPageStatsSecond.as_view()),
     path('mainPageStatsThird', mainPageStatsThird.as_view()),
+    # new contract page apis
+
+    path('newContractPageFirst', missingOrUnfinishedRequests.as_view()),
+
+    # third page apis  # cuurent contracts
+    path('currentContractCount', currentContractCount.as_view()),
+    path('currentContractTable', currentContractTable.as_view()),
+    path('currentContractTableEditContrctServices', currentContractTable.as_view()),
+    # path('currentContractTableSearch', currentContractTableSearch.as_view()),
+    # path('currentContractTableFilter', currentContractTableFilter.as_view()),
+    #path('currentContractTableCancelContract', currentContractTableCancelContract.as_view()),
 ]
 
 
