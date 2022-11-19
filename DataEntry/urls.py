@@ -27,9 +27,15 @@ urlpatterns = [
     path('currentContractCount', currentContractCount.as_view()),
     path('currentContractTable', currentContractTable.as_view()),
     path('currentContractTableEditContrctServices', currentContractTable.as_view()),
+    path('currentContractTableViewClientProfile', currentContractTableViewClientProfile.as_view()),
     # path('currentContractTableSearch', currentContractTableSearch.as_view()),
     # path('currentContractTableFilter', currentContractTableFilter.as_view()),
     #path('currentContractTableCancelContract', currentContractTableCancelContract.as_view()),
+
+    ## forth page apis   # make collect order page
+
+    path('getUnPaidClientsNum', getUnPaidClientsNum.as_view()),
+    path('UnPaidClientsTable', UnPaidClientsTable.as_view())
 ]
 
 

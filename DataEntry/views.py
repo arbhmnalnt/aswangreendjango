@@ -14,13 +14,70 @@ import json
 today = datetime.now()
 month = today.month
 
+class UnPaidClientsTable(APIView):
+    def post(self, request):
+        data2=json.loads(request.body)
+        dataList = []
+        page = int(data2["page"])
+        basic_start = 0
+        basic_end = 20
+        start = (page-1)*basic_end
+        end = basic_end*page
+        contract_list = []
+        contract_list2 = []
+        follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+        for follow in follows:
+            contract_list2.append(Contract.objects.get(client=follow.client))
+        count = len(contract_list2)
+        if count > 0:
+            contracts = [c for c in contract_list2 if  c in Contract.objects.all().order_by('-id')[start:end]]
+            for contract in contracts:
+                if contract in contract_list:
+                    continue
+                else:
+                    contract_list.append(contract)
+            print(f"contracts => {contract_list}")
+            thead = {"contractSerial":"سريال الفاتورة","contractDate":"تاريخ التعاقد",
+            "clientName":"اسم العميل","phone":"رقم الهاتف","area":"المنطقة",
+            "addressDetails":"العنوان بالتفصيل", "deserved":"المستحق", "notes":"الملاحظات"}
+            for contract in contract_list:
+                temp = {}
+                temp["contractId"]     = contract.id
+                temp["contractSerial"] = contract.serialNum
+                temp["clientName"]     = contract.client.name
+                temp["phone"]          = contract.client.phone
+                temp["addressDetails"] = contract.client.addressDetails
+                temp["area"]           = contract.client.area.name
+                # follows = FollowContractServices.objects.filter(client=contract.client)
+                temp["deserved"]  = contract.client.deserved
+                temp["notes"]     = contract.client.notes
+                dataList.append(temp)
+            data = {"thead":thead, "rows":dataList, 'start':start, 'end':end}
+        else:
+            data = {}
+        data = data
+        return Response(data)
+
+class getUnPaidClientsNum(APIView):
+    def get(self, request):
+        data = {'unPaidClientsNum': len(peopleTocollectFrom())}
+        return Response(data)
+
+class currentContractTableViewClientProfile(APIView):
+    def post(self, request):
+        data2=json.loads(request.body)
+        clientId = int(data2["clientId"])
+        data = getClientProfileData(clientId)
+        return Response(data)
+
+
 class currentContractTableEditContrctServices(APIView):
     def post(self, request):
         data2=json.loads(request.body)
         contract_id = int(data2["contractId"])
         updateFollowContractServices(data2,update_contract(data2, contract_id))
         data = {"msg":"done"}
-    return Response(data)
+        return Response(data)
 
 class currentContractTable(APIView):
     def post(self, request):
@@ -210,6 +267,15 @@ def test2(request):
     return HttpResponse("test")
 
 ####################  FUNCTIONS PART #################################
+def getClientProfileData(clientId):
+    client = Client.objects.get(pk=clientId)
+    contract = Contract.objects.get(client=client)
+    clientServices = [service.name for service in contract.services.all()]
+    data = {'clientName':client.name, 'phone':client.phone, 'area':client.area.name,
+        'addressDetails':client.addressDetails, 'services':clientServices, 'contractSerial':contract.serialNum,
+        'contractDate':contract.created_at_date, 'collectionStatus':"تم التحصيل", 'deserved':"0"}
+    return data
+
 # def update_contract(data, clientId):
 def updateFollowContractServices(data2,contractId):
     def get_month(date):
@@ -391,7 +457,7 @@ def create_new_client(dictt):
 
 
 def currentContracts():
-    list = ['تاريخ التعاقد','اسم العميل','رقم الهاتف','المنطقة','المسستحق','الخيارات']
+    list = ['تاريخ التعاقد','اسم العميل','رقم الهاتف','المنطقة','المستحق','الخيارات']
     bigRows_list = []
     contracts = Contract.objects.all()
     big_list  = []

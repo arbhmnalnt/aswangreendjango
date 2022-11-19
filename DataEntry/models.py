@@ -114,6 +114,7 @@ class Client(TimeStampMixin,models.Model):
     #
     is_employee       = models.BooleanField(default=False)
     missing_info      = models.BooleanField(default=False)
+    deserved = models.IntegerField(default=0, null=True, blank=True)
     #
     activation_request_accepted = models.BooleanField(default=False)  # is user registered from the interface of web or app or from dataentry person
     is_test= models.BooleanField(default=True)
