@@ -165,7 +165,7 @@ STATIC_URL = '/static/'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 # \\\\\\\\\\\\\\\\\\\
 # AUTH_USER_MODEL = 'DataEntry.Client'
 

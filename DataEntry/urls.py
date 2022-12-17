@@ -35,7 +35,21 @@ urlpatterns = [
     ## forth page apis   # make collect order page
 
     path('getUnPaidClientsNum', getUnPaidClientsNum.as_view()),
-    path('UnPaidClientsTable', UnPaidClientsTable.as_view())
+    path('UnPaidClientsTable', UnPaidClientsTable.as_view()),
+
+
+    # make new collect order
+    path('newCollectOrder', newCollectOrder.as_view()),
+
+    # some features and standalone
+
+    ##
+    ## get follow contracts by one key filter or more
+    path('filterFollowContracts', filterFollowContractServicesRecord),
+    #### ---
+    ## 2- generateFilteredTableView
+    path('generateFilteredTableView', generateFilteredTableView.as_view())
+    # 1- search and get client or clients by one key or more
 ]
 
 

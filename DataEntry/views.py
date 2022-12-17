@@ -6,6 +6,8 @@ from rest_framework import viewsets, status as st
 from .models import *
 from django.core import serializers as core_serializers
 from .serializers import ContractSerializer, ServiceSerializer, ClientSerializer
+from django.views.decorators.csrf import csrf_exempt
+
 
 import datetime
 from datetime import datetime
@@ -13,6 +15,41 @@ import json
 
 today = datetime.now()
 month = today.month
+
+# tableTypes  [detailed,2,3]
+
+class generateFilteredTableView(APIView):
+    def get(self, request):
+        filterKeysDict=json.loads(request.body)
+        tableType = "detailed"
+        contracts = filterFollowContractServicesRecord(filterKeysDict)
+        print(f"contracts => {contracts}")
+        data = generateTable(contracts, tableType)
+        return Response(data)
+
+class newCollectOrder(APIView):   # this class used with new collect orders also to update current collect orders
+    def post(self, request):
+        data2=json.loads(request.body)
+        collectorId = data2["collectorId"]
+        collector = Employee.objects.get(pk=collectorId)
+        clients_set = manyToManyIdSave(data2["clients"], Client)
+        areas_set = manyToManyIdSave(data2["areas"], Area)
+        month = data2["month"]
+        required = data2["required"]
+        if 'collectOrderID' in data2:
+            idd = data2["collectOrderID"]
+            collectOrder = CollectOrder.objects.filter(pk=idd)
+            collectOrder.update(collector=collector,month=month, required=required)
+            collectOrder[0].clients.set(clients_set)
+            collectOrder[0].areas.set(areas_set)
+            collect_order_id = collectOrder[0].id
+        else:
+            collect_order = CollectOrder.objects.create(collector=collector,month=month, required=required)
+            collect_order.clients.set(clients_set)
+            collect_order.areas.set(areas_set)
+            collect_order_id = collect_order.id
+        data = {'msg':'done', 'collectOrderId':collect_order_id}
+        return Response(data)
 
 class UnPaidClientsTable(APIView):
     def post(self, request):
@@ -265,8 +302,84 @@ def index(request):
 
 def test2(request):
     return HttpResponse("test")
+#==================================================================================================================================
+####################################################  FUNCTIONS PART #######################################################
+#==================================================================================================================================
+def generateTable(contracts, tableType):
+    contract_list = contracts
+    dataList = []
+    thead = {"contractSerial":"سريال الفاتورة","contractDate":"تاريخ التعاقد",
+            "clientName":"اسم العميل","phone":"رقم الهاتف","area":"المنطقة",
+            "addressDetails":"العنوان بالتفصيل", "deserved":"المستحق", "notes":"الملاحظات"}
+    print(f"contract_list => {contract_list}")
+    if contract_list == None:
+        dataList = ''
+    else:
+        for contracts in contract_list:
+            if contracts == '':
+                continue
+            else:
+                pass
+            temp = {}
+            temp["contractId"]     = contracts.id
+            temp["contractSerial"] = contracts.serialNum
+            temp["clientName"]     = contracts.client.name
+            temp["phone"]          = contracts.client.phone
+            temp["addressDetails"] = contracts.client.addressDetails
+            temp["area"]           = contracts.client.area.name
+            # follows = FollowContractServices.objects.filter(client=contracts.client)
+            temp["deserved"]  = contracts.client.deserved
+            temp["notes"]     = contracts.client.notes
+            dataList.append(temp)
+    table = {"thead":thead, "rows":dataList}
+    #return table
+    # testing
+    return table
 
-####################  FUNCTIONS PART #################################
+def set_follow_areas_name(follows):
+    for follow in follows:
+        FollowContractServices.objects.filter(pk=follow.id).update(area=follow.client.area.name)
+
+
+set_follow_areas_name(FollowContractServices.objects.all())
+
+#@csrf_exempt
+def filterFollowContractServicesRecord(filterKeysDictRequest):
+    # filterKeysDictRequest = {'page':'2','area':'الإسكان المميز'}
+    # filterKeysArray may contain (client, serviceCollectDayStart, serviceCollectDayEnd
+    #  collected_month, remain_amount, area, collcetStatusNums)  collcetStatusNums # حالة الدفع
+    res_follows = 0
+    print(f"filterKeysDictRequest keys is => {filterKeysDictRequest.keys}")
+    for key in filterKeysDictRequest:
+        res_follows = FollowContractServices.objects.filter(**filterKeysDictRequest)
+    if res_follows == 0:
+        uniqueContracts = ['']
+        print(f"res_follows => here 4")
+        print(f"res_follows => {res_follows}")
+    else:
+        print(f"here 5")
+        print(f"res_follows => {res_follows}")
+        contarcts = [Contract.objects.get(client=follow.client) for follow in res_follows]
+        uniqueContracts = list(set(contarcts))
+    return uniqueContracts
+    # for testing  only  (res_follows[0])
+    # return HttpResponse(uniqueContracts)
+
+
+# def recordManage(request):
+#     month = datetime.now().month
+#     print("month => ", month)
+
+#     ctx = {'month':month}
+#     return render(request, 'clinics/record_management.html', ctx)
+
+def manyToManyIdSave(manyToManyList,manyTomanyTable):
+    manyToManySet = set()
+    for objectID in manyToManyList:
+        manyToManyObject = manyTomanyTable.objects.get(pk=objectID)
+        manyToManySet.add(manyToManyObject)
+    return manyToManySet
+
 def getClientProfileData(clientId):
     client = Client.objects.get(pk=clientId)
     contract = Contract.objects.get(client=client)
@@ -281,13 +394,17 @@ def updateFollowContractServices(data2,contractId):
     def get_month(date):
         # if day>25 and day>15: then maked the month is the next month else make it current month
         date_formatted = datetime.strptime(date, '%Y-%m-%d')
+        month = 0
         if date_formatted.day > 15:
             if date_formatted.month != 12:
                 month = date_formatted.month + 1
             else:
                 month = 1
+        else:
+            month = date_formatted.month
         return month
     contract                =   Contract.objects.get(pk=contractId)
+    contractDate            =   contract.created_prev_date
     service_objects_list    =   data2["services"]
     current_services_list   =   contract.sevices
     services_list=[]
@@ -300,8 +417,8 @@ def updateFollowContractServices(data2,contractId):
     for service in services_list:
         service_self = Service.objects.get(pk=service["id"])
 
-        follow_contract_services = FollowContractServices.objects.create(
-            service=service_self, total_amount=service_self.price, remain_amount=service_self.price,
+        follow_contract_services = FollowContractServices.objects.create(area=contract.area.name,
+            service=service_self, startingDate=contractDate,total_amount=service_self.price, remain_amount=service_self.price,
             collected_month=get_month(data2['date']),created_by=Employee.objects.get(pk=data2['userId'])
         )
 
@@ -360,7 +477,7 @@ def getUnfinishedClients():
 
 def clientMissingInfo(cl):
     cond = False
-    if cl.area or  cl.name or cl.password or  cl.serialNum or cl.nationalId or cl.phone == "-" or cl.area or cl.password or cl.name or  cl.serialNum or cl.nationalId or cl.phone is None or cl.area or cl.password  or cl.serialNum or cl.nationalId or cl.name  or cl.phone == "":
+    if cl.area or cl.name  or cl.serialNum or cl.nationalId or cl.phone == "-" or cl.area or cl.name or  cl.serialNum or cl.nationalId or cl.phone is None or cl.area or cl.serialNum or cl.nationalId or cl.name  or cl.phone == "":
         cond = True
     else:
         cond = False
@@ -400,7 +517,11 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
                 month = date_formatted.month + 1
             else:
                 month = 1
+        else:
+            month = date_formatted.month
+        print(f"this month is {month}")
         return month
+
     client                  =   Client.objects.get(pk=newClientId)
     contract                =   Contract.objects.get(pk=newContractId)
     service_objects_list    =   data2["services"]
@@ -438,7 +559,7 @@ def update_client_data(dictt):
     client = Client.objects.filter(pk=clientId)
     client.update(
         name=dictt["name"],phone=dictt["phone"],nationalId=dictt["nationalId"], password="",
-        serialNum=dictt["Serial"],area=Area.objects.filter(name=dictt["area"])[0],streetName=dictt["streetName"],addressBuilding=dict["addressBuilding"],
+        serialNum=dictt["Serial"],area=Area.objects.filter(name=dictt["area"])[0],streetName=dictt["streetName"],addressBuilding=dictt["addressBuilding"],
         addressApartment=dictt["addressApartment"],addressDetails=dictt["addressDetails"],created_prev_date=dictt["date"],
         created_by=Employee.objects.get(pk=dictt['userId'])
         )

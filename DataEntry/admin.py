@@ -60,10 +60,19 @@ class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ['client__name', 'client__area__name']
-    list_display = ('client','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
+    list_display = ('client','get_area','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
+
+    def get_area(self, obj):
+        return obj.client.area.name
 
 class CollectOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('collector', 'created_at')
+    list_display = ('collector', 'get_clients', 'get_areas', 'month', 'required', 'created_at',)
+
+    def get_areas(self, obj):
+        return " - ".join([area.name for area in obj.areas.all()])
+
+    def get_clients(self, obj):
+        return " - ".join([client.name for client in obj.clients.all()])
 
 
 # Register your models here.
