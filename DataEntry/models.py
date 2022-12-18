@@ -64,6 +64,8 @@ class Employee(TimeStampMixin,models.Model):
     )
 
     name         = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="الاسم")
+    email        = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="الايميل")
+    password     = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="كلمة السر")
     address      = models.CharField(max_length=50 , null=True, blank=True)
     phone        = models.CharField(max_length=11, null=True, blank=True)
     departement  = models.ForeignKey('Departement', on_delete=models.CASCADE,  null=True, blank=True)
@@ -77,7 +79,8 @@ class Employee(TimeStampMixin,models.Model):
     salary       = models.IntegerField(null=True, blank=True)
     eNum         = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom employee number for future us as like his id in company or any use else
     notes        = models.TextField(max_length=50,null=True, blank=True)
-    is_test         = models.BooleanField(default=True)
+    is_test      = models.BooleanField(default=True)
+    last_login   = models.DateTimeField(null=True, blank=True)
 
 class Service(TimeStampMixin,models.Model):
     name                     = models.CharField(max_length=50,null=True, blank=True)
