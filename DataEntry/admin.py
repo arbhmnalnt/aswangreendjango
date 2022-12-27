@@ -1,9 +1,12 @@
 from django.contrib import admin
-from .models import Departement, Employee, Service, Client, Contract, FollowContractServices, Area, CollectOrder,ContactRequest, ContactRequestTypes,Offers,RequestSimpleService,SimpleService
+from .models import *
 from import_export.admin import ImportExportModelAdmin
 
 class ContactRequestTypesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'eNum')
+
+class TypeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'name')
 
 class ContactRequestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'contactRequest')
@@ -21,6 +24,7 @@ class RequestSimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'service')
 
 # ///
+admin.site.register(Typee, TypeeAdmin)
 admin.site.register(ContactRequestTypes, ContactRequestTypesAdmin)
 admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(Offers, OffersAdmin)

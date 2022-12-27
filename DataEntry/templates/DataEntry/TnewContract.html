@@ -1,0 +1,231 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>الصفحة الرئيسية</title>
+{% endblock %}
+{% block style %}
+    /* Style the form */
+    #regForm {
+      background-color: #ffffff;
+      margin: 100px auto;
+      padding: 40px;
+      width: 70%;
+      min-width: 300px;
+    }
+
+    /* Style the input fields */
+    input {
+      padding: 10px;
+      width: 100%;
+      font-size: 17px;
+      font-family: Raleway;
+      border: 1px solid #aaaaaa;
+    }
+
+    /* Mark input boxes that gets an error on validation: */
+    input.invalid {
+      background-color: #ffdddd;
+    }
+
+    /* Hide all steps by default: */
+    .tab {
+      display: none;
+    }
+
+    /* Make circles that indicate the steps of the form: */
+    .step {
+      height: 15px;
+      width: 15px;
+      margin: 0 2px;
+      background-color: #bbbbbb;
+      border: none;
+      border-radius: 50%;
+      display: inline-block;
+      opacity: 0.5;
+    }
+
+    /* Mark the active step: */
+    .step.active {
+      opacity: 1;
+    }
+
+    /* Mark the steps that are finished and valid: */
+    .step.finish {
+      background-color: #04AA6D;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="content-container" style="background-color:#F3F5F2">
+    <div class="row pt-3">
+        <div class="col-12 text-center text-info">
+            <h2 class="text-info">إكمال التعاقدات أو تعاقد جديد</h2>
+        </div>
+    </div>
+    <div class="continue-contrcats row">
+        {{contracts|length }}
+        <div id="carouselExampleControls" class="carousel slide col-12 text-center" data-ride="carousel">
+            <div class="carousel-inner">
+                {%for client in contracts%}
+                <div class="carousel-item w-100{% if forloop.first %} active {%else%} carousel-item w-100 {%endif%}">
+                    <h5>{{client.name}}</h5>
+                    <p>{{client.area.name}}</p>
+                </div>
+                {% endfor %}
+            </div>
+            <a class="carousel-control-prev bg-primary" href="#carouselExampleControls" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next bg-info" href="#carouselExampleControls" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+    <div class="row mb-2 mt-2">
+        <div class="col-4">
+            <button id="newContractShow" class="btn btn-primary w-100 mb-2">ادخال تعاقد جديد</button>
+        </div>
+    </div>
+    <div class="row new-contract-holder">
+        <div class="col-10 text-center m-auto">
+            --
+            <form id="regForm" class="mt-0" method="post" name="new Contract" required="required" action="#">
+                <input id="servicesId" name="servicesId" type="hidden" class="d-none">
+                <input name="userId" value="{{request.user.id}}"  type="hidden" class="d-none">
+                <h1>ادخال تعاقد جديد</h1>
+                <!-- One "tab" for each step in the form: -->
+                {% csrf_token %}
+                <div class="tab">بيانات العميل :
+                   <p class=" mt-3 mb-1"><input class="form-control" name="serial" placeholder="سريال العميل" onkeyup = 'checkSerial(this)'></p>
+                   <p class="mt-1 border"><span class="" id="serialStatus"></span></p>
+                   <p class=" mt-3"><input class="form-control" name="name" placeholder="اسم العميل"  oninput="this.className = ''"></p>
+                   <p><input class="form-control" name="phone" placeholder="رقم الهاتف" oninput="this.className = ''"></p>
+                   <p class="select_holder">
+                        <select name="area" class="form-control">
+                          {% for area in areas %}
+                          <option value="{{area.id}}">{{area.name}}</option>
+                          {%endfor%}
+                      </select>
+                    </p>
+                </div>
+
+                <div class="tab">الخطوة 2 من 3 :
+                    <input type="hidden" value={{today}} id="today" name="date">
+                  <p><input required="required" type=""  pattern=".{7,}" name="addressDetails" class="form-control" placeholder="العنوان بالتفصيل"></p>
+                  <hr>
+                  <label class="text-info border p-2">إختيارى</label>
+                  <p><input name="apartment" value="العمارة" class="form-control" placeholder="العمارة"></p>
+                  <p><input name="float" value="الشقة" class="form-control" placeholder="الشقة"></p>
+                  <label>حساب التعاقد ل</label>
+                  <p>
+                      <select name="referer" class="form-control">
+                          <option value=0></option>
+                          {% for employee in employees %}
+                          <option value="{{employee.id}}">{{employee.name}}</option>
+                          {%endfor%}
+                      </select>
+                  </p>
+                </div>
+
+                <div class="tab">الخدمات:
+                  <p>
+                      <table class="w-100 table table-bordered">
+                          <thead class="bg-dark text-white">
+                              <tr>
+                                  <th>اختيار</th>
+                                  <th>الخدمة</th>
+                                  <th>سعر الخدمة</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for service in services %}
+                              <tr class="service" id="{{service.id}}">
+                                  <input class="d-none" type="hidden" id="{{serviceId}}" name="service" value="{{service.id}}">
+                                  <td>
+                                      <input type="checkbox" class="form-control checkbox" name="service-{{service.id}}">
+                                  </td>
+                                  <td>{{service.name}}</td>
+                                  <td><input class="form-control text-center" value={{service.price}} name="servicePrice"></td>
+                              </tr>
+                              {%endfor%}
+                          </tbody>
+                      </table>
+                    <p>
+                </div>
+
+                <div style="overflow:auto;">
+                  <div style="float:right;">
+                      <button type="button"class="btn btn-primary" id="nextBtn" onclick="nextPrev(1)">التالى</button>
+                      <button type="button" class="btn btn-info" id="prevBtn" onclick="nextPrev(-1)">السابق</button>
+                  </div>
+                </div>
+
+                <!-- Circles which indicates the steps of the form: -->
+                <div style="text-align:center;margin-top:40px;">
+                  <span class="step"></span>
+                  <span class="step"></span>
+                  <span class="step"></span>
+                </div>
+
+                </form>
+            --
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+    setInterval(function(){
+        // console.log("keep going >> ")
+        var selected = [];
+        $('input[type=checkbox]').each(function() {
+           if ($(this).is(":checked")) {
+               let serviceId = $(this).parents("tr").attr("id");
+               selected.push(serviceId)
+           }
+           else{
+                let serviceId = $(this).parents("tr").attr("id");
+                //
+                var index = selected.indexOf(serviceId);
+                if (index !== -1) {
+                  array.splice(index, 1);
+                }
+           }
+           $("#servicesId").attr('value', selected)
+        })
+
+    },400)
+
+    function checkSerial(el){
+
+        let serialVal = el.value
+        console.log(serialVal);
+        $.ajax({
+            url : `https://aswangreen2.pythonanywhere.com/DataEntry/checkClientSerial/`, // Replace with your ajax url
+            type : 'GET',
+            data : {
+                'serial' : serialVal  // Replace with your data's
+            },
+            dataType:'json',
+            success : function(data) {
+                console.log('Data: '+data.responseText); // Success callback
+                if(data.responseText=="found"){
+                    $("#serialStatus").html(`<span class="bg-danger text-white d-block p-1">الرقم مسجل لعميل اخر</span>`)
+                }else if (data.responseText=="not found"){
+                $("#serialStatus").html(`<span class="bg-success text-white d-block p-1">الرقم متاح</span>`)
+                }
+            },
+            error : function(request,error){
+                //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+            }
+        });
+
+    }
+    $(".new-contract-holder").hide()
+    $("#newContractShow").click(function(){
+        $(".continue-contrcats").hide()
+        $(".new-contract-holder").show()
+    })
+
+
+{% endblock %}

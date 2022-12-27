@@ -101,7 +101,11 @@ class Area(TimeStampMixin,models.Model):
     counter = models.IntegerField(default=0,null=True, blank=True)
     is_test         = models.BooleanField(default=True)
 
+class Typee(TimeStampMixin,models.Model):
+    name = models.CharField(max_length=100,null=True, blank=True)
+
 class Client(TimeStampMixin,models.Model):
+    # typee           = models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
     serialNum       = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom client number for future us as like his id in company or any use else
     name            = models.CharField(max_length=50,null=True, blank=True, db_index=True)
     phone           = models.CharField(max_length=11, null=True, blank=True, db_index=True)

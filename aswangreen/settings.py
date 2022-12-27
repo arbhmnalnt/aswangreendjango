@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'DataEntry',
     'collection',
     'import_export',
+    'simple_pagination',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -171,6 +172,15 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# LOGOUT_REDIRECT_URL = 'cAccounts/login'
+# LOGIN_REDIRECT_URL = '/cAccounts/profile/'
+
+LOGIN_URL = '/cAccounts/login'
+
+
+
+
 # \\\\\\\\\\\\\\\\\\\
 # AUTH_USER_MODEL = 'DataEntry.Client'
 

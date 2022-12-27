@@ -5,7 +5,16 @@ from .views import *
 # router = routers.DefaultRouter()
 # router.register(r'clients', views.get_clients_api_with_serialization)
 
+app_name="DataEntry"
+
 urlpatterns = [
+    # -- temp pages
+    path('', TmainPage, name="mainPage") ,
+    path('TmainPage/', TmainPage, name="TmainPage") ,
+    path('TnewContract/', TnewContract, name="TnewContract"),
+    path('checkClientSerial/', checkClientSerial, name="checkClientSerial"),
+
+    # --- end temp pages
     path('', index, name='index'),
     path('filters' ,filters.as_view(), name='filters'),
     path('contractTables', contractTables.as_view(), name='collection_stats'),
