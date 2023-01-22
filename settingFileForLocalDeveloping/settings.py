@@ -38,11 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'dbbackup',  # django-dbbackup # # not working
     'corsheaders',
     'rest_framework',
+    'bootstrap4',
+    'crispy_forms',
     'website',
     'account',
+    'cAccounts',
     'api',
     'DataEntry',
     'import_export',
@@ -149,15 +151,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
+
 onlinelocalPath   = "/home/aswangreen/aswangreen/"
-offlinelocalPath  =  "/aswanGreen/system/aswangreen/DataEntry"
+offlinelocalPath  =  "/aswanGreen/system/aswangreen/"
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
 MEDIA_ROOT = offlinelocalPath +'/media/'
 MEDIA_URL = 'media/'
 STATIC_ROOT = offlinelocalPath+'/static/'
 STATIC_URL = '/static/'
-
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
