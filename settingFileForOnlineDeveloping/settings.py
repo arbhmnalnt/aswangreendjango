@@ -95,7 +95,7 @@ dataBaseUser = "aswangreen2"
 password     = "ahmed123!"
 host         = "aswangreen2.mysql.pythonanywhere-services.com"
 # port         = "3306"
-
+#
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
