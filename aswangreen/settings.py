@@ -40,19 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'bootstrap4',
-    'crispy_forms',
     'website',
-    'cAccounts',
     'account',
     'api',
     'DataEntry',
-    'collection',
     'import_export',
-    'simple_pagination',
 ]
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+# not working
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location':  BASE_DIR / '/backup/'}
+#
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,6 +61,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = False
 
 ROOT_URLCONF = 'aswangreen.urls'
 
@@ -83,18 +83,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'aswangreen2.wsgi.application'
+WSGI_APPLICATION = 'aswangreen.wsgi.application'
 
-
-# =======
-# WSGI_APPLICATION = 'aswangreen.wsgi.application'
-
-# # variables to be changed to work on localhost or online in pythonanywhere
-dataBaseName = "aswangreen2$data"
-dataBaseUser = "aswangreen2"
-password     = "ahmed123!"
-host         = "aswangreen2.mysql.pythonanywhere-services.com"
-# port         = "3306"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -102,11 +92,11 @@ host         = "aswangreen2.mysql.pythonanywhere-services.com"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': dataBaseName,
-        'USER': dataBaseUser,
-        'PASSWORD': password,
-        'HOST': host,
-        # 'PORT': port,
+        'NAME': 'aswangreen',
+        'USER': 'root',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'port':"3306",
         'OPTIONS': {
             'sql_mode': 'traditional',
         }
@@ -133,11 +123,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
-REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'account.exceptions.status_code_handler'
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -163,9 +148,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-MEDIA_ROOT = '/home/aswangreen2/aswangreen/media'
-MEDIA_URL = '/media/'
-STATIC_ROOT = '/home/aswangreen2/aswangreen/static'
+
+onlinelocalPath   = "/home/aswangreen/aswangreen/"
+offlinelocalPath  =  "/aswanGreen/system/aswangreen/"
+# default static files settings for PythonAnywhere.
+# see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
+MEDIA_ROOT = offlinelocalPath +'/media/'
+MEDIA_URL = 'media/'
+STATIC_ROOT = offlinelocalPath+'/static/'
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -177,11 +167,3 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 # LOGIN_REDIRECT_URL = '/cAccounts/profile/'
 
 LOGIN_URL = '/cAccounts/login'
-
-
-
-
-# \\\\\\\\\\\\\\\\\\\
-# AUTH_USER_MODEL = 'DataEntry.Client'
-
-# AUTH_USER_MODEL = 'core.User'

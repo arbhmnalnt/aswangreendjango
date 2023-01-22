@@ -149,7 +149,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-MEDIA_ROOT = '/home/aswangreen/aswangreen/media'
-MEDIA_URL = '/media/'
-# STATIC_ROOT = '/home/aswangreen/aswangreen/static'
-# STATIC_URL = '/static/'
+onlinelocalPath   = "/home/aswangreen/aswangreen/"
+offlinelocalPath  =  "/aswanGreen/system/aswangreen/DataEntry"
+# default static files settings for PythonAnywhere.
+# see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
+MEDIA_ROOT = offlinelocalPath +'/media/'
+MEDIA_URL = 'media/'
+STATIC_ROOT = offlinelocalPath+'/static/'
+STATIC_URL = '/static/'
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# LOGOUT_REDIRECT_URL = 'cAccounts/login'
+# LOGIN_REDIRECT_URL = '/cAccounts/profile/'
+
+LOGIN_URL = '/cAccounts/login'
