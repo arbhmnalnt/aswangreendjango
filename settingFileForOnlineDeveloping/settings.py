@@ -40,12 +40,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'bootstrap4',
+    'crispy_forms',
     'website',
+    'cAccounts',
     'account',
     'api',
     'DataEntry',
+    'collection',
     'import_export',
+    'simple_pagination',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -76,14 +83,19 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'aswangreen.wsgi.application'
+WSGI_APPLICATION = 'aswangreen2.wsgi.application'
 
-# variables to be changed to work on localhost or online in pythonanywhere
-dataBaseName = "data"
-dataBaseUser = "root"
-password     = "123456"
-host         = "127.0.0.1"
-port         = "3306"
+
+# =======
+# WSGI_APPLICATION = 'aswangreen.wsgi.application'
+
+# # variables to be changed to work on localhost or online in pythonanywhere
+dataBaseName = "aswangreen2$data"
+dataBaseUser = "aswangreen2"
+password     = "ahmed123!"
+host         = "aswangreen2.mysql.pythonanywhere-services.com"
+# port         = "3306"
+
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -94,7 +106,7 @@ DATABASES = {
         'USER': dataBaseUser,
         'PASSWORD': password,
         'HOST': host,
-        'PORT': port,
+        # 'PORT': port,
         'OPTIONS': {
             'sql_mode': 'traditional',
         }
@@ -119,6 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'account.exceptions.status_code_handler'
@@ -149,13 +163,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-MEDIA_ROOT = '/home/aswangreen2/aswangreen/media'
-MEDIA_URL = '/media/'
-STATIC_ROOT = '/home/aswangreen2/aswangreen/static'
+
+onlinelocalPath   = "/home/aswangreen/aswangreen/"
+offlinelocalPath  =  "/aswanGreen/system/aswangreen/"
+# default static files settings for PythonAnywhere.
+# see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
+MEDIA_ROOT = onlinelocalPath +'/media/'
+MEDIA_URL = 'media/'
+STATIC_ROOT = onlinelocalPath+'/static/'
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# LOGOUT_REDIRECT_URL = 'cAccounts/login'
+# LOGIN_REDIRECT_URL = '/cAccounts/profile/'
+
+LOGIN_URL = '/cAccounts/login'
+
+
 
 
 # \\\\\\\\\\\\\\\\\\\
