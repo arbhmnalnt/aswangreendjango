@@ -64,6 +64,8 @@ class Employee(TimeStampMixin,models.Model):
     )
 
     name         = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="الاسم")
+    role         = models.CharField(max_length=50 , null=True, blank=True, default=" ")
+    job2         = models.CharField(max_length=50 , null=True, blank=True, default=" ") # for abdallah api auth
     email        = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="الايميل")
     password     = models.CharField(max_length=50 , null=True, blank=True,  verbose_name="كلمة السر")
     address      = models.CharField(max_length=50 , null=True, blank=True)

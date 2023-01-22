@@ -1,0 +1,86 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>طلب تحصيل جديد</title>
+{% endblock %}
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+<div class="content-container p-2" style="background-color:#F3F5F2">
+    <div class="row">
+        <div class="col-6 text-right">
+            <h5>إنشاء طلب تحصيل</h5>
+        </div>
+        <div class="col-3 mr-auto">
+            <button class="btn btn-primary">تأكيد الطلب</button>
+        </div>
+    </div>
+    <hr>
+    <div class="row mt-2">
+        <div class="col-8 ">
+              <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                المناطق
+              </button>
+            <div class="collapse" id="collapseExample">
+                    {% for area in areas %}
+                    <div class="card card-body d-inline-block">
+                        <a class="btn btn-info text-white" href="#">{{area.name}}</a>
+                    </div>
+                    {% endfor %}
+            </div>
+        </div>
+        <div class="col-3 mr-auto">
+            <input class="form-control" placeholder="بحث">
+            <button class="btn btn-info mt-2">بحث</button>
+        </div>
+    </div>
+</div>
+
+<div class="content-container p-2 mt-3" style="background-color:#F3F5F2">
+    <div class="row">
+        {{clientsCount}} عميل لم يتم التحصيل منه
+        <div class="col-12">
+            {% if isContracts %}
+            <table class="w-100 table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData"
+            style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th>الكل<input name="checkAll" id="checkAll" type="checkbox"></th>
+                    <th>م</th>
+                    <th>تاريخ التعاقد</th>
+                    <th>اسم العميل</th>
+                    <th>رقم الهاتف</th>
+                    <th>المنطقة</th>
+                    <th>العنوان بالتفصيل</th>
+                    <th>المستحق</th>
+                    <th>الملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts %}
+                <tr id="{{contract.id}}">
+                    <td><input name="contractSelect" class="contractSelect {{contract.id}}" type="checkbox"></td>
+                    <td>{{forloop.counter}}</td>
+                    <td class="date">{{contract.created_prev_date|date:"d / m /Y" }}</td>
+                    <td>{{contract.client.name}}</td>
+                    <td>{{contract.client.phone}}</td>
+                    <td>{{contract.client.area.name}}</td>
+                    <td>{{contract.client.addressDetails}}</td>
+                    <td class="deserved ">{{contract.client.deserved}} جم</td>
+                    <td>{{contract.client.notes}}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <h4 class="text-center text-white bg-danger">لايوجد تعاقدات متاحة للتحصيل</h4>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+
+{% endblock %}

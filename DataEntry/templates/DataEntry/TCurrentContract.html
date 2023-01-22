@@ -1,0 +1,236 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>التعاقدات الحالية</title>
+{% endblock %}
+{% block style %}
+    .vertical-buttons {
+      flex-direction: column;
+    }
+
+    .top-margin {
+      margin-top: .5em;
+    }
+    td,th{
+        text-align:center !important
+    }
+
+    .serv::after {
+        content: ' - ';
+    }
+
+    .serv:last-child::after {
+        content: '';
+    }
+
+    #tblData{
+        font-size: 1rem;
+        height: 80vh;
+        overflow-y: auto;
+        display: inline-block;
+    }
+
+
+
+    @media print {
+        body * {
+            visibility: hidden;
+
+        }
+
+        .print-none{
+            display: none !important;
+        }
+
+        #tblData, #tblData * {
+            visibility: visible;
+            height: auto !important
+        }
+
+        #tblData {
+            position: absolute;
+            left: 0;
+            top: 0;
+
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="content-container pt-2" style="background-color:#F3F5F2">
+    <div class="row">
+    </div>
+    <div class="row">
+        <div class="col-3 m-auto">
+            <span class="btn btn-primary text-white p-2 d-inline-block">إجمالى التعاقدات
+            </span>
+            <span class="bg-dark text-white p-3">
+            {{contracts_list.count}}
+            </span>
+        </div>
+        <div class="col-4 m-auto">
+            <p>
+
+                <input class="input w-100 text-center" id="input_search" placeholder="بحث بالاسم-السريال-المنطقة-الخدمات">
+                <a href="#" class="btn btn-danger mt-2 w-100" id="search">البحث / الفلترة</a>
+            </p>
+        </div>
+        <div class="col-3 text-center m-auto">
+            <button class="btn btn-success w-100" onclick="$('#tblData').printThis();">طباعة</button>
+        </div>
+    </div>
+    <div class="row">
+        <table class="col-12 table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData"
+        style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th>م</th>
+                    <th>سريال التعاقد</th>
+                    <th>اسم العميل</th>
+                    <th>رقم الهاتف</th>
+                    <th>المنطقة</th>
+                    <th>تفاصيل العنوان</th>
+                    <th>الخدمات</th>
+                    <th>حالة التحصيل</th>
+                    <th>سريال الفاتورة</th>
+                    <th class="print-none">الخيارات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts_list %}
+                <tr id="{{contract.serialNum}}">
+                    <td>{{forloop.counter}}</td>
+                    <td class="serial">{{contract.serialNum}}</td>
+                    <td>{{contract.client.name}}</td>
+                    <td>{{contract.client.phone}}</td>
+                    <td>{{contract.client.area.name}}</td>
+                    <td>{{contract.client.addressDetails}}</td>
+                    <td class="services">({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})</td>
+                    <td class="collectstatue"><input class="d-none" type="hidden" value={{contract.id}}>
+                        <span class="res"></span>
+                    </td>
+                    <td>لا يوجد</td>
+                    <td class="options print-none" >
+                        {% if contract.client.missing_info %}
+                            <input class="d-none" type="hidden" value={{contract.id}}>
+                            <a class="btn btn-info options_dialog"  href="#"><i class="fa fa-bars" aria-hidden="true"></i></a>
+                        {% else %}
+                            <a class="btn btn-info text-white" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    {% if contracts.has_other_pages %}
+        <ul class="pagination">
+            {% if contracts.has_previous %}
+                <li class="waves-effect"><a href="?page=
+                        {{ contracts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i
+                        class="material-icons">السابق</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">السابق</i></a></li>
+            {% endif %}
+            {% for num in contracts.paginator.page_range %}
+                {% if contracts.number == num %}
+                    <li class="active"><a href="#!">{{ num }}</a></li>
+                {% else %}
+                    <li class="waves-effect"><a
+                            href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if contracts.has_next %}
+                <li class="waves-effect"><a
+                        href="?page={{ contracts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i
+                        class="material-icons">التالى</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">التالى</i></a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
+{% block script %}
+// search
+
+document.getElementById("input_search").addEventListener("keyup", function(event){
+    let el = $(this)
+  // event.preventDefault()
+  let val = $("#input_search").val();
+  console.log(val)
+  if(val.length>0){
+    $("#search").attr(`href`, `/DataEntry/TCurrentContract/?q=${val}`)
+  }
+});
+
+$(".collectstatue").each(function(){
+
+    let contractId =  $(this).children("input").val(),
+        el         =  $(this);
+    //console.log(`test => ${contractId}`)
+    $.ajax({
+            url : `https://aswangreen2.pythonanywhere.com/DataEntry/TgetcollcetStatus`, // Replace with your ajax url
+            type : 'GET',
+            data : {
+                'contractId' : contractId  // Replace with your data's
+            },
+            dataType:'json',
+            success : function(data) {
+                //console.log('Data: '+data.followsStatus); // Success callback
+                //console.log(el)
+                $(el).children(".res").html(`<span class="bg-primary text-white d-block p-1 btn">${data.followsStatus}</span>`)
+
+            },
+            error : function(request,error){
+                //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+            }
+        });
+})
+
+$(".options_dialog").each(function(){
+
+    $(this).click(function(){
+
+
+        Swal.fire({
+          title: 'تأكيد صحة البيانات',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'حفظ البيانات',
+          denyButtonText: 'يحتاج الى تعديل',
+          cancelButtonText: 'الغاء',
+          reverseButtons: true,
+        }).then((result) => {
+          /* Read more about isConfirmed, isDenied below */
+          if (result.isConfirmed) {
+            let contractId = $(this).parent().siblings('.serial').text();
+            $.ajax({
+                url : `https://aswangreen2.pythonanywhere.com/DataEntry/ConfirmContract/`, //
+                type : 'GET',
+                data : {
+                    'contractId' : contractId  //
+                },
+                dataType:'json',
+                success : function(data) {
+                    //console.log('Data: '+data.msg); // Success callback
+                    //console.log(el)
+                    // $(el).children(".res").html(`<span class="bg-primary text-white d-block p-1 btn">${data.followsStatus}</span>`)
+
+                },
+                error : function(request,error){
+                    //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+                }
+            });
+            Swal.fire('تم الحفظ', '', 'success')
+            // window.location.reload(true);
+          } else if (result.isDenied) {
+            Swal.fire('Changes are not saved', '', 'info')
+          }
+        })
+    })
+})
+
+
+{% endblock %}

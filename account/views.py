@@ -67,6 +67,12 @@ def clientDataForMobile(clientId, key, access_token):
     data = {"responseStatusId":"1", "isRequested":"2" if user.activation_request == True  else "1","message" : msg, "clientId":str(user.id),"name":str(client_name) , "phone":user.phone , "nationalId":user.nationalId , "area":"مدينة ناصر" ,"streetName":user.streetName  ,"buildingNumber":user.addressBuilding, "apartementNumber":user.addressApartment, "token":access_token}
     return data
 
+def EmployeeDataForWeb(clientId, key, access_token):
+    user = Employee.objects.get(id=clientId)
+    client_name = str(user.name)
+    data = {"Name":client_name,"Role":user.role ,"job":user.job2 ,"token":access_token}
+    return data
+
 def validateFirstRegisterData(name,nationalId,phone,password):
     data_good     = True
     erorr_message = ""
@@ -303,6 +309,7 @@ class login(APIView):
 
         PhoneRight = Client.objects.filter(phone=phone)
         users      = Client.objects.filter(phone=phone, password=password)
+        employeeCount = Employee.objects.filter(phone=phone, password=password)
         if users.count()>0:
             user=users.first()
             userId=user.id
@@ -310,11 +317,22 @@ class login(APIView):
             refresh_token = create_refresh_token(userId)
 
             data = clientDataForMobile(userId, 'login', access_token)
+            data = clientDataForWeb(userId, 'login', access_token)
             response = Response()
             response.data = data
             response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
             return response
+        elif employeeCount.count()>0:
+            user=employeeCount.first()
+            userId=user.id
+            access_token  = create_access_token(userId)
+            refresh_token = create_refresh_token(userId)
 
+            data = EmployeeDataForWeb(userId, 'login', access_token)
+            response = Response()
+            response.data = data
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+            return response
         elif PhoneRight.count()>0:
             data = mobileErorrResponse(2,"هذا الهاتف مسجل من قبل, اذا كنت نسيت كلمة السر ,الرجاء التواصل مع خدمة العملاء")
             return Response(data)

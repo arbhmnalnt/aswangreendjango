@@ -26,7 +26,7 @@ urlpatterns = [
     path('login', login.as_view(), name='login'),
     # ///
     path('user', UserAPIView.as_view(), name='UserAPIView'),
-    path('user', UserAPIView.as_view(), name='UserAPIView'),
+    # path('user', UserAPIView.as_view(), name='UserAPIView'),
     path('refresh', RefreshAPIView.as_view(), name='refresh'),
     path('logout', LogoutAPIView.as_view(), name='logout')
 ]

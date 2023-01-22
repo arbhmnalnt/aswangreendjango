@@ -64,45 +64,7 @@
             <h2 class="text-info pb-2">إكمال التعاقدات أو تعاقد جديد</h2>
         </div>
     </div>
-    <div class="continue-contrcats row {% if isClient %} d-none {% endif %}">
-        <h6 class="bg-white text-danger p-2 col-12">
-            <span id="num">{{contracts|length }}</span> : طلب قيد الانتظار
-        </h6>
 
-        <div id="" class="col-12 m-auto text-center" style="overflow:hidden; overflow-x:auto">
-            <div class="row" id="holder_scroll" style="width:300%">
-                {%for client1 in contracts%}
-                <span class="d-inline-block m-2" style="width:300px">
-                    <div>
-                        <div class="d-inline-block mb-0 text-right h6 bg-white w-100 p-4 clientHolder"  style="height:330px">
-                            <p class="text-right lead">حساب التعاقد</p>
-                            <hr>
-                            <p class="h5">{{client1.name}}</p>
-                            <p class="h5 lead">
-                                {% if client1.phone is None%}
-                                    غير موجود
-                                {% else %}
-                                    0{{client1.phone}}
-                                {% endif %}
-                            </p>
-                            <hr>
-                            <p>الخدمة / الخدمات</p>
-                            <input type="hidden" class="d-none" id="clientId" value="{{client1.id}}">
-                            <p class="services lead"></p>
-                            <p class="h5">العنوان</p>
-                            <p class="lead">{% if client1.addressDetails == None %}{{client1.area.name}}{% else %}{{client1.addressDetails}}{% endif %}</p>
-                        </div>
-                        <p class="bg-white w-100 p-4 mt-0 text-right">
-                            <a class="border-bottom ml-5 btn btn-primary" href="/DataEntry/TnewContract2?clientId={{client1.id}}">إكمال التعاقد</a>
-                            <a class="text-dark border-bottom" href="/cancelContract/14235">الغاء الطلب</a>
-                        </p>
-                    </div>
-                </span>
-                {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row mb-2 mt-2 {% if isClient %} d-none {% else %} {% endif %}">
         <div class="col-4">
             <button id="newContractShow" class="btn btn-primary w-100 mb-2">ادخال تعاقد جديد</button>
@@ -113,12 +75,13 @@
         <div class="col-10 text-center m-auto">
             <form id="regForm" class="mt-0" method="post" name="new Contract" required="required" action="#">
                 <input id="servicesId" name="servicesId" type="hidden" class="d-none">
+
                 <input name="userId" value="{{request.user.id}}"  type="hidden" class="d-none">
-                <input name="clientId" value="{{clientId}}"   type="hidden" class="d-none">
+
                 <h1>{% if isClient %} اكمال تعاقد{% else %}ادخال تعاقد جديد {% endif %}</h1>
                 <!-- One "tab" for each step in the form: -->
                 {% csrf_token %}
-                <div class="tab">بيانات العميل :{{clientRecord.id}}
+                <div class="tab">بيانات العميل :ss
                    <p class=" mt-3 mb-1"><input class="form-control" value="{% if isClient %}{{clientRecord.serialNum}}{% endif %}" name="serial" placeholder="سريال العميل" onkeyup = 'checkSerial(this)'></p>
                    <p class="mt-1 border"><span class="" id="serialStatus"></span></p>
                    <p class=" mt-3"><input class="form-control" name="name" value="{% if isClient %}{{clientRecord.name}}{% endif %}" placeholder="اسم العميل"  oninput="this.className = ''"></p>

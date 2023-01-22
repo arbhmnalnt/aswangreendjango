@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404, redirec
 from django.http import HttpResponse,JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework import viewsets, status as st
 from .models import *
 from django.core import serializers as core_serializers
@@ -12,6 +13,8 @@ import datetime
 from datetime import datetime
 import json
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 today = datetime.now()
 
@@ -19,6 +22,154 @@ todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
+
+
+def TnewCollectOrder(request):
+    areas = Area.objects.all()
+    isContracts = True
+    if request.method == 'POST':
+        pass
+    else:
+        contract_list = []
+        contract_list2 = []
+        follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+        for follow in follows:
+            contract_list2.append(Contract.objects.get(client=follow.client))
+        count = len(contract_list2)
+        if count > 0:
+            contracts = [c for c in contract_list2 if  c in Contract.objects.all().order_by('-id')]
+            for contract in contracts:
+                if contract in contract_list:
+                    continue
+                else:
+                    contract_list.append(contract)
+        else:
+            isContracts = False
+        print(f"contract_list 111 => {contract_list}")
+        ctx = {'areas':areas, 'contracts':contract_list, 'clientsCount':count, 'isContracts':isContracts}
+        return render(request,'DataEntry/TnewCollectOrder.html',ctx)
+
+class currentContractTableSearchFilter(APIView):
+    def post(self, request):
+
+        return Response(data)
+
+class deleteContract(APIView):
+    def get(self,request):
+        contractId = request.GET.get('contractId')
+        Contract.objects.filter(pk=contractId, is_deleted=False).update(is_deleted=True)
+        contract = Contract.objects.get(serialNum=contractId)
+        client = contract.client
+        clientId = client.id
+        Client.objects.filter(pk=clientId, is_deleted=False).update(is_deleted=True)
+        data = {'msg': 'done'}
+        return Response(data)
+
+@api_view(['POST'])
+def ConfirmContract(request):
+    print('testing')
+    contractId = request.POST.get('contractId')
+    Contract.objects.filter(pk=contractId).update(is_test=False)
+    contract = Contract.objects.get(serialNum=contractId)
+    client = contract.client
+    clientId = client.id
+    Client.objects.filter(pk=clientId).update(missing_info=False)
+    print(f"contractId => {contractId}  / /  clientId => {clientId}")
+    Client.objects.filter(pk=clientId).update(is_test=False, missing_info=False)
+
+    newContractId = create_new_contract(data2, clientId)
+    # follow Services
+    make_new_contract_service_followers(data2, newContractId, clientId)
+    data = {'msg': 'done'}
+    return Response(data)
+
+
+@api_view(('GET',))
+# @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def ConfirmContract(request):
+    contractId = request.GET.get('contractId')
+    Contract.objects.filter(pk=contractId).update(is_test=False)
+    contract = Contract.objects.get(serialNum=contractId)
+    client = contract.client
+    clientId = client.id
+    Client.objects.filter(serialNum=contractId).update(is_test=False, missing_info=False)
+    data = {'clientId':clientId,'contract':contractId}
+    data = {'msg': 'done','data':data}
+    return Response(data)
+
+@api_view(('GET',))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def TgetcollcetStatus(request):
+    contractId = request.GET.get('contractId')
+    # clientId = Contract.objects.get(pk=contractId, is_deleted=False, is_test=False).client.id
+    clientId = Contract.objects.get(pk=contractId, is_deleted=False).client.id
+    client = Client.objects.get(pk=clientId)
+    follows = FollowContractServices.objects.filter(client=client)
+    followsStatus = ''
+    for follow in follows:
+        print(f"follow.collcetStatusNums => {follow.collcetStatusNums}")
+        if follow.collcetStatusNums == "تم الدفع":
+            followsStatus = "تم الدفع"
+        elif follow.collcetStatusNums == "مطلوب الدفع":
+            followsStatus = "مطلوب الدفع"
+        elif follow.collcetStatusNums == "فى انتظار ميعاد التحصيل":
+            followsStatus = "فى انتظار ميعاد التحصيل"
+    data = {'followsStatus':followsStatus}
+    return Response(data)
+
+def TCurrentContract(request):
+    listcount = 15
+    # contracts_list = Contract.objects.filter(is_deleted=False, is_test=False)
+    contracts_list = Contract.objects.filter(is_deleted=False)
+    query       = request.GET.get('q')
+    queryDate   = request.GET.get('qd')
+    queryStatue = request.GET.get('qs')
+    if query:
+        contracts_list = Contract.objects.filter(
+            Q(client__name__icontains=query)& Q(is_deleted=False) |  Q(client__area__name__icontains=query)& Q(is_deleted=False)|
+            Q(belong_to__name__icontains=query)& Q(is_deleted=False) |Q(notes__icontains=query)& Q(is_deleted=False) |
+            Q(created_by__name__icontains=query)& Q(is_deleted=False)|Q(services__name__icontains=query)& Q(is_deleted=False)
+        ).distinct()
+    if queryDate:
+        contracts_list = Contracts.objects.filter(created_prev_date==queryDate,is_deleted=False).distinct()
+    # if queryStatue:
+    #     contracts_list = []
+    #     follows = []
+    #     contractsObjects = Contract.objects.all()
+    #     clientsList   = [con.client for con in contractsObjects]
+    #     follows =FollowContractServices.objects.filter(collcetStatusNums__contains=queryStatue)
+    #     print(f"follows => {follows}")
+    #     for follow in follows:
+    #       if follow.client in clientsList:
+    #           contracts_list.append(follow.client)
+
+    paginator = Paginator(contracts_list, listcount) # 6 posts per page
+    page = request.GET.get('page')
+    try:
+        contracts = paginator.page(page)
+    except PageNotAnInteger:
+        contracts = paginator.page(1)
+    except EmptyPage:
+        contracts = paginator.page(paginator.num_pages)
+
+    ctx = {'contracts_list':contracts_list, 'contracts':contracts}
+    return render(request, 'DataEntry/TCurrentContract.html', ctx)
+
+@api_view(['GET'])
+def getServicesOfClient(request):
+    clientId   = request.GET.get('clientId')
+    clientRecord = Client.objects.get(pk=clientId)
+    servicesList = Contract.objects.filter(client=clientRecord)
+    if servicesList.count() > 0:
+        servicesList = servicesList[0].services
+        servicesList = [serv.name  for serv in servicesList.all()]
+        services = str(servicesList)
+        services2 = " - ".join(servicesList)
+    else :
+        services = " - "
+        services2 = " - "
+    data = {'services':services, 'services2':services2}
+    return Response(data)
 
 @api_view(['GET'])
 def checkClientSerial(request):
@@ -32,13 +183,72 @@ def checkClientSerial(request):
     data = {'responseText':res}
     return Response(data)
 
+def TnewContract2(request):
+    services  = Service.objects.all()
+    servicesList = ["service-"+str(service.id) for service in services]
+    isClient       = False
+    if request.method == 'POST':
+        date            = request.POST['date']    # todayUser
+        clientId        = request.POST['clientId']
+        Client.objects.filter(pk=clientId).update(missing_info=False)
+        Client.objects.filter(pk=clientId).update(notes='')
+        userId          = request.POST['userId']
+        serial          = request.POST['serial']
+        clientName      = request.POST['name']
+        phone           = request.POST['phone']
+        area            = Area.objects.get(pk=request.POST['area'])
+        addressDetails  = request.POST['addressDetails']
+        apartment       = isEmptyStr(request.POST['apartment'])
+        flat            = isEmptyStr(request.POST['float'])
+        servicesIdsList = request.POST['servicesId']
+        servicesIdsList = servicesIdsList.split(',')
+        servicesIdsListint = [int(s) for s in servicesIdsList]
+        referer         = 0 if request.POST['referer'] == '0' else Employee.objects.get(pk=request.POST['referer'])
+        clientServicesList = [Service.objects.get(pk=service) for service in servicesIdsListint ]
+        belong_to      = Employee.objects.get(pk=referer) if referer != 0 else ''
+        ##########
+
+        # to be done
+        data2 = {"name":clientName, "clientId": clientId,"phone":phone, "nationalId":"", "serial":serial, "area":area, "streetName":addressDetails,
+        "addressBuilding":apartment,"addressApartment": flat, "addressDetails": f" {addressDetails} - {apartment} - {flat}",
+        "services":servicesIdsListint,"referer":referer,"date":date,"userId":userId}
+
+
+        newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
+        # client contract data
+        newContractId = create_new_contract(data2, newClientId)
+        # follow Services
+        make_new_contract_service_followers(data2, newContractId, newClientId)
+        return redirect('/DataEntry/TnewContract/')
+    else:
+        print(f"isClient => {isClient}")
+        if request.GET.get('clientId'):
+            isClient       = True
+            clientId       = request.GET.get('clientId')
+            Client.objects.filter(pk=clientId).update(missing_info=False)
+            Client.objects.filter(pk=clientId).update(notes='')
+            clientRecord   = Client.objects.get(pk=clientId)
+            isContract     = Contract.objects.filter(client=clientRecord)
+            clientContract = isContract[0] if isContract.count()>0 else False
+            servicesList   = [serv.name for serv in clientContract.services.all()] if isContract.count()>0 else []
+            areas     = Area.objects.all()
+            employees = Employee.objects.all()
+            ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
+            'todayUser':todayUser, 'clientRecord':clientRecord,'clientId':clientId,
+            'clientContract':clientContract,'servicesList':servicesList,'isClient':isClient}
+            return render(request, 'DataEntry/TnewContract.html', ctx)
+    areas     = Area.objects.all()
+    employees = Employee.objects.all()
+    ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
+    'todayUser':todayUser, 'isClient':isClient}
+    return render(request, 'DataEntry/TnewContract2.html', ctx)
+
 def TnewContract(request):
     services  = Service.objects.all()
     servicesList = ["service-"+str(service.id) for service in services]
     temp = True
-    print(f"here => 04")
-    continueContracts = getUnfinishedClients(temp)
-    print(f"continueContracts => {continueContracts}")
+    continueContractsRecords = Client.objects.filter(missing_info=True)
+    isClient       = False
     if request.method == 'POST':
         date            = request.POST['date']    # todayUser
         userId          = request.POST['userId']
@@ -48,7 +258,6 @@ def TnewContract(request):
         area            = Area.objects.get(pk=request.POST['area'])
         addressDetails  = request.POST['addressDetails']
         apartment       = isEmptyStr(request.POST['apartment'])
-        print(f"addressBuilding => {apartment}")
         flat            = isEmptyStr(request.POST['float'])
         servicesIdsList = request.POST['servicesId']
         servicesIdsList = servicesIdsList.split(',')
@@ -71,26 +280,47 @@ def TnewContract(request):
         make_new_contract_service_followers(data2, newContractId, newClientId)
         return redirect('/DataEntry/')
     else:
-        pass
+        if request.GET.get('clientId'):
+            isClient       = True
+            clientId       = request.GET.get('clientId')
+            clientRecord   = Client.objects.get(pk=clientId)
+            isContract     = Contract.objects.filter(client=clientRecord)
+            clientContract = isContract[0] if isContract.count()>0 else False
+            servicesList   = [serv.name for serv in clientContract.services.all()] if isContract.count()>0 else []
+            areas     = Area.objects.all()
+            employees = Employee.objects.all()
+            ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
+            'todayUser':todayUser, 'contracts':continueContractsRecords, 'clientRecord':clientRecord,
+            'clientContract':clientContract,'servicesList':servicesList,'isClient':isClient}
+            return render(request, 'DataEntry/TnewContract.html', ctx)
     areas     = Area.objects.all()
     employees = Employee.objects.all()
     ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
-    'todayUser':todayUser, 'contracts':continueContracts}
+    'todayUser':todayUser, 'contracts':continueContractsRecords, 'isClient':isClient}
     return render(request, 'DataEntry/TnewContract.html', ctx)
+
+import math
+def getPageNums(total, listcount):
+    pages = math.ceil(total/listcount)
+    return pages;
 
 @login_required
 def TmainPage(request):
+    listcount = 5
     # stats part
     remainingCollections = len(peopleTocollectFrom())
     collected            = len(peopleCollectedFrom())
     currentClients       = Contract.objects.all().count()
     collectorsNum        = Employee.objects.filter(jobTitle="موظف تحصيل").count()
     # latest contracts
-    contracts            = Contract.objects.all().order_by('-id')[:20]
+    contracts            = Contract.objects.all().order_by('-id')
+
+    pages = getPageNums(Contract.objects.all().count(), listcount)
     # current collecr orders
     orders               = CollectOrder.objects.filter(month=month)
     ctx= {'remainingCollections':remainingCollections, "collected":collected, "currentClients":currentClients, "collectorsNum":collectorsNum,
-        'items':contracts, 'contractsLen':contracts.count(), 'orders':orders, 'ordersLen':orders.count()}
+        'items':contracts, 'contractsLen':contracts.count(), 'orders':orders, 'ordersLen':orders.count(),
+        'pages':pages, 'listcount':listcount}
 
     return render(request, 'DataEntry/TmainPage.html', ctx)
 
@@ -267,6 +497,7 @@ class mainPageStatsSecond(APIView):
             orders = CollectOrder.objects.filter(month=month)
             for order in orders:
                 temp = {}
+                temp["requestId"] = order.id
                 temp["collector"] = order.collector.name
                 temp["clientsNum"]= order.clients.count()
                 temp["areas"]     = [area.name for area in order.areas.all()]
@@ -277,6 +508,11 @@ class mainPageStatsSecond(APIView):
             data = {}
         return Response(data)
 
+class recentContracts(APIView):
+    def get(self,request):
+        contracts            = Contract.objects.all().order_by('-id')[:20]
+        data = generateTable(contracts, "recentContracts")
+        return Response(data)
 
 class mainPageStatsFirst(APIView):
     def get(self, request):
@@ -313,6 +549,9 @@ class HandleClients(APIView):
         # # add missing info check to all Clients with missing info like:
         # # name is not length [complete name] ot missing serial num
         # # phone is not 11 digit length or missing area or missing details in address
+        # for obj in Client.objects.all():
+        #     obj.notes=''
+        #     obj.save()
         checkmissingClientsInfo()
         return Response({"msg": "done"})
 
@@ -394,32 +633,35 @@ def isEmptyStr(string):
 def generateTable(contracts, tableType):
     contract_list = contracts
     dataList = []
-    thead = {"contractSerial":"سريال الفاتورة","contractDate":"تاريخ التعاقد",
-            "clientName":"اسم العميل","phone":"رقم الهاتف","area":"المنطقة",
-            "addressDetails":"العنوان بالتفصيل", "deserved":"المستحق", "notes":"الملاحظات"}
-    print(f"contract_list => {contract_list}")
-    if contract_list == None:
-        dataList = ''
-    else:
-        for contracts in contract_list:
-            if contracts == '':
-                continue
-            else:
-                pass
-            temp = {}
-            temp["contractId"]     = contracts.id
-            temp["contractSerial"] = contracts.serialNum
-            temp["clientName"]     = contracts.client.name
-            temp["phone"]          = contracts.client.phone
-            temp["addressDetails"] = contracts.client.addressDetails
-            temp["area"]           = contracts.client.area.name
-            # follows = FollowContractServices.objects.filter(client=contracts.client)
-            temp["deserved"]  = contracts.client.deserved
-            temp["notes"]     = contracts.client.notes
-            dataList.append(temp)
-    table = {"thead":thead, "rows":dataList}
-    #return table
-    # testing
+
+    if tableType == "recentContracts":
+        thead = {"contractSerial":"سريال الفاتورة","contractDate":"تاريخ التعاقد",
+                "clientName":"اسم العميل","phone":"رقم الهاتف","area":"المنطقة",
+                "addressDetails":"العنوان بالتفصيل",
+                "services":"الخدمات",
+                "deserved":"المستحق", "notes":"الملاحظات"}
+        if contract_list == None:
+            dataList = ''
+        else:
+            for contracts in contract_list:
+                if contracts == '':
+                    continue
+                else:
+                    pass
+                temp = {}
+                temp["contractId"]     = contracts.id
+                temp["contractSerial"] = contracts.serialNum
+                temp["clientName"]     = contracts.client.name
+                temp["phone"]          = contracts.client.phone
+                temp["addressDetails"] = contracts.client.addressDetails
+                temp["area"]           = contracts.client.area.name
+                # follows = FollowContractServices.objects.filter(client=contracts.client)
+                servicesList           = [serv.name for serv in contracts.services.all() ]
+                temp["services"]       = ' - '.join(servicesList)
+                temp["deserved"]  = contracts.client.deserved
+                temp["notes"]     = contracts.client.notes
+                dataList.append(temp)
+        table = {"thead":thead, "rows":dataList}
     return table
 
 def set_follow_areas_name(follows):
@@ -572,7 +814,7 @@ def getUnfinishedClients(cond):
 
 def clientMissingInfo(cl):
     cond = False
-    if cl.area or cl.name  or cl.serialNum or cl.nationalId or cl.phone == "-" or cl.area or cl.name or  cl.serialNum or cl.nationalId or cl.phone is None or cl.area or cl.serialNum or cl.nationalId or cl.name  or cl.phone == "":
+    if cl.area=="-" or cl.name=="-" or cl.serialNum=="-" or cl.phone == "-" or cl.area == None or cl.name == None or cl.serialNum == None or cl.phone == None or cl.area == "" or cl.serialNum=="" or cl.name == "" or cl.phone == "":
         cond = True
     else:
         cond = False
@@ -610,7 +852,7 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
         date_formatted = datetime.strptime(date, '%Y-%m-%d')
         if date_formatted.day > 15:
             if date_formatted.month != 12:
-                month = date_formatted.month + 1
+                month = date_formatted.month
             else:
                 month = 1
         else:
@@ -623,13 +865,14 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
     service_objects_list    =   data2["services"]
     for service in service_objects_list:
         service_self = Service.objects.get(pk=service)
-
-        follow_contract_services = FollowContractServices.objects.create(
-            client=client, service=service_self, total_amount=service_self.price, remain_amount=service_self.price,
-            collected_month=get_month(data2['date']),created_by=Employee.objects.get(pk=data2['userId'])
+        follow_contract_services = FollowContractServices.objects.update_or_create(
+            client=client,service=service_self,
+            defaults={
+                'client':client, 'service':service_self, 'total_amount':service_self.price, 'remain_amount':service_self.price,
+                'collected_month':get_month(data2['date']),'created_by':Employee.objects.get(pk=data2['userId']), 'is_test':False
+            }
         )
 
-        follow_contract_services.save()
 
 def create_new_contract(data, newClientId):
     services_list = data["services"]
@@ -640,12 +883,19 @@ def create_new_contract(data, newClientId):
         serv = Service.objects.get(pk=service)
         services_set.add(serv)
         i += 1
-
-    contract = Contract.objects.create(
-        serialNum=data["Serial"],client=Client.objects.get(pk=newClientId),
-        belong_to=Employee.objects.get(pk=data['referer'] if data['referer'] != 0 else 10),
-        created_prev_date=data['date'],created_by=Employee.objects.get(pk=data['userId'])
+#     = Person.objects.update_or_create(
+#     first_name='John', last_name='Lennon',
+#     defaults={'first_name': 'Bob'},
+# )
+    contract = Contract.objects.update_or_create(
+        client=Client.objects.get(pk=newClientId),
+        defaults={
+            'serialNum':data["serial"],'client':Client.objects.get(pk=newClientId),
+            'belong_to':Employee.objects.get(pk=data['referer'] if data['referer'] != 0 else 10),
+            'created_prev_date':data['date'],'created_by':Employee.objects.get(pk=data['userId']), 'is_test':False
+        }
     )
+    contract = Contract.objects.get(client=Client.objects.get(pk=newClientId))
     contract.services.set(services_set)
     contract.save()
     contract_id = contract.id
@@ -659,20 +909,23 @@ def update_client_data(dictt):
         name=dictt["name"],phone=dictt["phone"],nationalId=dictt["nationalId"], password="",
         serialNum=dictt["Serial"],area=Area.objects.filter(name=dictt["area"])[0],streetName=dictt["streetName"],addressBuilding=dictt["addressBuilding"],
         addressApartment=dictt["addressApartment"],addressDetails=dictt["addressDetails"],created_prev_date=dictt["date"],
-        created_by=Employee.objects.get(pk=dictt['userId'])
+        created_by=Employee.objects.get(pk=dictt['userId'], is_test=False)
         )
     return clientId
 
 def create_new_client(dictt):
-
-    client=Client.objects.create(
-        name=dictt["name"],phone=dictt["phone"],nationalId=dictt["nationalId"], password="",
-        serialNum=dictt["Serial"],area=Area.objects.filter(name=dictt["area"])[0],streetName=dictt["streetName"],
-        addressBuilding=dictt["addressBuilding"],addressApartment=dictt["addressApartment"],addressDetails=dictt["addressDetails"],
-        created_prev_date=dictt["date"],created_by=Employee.objects.get(pk=dictt['userId'])
+    print(f'dictt["clientId"] => {dictt["clientId"]}')
+    client=Client.objects.update_or_create(
+        pk=dictt["clientId"],name=dictt["name"],
+        defaults = {
+            'serialNum':dictt["serial"],'name':dictt["name"],'phone':dictt["phone"],'nationalId':dictt["nationalId"], 'password':"",
+            'area':Area.objects.filter(name=dictt["area"])[0],'streetName':dictt["streetName"],
+            'addressBuilding':dictt["addressBuilding"],'addressApartment':dictt["addressApartment"],'addressDetails':dictt["addressDetails"],
+            'created_prev_date':dictt["date"],'created_by':Employee.objects.get(pk=dictt['userId'])
+        }
     )
-    client.save()
-    clientId=client.id
+
+    clientId=Client.objects.get(pk=dictt["clientId"]).id
     return clientId
 
 
@@ -719,7 +972,7 @@ def checkmissingClientsInfo():
         cl.notes = ""
         cl.save()
 
-        if cl.area or  cl.name or cl.password or  cl.serialNum or cl.phone == "-" or cl.area or cl.password or cl.name or  cl.serialNum  or cl.phone is None or cl.area or cl.password  or cl.serialNum or cl.nationalId or cl.name  or cl.phone == "":
+        if cl.area or  cl.name or cl.phone == "-" or cl.area or cl.name or cl.phone is None or cl.area or cl.name  or cl.phone == "":
             temp += 1
             cl.missing_info = True
             if cl.area == "-" or cl.area is None or cl.area == "":
@@ -728,12 +981,13 @@ def checkmissingClientsInfo():
                 notes += "الإسم غير كامل أو غير مكتوب\n"
             if cl.serialNum == "-" or cl.serialNum is None or cl.serialNum == "":
                 notes += "خطأ برقم السريال\n"
-            if cl.phone == "-" or cl.name is None or cl.name == "" or len(str(cl.phone)) != 11:
-                notes += "خطأ بالرقم التليفونى \n"
+            if cl.phone == "-" or cl.name is None or cl.name == "" or len(str(cl.phone)) > 11 or len(str(cl.phone)) < 10:
+                notes += "خطأ برقم التليفون \n"
             print(f'client id --> {cl.id} is missing area')
             cl.notes = notes
             print(f"client notes ==> {notes}")
             cl.save()
         else:
-            continue
+            cl.missing_info=False
+            cl.save
     print(f"total {temp} clients // done all clients check")

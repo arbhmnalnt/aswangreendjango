@@ -12,7 +12,14 @@ urlpatterns = [
     path('', TmainPage, name="mainPage") ,
     path('TmainPage/', TmainPage, name="TmainPage") ,
     path('TnewContract/', TnewContract, name="TnewContract"),
+    path('TnewContract2/', TnewContract2, name="TnewContract2"),
+    path('TCurrentContract/', TCurrentContract, name="TCurrentContract"),
+    path('TgetcollcetStatus/', TgetcollcetStatus, name="TgetcollcetStatus"),
+    path('TnewCollectOrder/', TnewCollectOrder, name="TnewCollectOrder"),
     path('checkClientSerial/', checkClientSerial, name="checkClientSerial"),
+    path('getServicesOfClient/', getServicesOfClient, name="getServicesOfClient"),
+    path('ConfirmContract/', ConfirmContract, name="ConfirmContract"),
+
 
     # --- end temp pages
     path('', index, name='index'),
@@ -22,11 +29,12 @@ urlpatterns = [
     path('getRegions' ,getRegions.as_view(), name='getRegions'),
     # --
     path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
-    path('handleClients' ,HandleClients.as_view(), name='HandleClients'),
+    path('handleClients/' ,HandleClients.as_view(), name='HandleClients'),
 
     # main_page_apis
-    path('mainPageStatsFirst', mainPageStatsFirst.as_view()),
-    path('mainPageStatsSecond', mainPageStatsSecond.as_view()),
+    path('stats', mainPageStatsFirst.as_view()),
+    path('recentContracts', recentContracts.as_view()),
+    path('ongoingCollectionRequests', mainPageStatsSecond.as_view()),
     path('mainPageStatsThird', mainPageStatsThird.as_view()),
     # new contract page apis
 
@@ -35,9 +43,10 @@ urlpatterns = [
     # third page apis  # cuurent contracts
     path('currentContractCount', currentContractCount.as_view()),
     path('currentContractTable', currentContractTable.as_view()),
+    path('deleteContract', deleteContract.as_view()),
     path('currentContractTableEditContrctServices', currentContractTable.as_view()),
     path('currentContractTableViewClientProfile', currentContractTableViewClientProfile.as_view()),
-    # path('currentContractTableSearch', currentContractTableSearch.as_view()),
+    path('currentContractTableSearchFilter', currentContractTableSearchFilter.as_view()),
     # path('currentContractTableFilter', currentContractTableFilter.as_view()),
     #path('currentContractTableCancelContract', currentContractTableCancelContract.as_view()),
 
