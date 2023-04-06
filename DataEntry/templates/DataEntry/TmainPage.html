@@ -7,7 +7,7 @@
         padding-top:10rem
     }
     .serviceName:not(:first-child):before {
-        content : " - "
+       //  content : " - "
     }
 {% endblock %}
 
@@ -64,9 +64,10 @@
     <div class="row">
         <div class="col-8 pt-2 bg-white">
             <div class="row">
-                <div class="col-11 m-auto">
-                    <h6 class=" text-center">أحدث التعاقدات <span><a href="#" class="text-left" style="position:relative; right:37%">المزيد</a></span></h6>
-                    <span>{{contractsLen}}</span> تعاقدات
+                <div class="col-12 m-auto">
+                    <h5 class=" text-center">أحدث التعاقدات <span><a href="#" class="text-left" style="position:relative; right:37%">المزيد</a></span></h6>
+                    <span class="h6">{{contractsLen}} تعاقدات</span> 
+                    <span class="h6 d-inline-block" style="margin-right:22rem!important">الصفحة رقم <span id="currentPageNumShow" class="text-info"></span></span>
                     <hr>
                     {% load paginate %}
                     <table class="table text-center table-striped table-hover table-bordered"
@@ -78,6 +79,7 @@
                                 <th style="font-weight:900">رقم الهاتف</th>
                                 <th style="font-weight:900">المنطقة</th>
                                 <th style="font-weight:900">الخدمات</th>
+                                <th style="font-weight:900">تاريخ التعاقد</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,7 +90,8 @@
                                 <td style="font-weight:600">{{contract.client.name}}</td>
                                 <td style="font-weight:600">{{contract.client.phone}}</td>
                                 <td style="font-weight:600">{{contract.client.area}}</td>
-                                <td style="font-weight:600">({% for c in  contract.services.all%} <span class="serviceName">{{c.name}}</span> {% endfor %})</td>
+                                <td style="font-weight:600">({% for c in  contract.services.all%} <span class="serviceName">{{c.name}} &</span> {% endfor %})</td>
+                                <td style="font-weight:600">{{contract.created_prev_date|date:"d-m-Y"}}</td>
                             </tr>
                             {%endfor%}
                         </tbody>
@@ -155,9 +158,14 @@
         return false;
     };
 
+    var pageNum = getUrlParameter('page');
+    $("#currentPageNumShow").html(`${parseInt(pageNum)}`)
+
     $("#next").click(function(e){
+        
         e.preventDefault();
         var pageNum = getUrlParameter('page');
+        $("#currentPageNumShow").html(`${parseInt(pageNum)}`)
         if(pageNum >= $("#pages").text()){
             location.href = "/DataEntry/TmainPage/?page=1"
         }else{

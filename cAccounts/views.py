@@ -29,9 +29,15 @@ def logout(request):
 def login(request):
     message = ''
     if request.method == 'POST':
-        username =request.POST['username']
-        password = request.POST['password']
+        data2 = request.POST
+        # print(data2)
+        #data2 = json.loads(json.dumps(request.bo))
+        
+        username = data2.get('username')
+        # print(f"username => {username}")
+        password = data2.get('password')
         user = authenticate(username=username,password=password)
+        # print(f"user => {user}")
         if user is not None:
             auth_login(request, user)
             return redirect('/cAccounts/profile')
@@ -60,18 +66,24 @@ def profile(request):
     user = request.user
     request.session.setdefault('group', False)
     print(f"user groups => {user.groups.all()}")
-    if user.groups.filter(name="admin_all"):
-        request.session['group'] = "admin_all"
-        return redirect('/admin/')
+    if user.groups.filter(name="adminAll"):
+        request.session['group'] = "adminAll"
+        return redirect('/adminAll/')
 
-    elif user.groups.filter(name="dataEntry_supervisor"):
-        request.session['group'] = "dataEntry_supervisor"
+    elif user.groups.filter(name="dataEntryAdmin"):
+        request.session['group'] = "dataEntryAdmin"
         return redirect('/DataEntry/TmainPage')
 
-    elif user.groups.filter(name="dataEntry_member"):
-        request.session['group'] = "dataEntry_member"
+    elif user.groups.filter(name="tahsealAdmin"):
+        request.session['group'] = "tahsealAdmin"
         # print("admin here => ")
         return redirect('/DataEntry/TmainPage')
+    
+    elif user.groups.filter(name="ServiceManagerAdmin"):
+        request.session['group'] = "ServiceManagerAdmin"
+        # print("admin here => ")
+        return redirect('/moreServicesManager/')
+        
     else:
         request.session['group'] = "else"
         msg="user has no group"

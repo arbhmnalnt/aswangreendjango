@@ -13,6 +13,8 @@ from django.core import serializers as core_serializers
 from DataEntry.serializers import ContractSerializer, ServiceSerializer, ClientSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from .authentication import *
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 
@@ -301,11 +303,15 @@ class registerFinal(APIView):
             data = {"erorr":int(userc)}
         return Response(data)
 
+# @method_decorator(csrf_exempt, name='dispatch')
 class login(APIView):
+    import json
     def post(self, request):
-        data2       = json.loads(request.body)
+        data2 = json.loads(json.dumps(request.data))
         phone       = data2["phone"]
+        username    = data2["username"]
         password    = data2["password"]
+        print(phone + " / " + username + " / " + password)
 
         PhoneRight = Client.objects.filter(phone=phone)
         users      = Client.objects.filter(phone=phone, password=password)

@@ -37,7 +37,7 @@
 
         }
 
-        .print-none{
+        th.print-none{
             display: none !important;
         }
 
@@ -75,7 +75,7 @@
             </p>
         </div>
         <div class="col-3 text-center m-auto">
-            <button class="btn btn-success w-100" onclick="$('#tblData').printThis();">طباعة</button>
+            <button class="btn btn-success w-100" onclick="printDoc()">طباعة</button>
         </div>
     </div>
     <div class="row">
@@ -114,7 +114,7 @@
                             <input class="d-none" type="hidden" value={{contract.id}}>
                             <a class="btn btn-info options_dialog"  href="#"><i class="fa fa-bars" aria-hidden="true"></i></a>
                         {% else %}
-                            <a class="btn btn-info text-white" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a>
+                            <a class="btn btn-info text-white h-100" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a>
                         {% endif %}
                     </td>
 
@@ -153,8 +153,15 @@
 </div>
 {% endblock %}
 {% block script %}
-// search
 
+function printDoc(){
+    $('.print-none').hide();
+    $('#tblData').printThis();
+    setTimeout(function(){
+        $('.print-none').show();
+    },500)
+}
+// search
 document.getElementById("input_search").addEventListener("keyup", function(event){
     let el = $(this)
   // event.preventDefault()
@@ -180,7 +187,7 @@ $(".collectstatue").each(function(){
             success : function(data) {
                 //console.log('Data: '+data.followsStatus); // Success callback
                 //console.log(el)
-                $(el).children(".res").html(`<span class="bg-primary text-white d-block p-1 btn">${data.followsStatus}</span>`)
+                $(el).children(".res").html(`<span class="bg-primary text-white d-block p-1 btn h-100">${data.followsStatus}</span>`)
 
             },
             error : function(request,error){

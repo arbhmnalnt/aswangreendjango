@@ -2,6 +2,12 @@ from django.contrib import admin
 from .models import *
 from import_export.admin import ImportExportModelAdmin
 
+class TypeeAdmin(admin.ModelAdmin):
+    list_display = ('name')
+
+class SubServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('baseService','name', 'typee')
+
 class ContactRequestTypesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'eNum')
 
@@ -30,6 +36,7 @@ admin.site.register(ContactRequest, ContactRequestAdmin)
 admin.site.register(Offers, OffersAdmin)
 admin.site.register(SimpleService, SimpleServiceAdmin)
 admin.site.register(RequestSimpleService, RequestSimpleServiceAdmin)
+admin.site.register(SubService, SubServiceAdmin)
 
 # ///
 
@@ -42,7 +49,7 @@ class EmployeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return " - ".join([employee.name for employee in obj.employees.all()])
 
 class ServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('id','name','typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
+    list_display = ('id','name' ,'typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
 
 class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
@@ -70,7 +77,7 @@ class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return obj.client.area.name
 
 class CollectOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('collector', 'get_clients', 'get_areas', 'month', 'required', 'created_at',)
+    list_display = ('collector', 'get_clients', 'get_areas', 'month', 'confirmed','required', 'created_at',)
 
     def get_areas(self, obj):
         return " - ".join([area.name for area in obj.areas.all()])

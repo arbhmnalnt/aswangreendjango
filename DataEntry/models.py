@@ -84,27 +84,39 @@ class Employee(TimeStampMixin,models.Model):
     is_test      = models.BooleanField(default=True)
     last_login   = models.DateTimeField(null=True, blank=True)
 
+
+
+class Typee(models.Model):
+    name = models.CharField(max_length=50,null=True, blank=True)
+    def __str__(self):
+        return self.name
+
 class Service(TimeStampMixin,models.Model):
     name                     = models.CharField(max_length=50,null=True, blank=True)
     typee                    = models.CharField(max_length=50,null=True, blank=True)
-    price                    = models.IntegerField(null=True, blank=True)
-    priceType                = models.CharField(max_length=50,null=True, blank=True)
+    is_main                  = models.BooleanField(default=False)
+    price                    = models.IntegerField(default=10)
+    notes                    = models.TextField(max_length=250,null=True, blank=True)
+    priceType                = models.TextField(max_length=250,null=True, blank=True)
     supervisor               = models.ForeignKey('Employee', related_name='supervisor', on_delete=models.CASCADE,null=True, blank=True)
     billSerial               = models.IntegerField(null=True, blank=True, unique=True)
     billed_at                = models.DateField(null=True, blank=True)
     fixedDeliveryDate        = models.IntegerField(default=1,null=True, blank=True) # check that the day nuumber is between 1-30 in api insert
     fixedPriceCollectDate    = models.IntegerField(default=25,null=True, blank=True) # check that the day nnumber is between 1-30 in api insert
     fixedPriceCollectDate_more    = models.DateField(null=True, blank=True) # may neeed in future use
-    notes                    = models.TextField(max_length=50,null=True, blank=True)
     is_test         = models.BooleanField(default=True)
+
+class SubService(TimeStampMixin,models.Model):
+    baseService       = models.ForeignKey('Service', related_name='Baseservice', on_delete=models.CASCADE,null=True, blank=True)
+    name                     = models.CharField(max_length=50,null=True, blank=True)
+    typee             =  models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
+    price                    = models.IntegerField(null=True, blank=True, default=10)
+    
 
 class Area(TimeStampMixin,models.Model):
     name = models.CharField(max_length=100,null=True, blank=True)
     counter = models.IntegerField(default=0,null=True, blank=True)
     is_test         = models.BooleanField(default=True)
-
-class Typee(TimeStampMixin,models.Model):
-    name = models.CharField(max_length=100,null=True, blank=True)
 
 class Client(TimeStampMixin,models.Model):
     # typee           = models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
@@ -127,7 +139,6 @@ class Client(TimeStampMixin,models.Model):
     #
     is_employee       = models.BooleanField(default=False)
     missing_info      = models.BooleanField(default=False)
-    deserved        = models.IntegerField(default=0, null=True, blank=True)
     #
     activation_request_accepted = models.BooleanField(default=False)  # is user registered from the interface of web or app or from dataentry person
     is_test         = models.BooleanField(default=True)
@@ -135,13 +146,14 @@ class Client(TimeStampMixin,models.Model):
     image           = models.ImageField(upload_to='images/clients/', default='user_profile_image_placeholer.png')
     notes           = models.TextField(max_length=250,null=True, blank=True)
     #
-    deserved        = models.IntegerField(default=0, help_text="لجمالى المستحق على العميل")
+    deserved        = models.IntegerField(default=0, help_text="إجمالى المستحق على العميل")
 
 
 class Contract(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(help_text="رقم سريال متفرد لكل تعاقد",unique=True,null=True, blank=True,db_index=True)
     client          = models.OneToOneField('Client', related_name='contract_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
     services        = models.ManyToManyField('Service',related_name='services')
+    # subServices     = models.ManyToManyField('SubService',related_name='services')
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
@@ -185,6 +197,7 @@ class FollowContractServices(TimeStampMixin,models.Model):
     created_prev_date    = models.DateField(null=True, blank=True)
     # source_outside       = models.BooleanField(default=False)   # not for any use just for a conflict
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
+    notes           = models.CharField(max_length=100,null=True, blank=True)
     is_test         = models.BooleanField(default=True)
 
 class CollectOrder (TimeStampMixin,models.Model):
@@ -192,7 +205,10 @@ class CollectOrder (TimeStampMixin,models.Model):
     clients              = models.ManyToManyField('Client',related_name='orders_clients', verbose_name="العملاء")
     areas                = models.ManyToManyField('Area',related_name='orders_areas', verbose_name="المناطق")
     month                = models.IntegerField(null=True, blank=True, verbose_name="الشهر")
-    required             = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
+    confirmed            = models.BooleanField(default=False, verbose_name="تم التأكيد")
+    reason               = models.CharField(max_length=100,null=True, blank=True)
+    required             = models.IntegerField(default=0, verbose_name="المبلغ المطلوب تحصيله")
+    created_prev_date    = models.DateField(null=True, blank=True)
     is_test              = models.BooleanField(default=True)
 
 class SimpleService(TimeStampMixin,models.Model):

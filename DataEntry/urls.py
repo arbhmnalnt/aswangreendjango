@@ -19,6 +19,8 @@ urlpatterns = [
     path('checkClientSerial/', checkClientSerial, name="checkClientSerial"),
     path('getServicesOfClient/', getServicesOfClient, name="getServicesOfClient"),
     path('ConfirmContract/', ConfirmContract, name="ConfirmContract"),
+    path('getsubServices/' ,getsubServicesAll),
+    
 
 
     # --- end temp pages
@@ -28,7 +30,7 @@ urlpatterns = [
     path('getServices' ,getServices.as_view(), name='getServices'),
     path('getRegions' ,getRegions.as_view(), name='getRegions'),
     # --
-    path('addNewContract' ,addNewContract.as_view(), name='addNewContract'),
+    path('addNewContract/' ,addNewContract.as_view(), name='addNewContract'),
     path('handleClients/' ,HandleClients.as_view(), name='HandleClients'),
 
     # main_page_apis
@@ -38,32 +40,49 @@ urlpatterns = [
     path('mainPageStatsThird', mainPageStatsThird.as_view()),
     # new contract page apis
 
-    path('newContractPageFirst', missingOrUnfinishedRequests.as_view()),
+    path('missingOrUnfinishedRequests', missingOrUnfinishedRequests.as_view()),
 
     # third page apis  # cuurent contracts
-    path('currentContractCount', currentContractCount.as_view()),
-    path('currentContractTable', currentContractTable.as_view()),
-    path('deleteContract', deleteContract.as_view()),
+    path('currentContractCount/', currentContractCount.as_view()),
+    path('currentContractTable/', currentContractTable.as_view()),
+    path('currentContractTableSearchFilter/', currentContractTableSearchFilter.as_view()),
+    path('deleteContract/', deleteContract.as_view()),
     path('currentContractTableEditContrctServices', currentContractTable.as_view()),
     path('currentContractTableViewClientProfile', currentContractTableViewClientProfile.as_view()),
-    path('currentContractTableSearchFilter', currentContractTableSearchFilter.as_view()),
+    ###########  fourth page
+    path('clientProfile/', clientProfile.as_view()),
+    path('clientHistory/', clientHistory.as_view()),
+    ########### fifth Page 
+    path('OngoingCollectionRequests/', OngoingCollectionRequests.as_view()),
+    # response => name / phone number / area / address details / services / contract serial / contract date / collection state / requested payments
+    path('collectionRequestsHistory/', collectionRequestsHistory.as_view()),
+    path('collectionRequestConfirm/', collectionRequestConfirm.as_view()),
+    path('collectionRequestUnConfirm/', collectionRequestUnConfirm.as_view()),
+    path('collectionRequestCancel/', collectionRequestCancel.as_view()),
+    ########### six page apis
+    path('collectionRequestCancel/', collectionRequestCancel.as_view()),
+    path('clientsToPayTable/', clientsToPayTable.as_view()),
+    path('clientNestedTable/', clientNestedTable.as_view()), # the nested table of services with payment statue
+    # path('createCollectOrder/', createCollectOrder.as_view()), # for create or confirm previous created collect order
+
+    
+    
+    path('cancelContract/<int:client_id>', CancelContractView.as_view()),
     # path('currentContractTableFilter', currentContractTableFilter.as_view()),
     #path('currentContractTableCancelContract', currentContractTableCancelContract.as_view()),
 
     ## forth page apis   # make collect order page
 
-    path('getUnPaidClientsNum', getUnPaidClientsNum.as_view()),
-    path('UnPaidClientsTable', UnPaidClientsTable.as_view()),
-
-
+    path('getUnPaidClientsNum/', getUnPaidClientsNum.as_view()),
+    path('UnPaidClientsTable/', UnPaidClientsTable.as_view()),
     # make new collect order
-    path('newCollectOrder', newCollectOrder.as_view()),
+    path('newCollectOrder/', newCollectOrder.as_view()),
 
     # some features and standalone
 
     ##
     ## get follow contracts by one key filter or more
-    path('filterFollowContracts', filterFollowContractServicesRecord),
+    path('filterFollowContracts/', filterFollowContractServicesRecord),
     #### ---
     ## 2- generateFilteredTableView
     path('generateFilteredTableView', generateFilteredTableView.as_view())

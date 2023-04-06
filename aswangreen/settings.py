@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'simple_pagination',
     'bootstrap4',
     'crispy_forms',
     'website',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'cAccounts',
     'api',
     'DataEntry',
+    'moreServicesManager',  
     'import_export',
 ]
 # not working
@@ -97,7 +99,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'aswangreen',
         'USER': 'root',
-        'PASSWORD': '123456',
+        'PASSWORD': 'root',
         'HOST': '127.0.0.1',
         'port':"3306",
         'OPTIONS': {
@@ -105,6 +107,8 @@ DATABASES = {
         }
     }
 }
+
+
 
 
 # Password validation
