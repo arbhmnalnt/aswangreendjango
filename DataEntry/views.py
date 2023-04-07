@@ -235,7 +235,7 @@ class clientProfile(APIView):
         collectionState    = 'غير محدد'
         requestedPayements = '10000'
         data = {'name':name, 'phoneNumber':phoneNumber, 'area':area,'addressdetails':addressdetails,
-        'services':services,'contractSerial':contractSerial, 'contractdate':contractdate, 
+        'services':services,'contractSerial':contractSerial, 'contractdate':contractdate,
         'collectionState':collectionState,'requestedPayements':requestedPayements
         }
         return Response(data)
@@ -492,7 +492,7 @@ def checkClientSerial(request):
     print(frontSerialExist)
     if frontSerialExist > 0:
         res = "found"
-        
+
         a = Client.objects.filter(serialNum=frontSerial)
         a = a[0].name
     else:
@@ -542,12 +542,12 @@ def TnewContract2(request):
             for serv in services:
                 print(f"services => {serv}")
                 servicesPrices = request.POST.getlist('servicePrice[]')
-                indexx  = services.index(serv)    
+                indexx  = services.index(serv)
                 servicePrice = servicesPrices[indexx]
                 servicePriceTypes = request.POST.getlist('servicePriceType[]')
                 servicePriceType = servicePriceTypes[indexx]
                 isServiceExist = checkServiceExist(serv,servicePrice, servicePriceType)
-                
+
                 print(f"checkServiceExist => {isServiceExist}")
                 if isServiceExist :
                     serviceId = getServiceId(serv, servicePrice ,servicePriceType)
@@ -555,7 +555,7 @@ def TnewContract2(request):
                 else:
                     servcesNotes = request.POST.getlist('notes[]')
                     serviceNote  = servcesNotes[indexx]
-                    
+
                     serviceTypes = request.POST.getlist('serviceType[]')
                     serviceType  = serviceTypes[indexx]
                     print(f"servicePrice=> {servicePrice}")
@@ -605,7 +605,7 @@ def TnewContract2(request):
             return render(request, 'DataEntry/TnewContract.html', ctx)
     areas     = Area.objects.all()
     employees = Employee.objects.all()
-    
+
     ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
     'todayUser':todayUser, 'isClient':isClient, 'isServiceManagerAdmin':isServiceManagerAdmin}
     return render(request, 'DataEntry/TnewContract2.html', ctx)
@@ -634,7 +634,7 @@ def TnewContract(request):
             Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False, is_deleted=False)
             Client.objects.filter(pk=clientId, is_deleted=False).update(notes='', is_deleted=False)
         else:
-            pass    
+            pass
         userId          = request.POST['userId']
         serial          = request.POST['serial']
         clientName      = request.POST['name']
@@ -652,7 +652,7 @@ def TnewContract(request):
             for serv in services:
                 print(f"services => {serv}")
                 servicesPrices = request.POST.getlist('servicePrice[]')
-                indexx  = services.index(serv)    
+                indexx  = services.index(serv)
                 servicePrice = servicesPrices[indexx]
                 servicePriceTypes = request.POST.getlist('servicePriceType[]')
                 servicePriceType = servicePriceTypes[indexx]
@@ -1081,11 +1081,11 @@ def test2(request):
 #==================================================================================================================================
 def collectManager():
     statue = {'msg':'start'}   # for debugging
-    ####  how to it 
+    ####  how to it
     ## for sake of debugging the start and end of collect days wwill be from 4 to 5 only
     ## get current day if it between  25 and 5 of the next month the start and end of the collecting then start the process
-    ##  get all follows for all contracts 
-    ##  for every follow 
+    ##  get all follows for all contracts
+    ##  for every follow
     tahselaStart = 4
     tahsealEnd = 5
     todaynum = 4
@@ -1094,7 +1094,7 @@ def collectManager():
         follows = FollowContractServices.objects.filter(collected_month=4,  collcetStatusNums="فى انتظار ميعاد التحصيل", is_deleted=False)
         followsCount = follows.count()
         statue['count'] = followsCount
-        # need to calculate payment of all clients and add everyone payement to it's desireved 
+        # need to calculate payment of all clients and add everyone payement to it's desireved
         updatedCount = follows.update(collcetStatusNums="مطلوب الدفع")
         statue['updatedCount'] = updatedCount
     else:
@@ -1194,8 +1194,8 @@ def set_follow_areas_name(follows):
     for follow in follows:
         FollowContractServices.objects.filter(pk=follow.id).update(area=follow.client.area.name)
 
-
-set_follow_areas_name(FollowContractServices.objects.all())
+# erorr
+# set_follow_areas_name(FollowContractServices.objects.all())
 
 #@csrf_exempt
 def filterFollowContractServicesRecord(filterKeysDictRequest):
@@ -1304,9 +1304,9 @@ def getCollectStatus(follows):
     return status
 
 def checkToChangecollectStatue(follos):
-    # with fixed time  25 
+    # with fixed time  25
     pass
-    # with passing the typee of the service 
+    # with passing the typee of the service
 
 def clientRequestContact(client):
     cond = False
