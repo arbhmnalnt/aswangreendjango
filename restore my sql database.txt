@@ -1,0 +1,31 @@
+Restore the database:
+On the new PC, create a new empty database with the same name as the old database.
+
+php
+Copy code
+CREATE DATABASE <database_name>;
+Then, run the following command to restore the data:
+
+php
+Copy code
+mysql -u <username> -p <database_name> < backup.sql
+Again, replace <username> with your MySQL username and <database_name> with the name of your database. You will be prompted to enter your MySQL password.
+
+Update Django settings:
+In your Django project, open the settings.py file and update the DATABASES settings to match the new MySQL database:
+
+bash
+Copy code
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '<database_name>',
+        'USER': '<username>',
+        'PASSWORD': '<password>',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+Replace <database_name>, <username>, and <password> with your MySQL database name, username, and password, respectively.
+
+That's it! Your MySQL database should now be restored on the new PC and ready to use with your Django project.
