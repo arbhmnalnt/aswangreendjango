@@ -53,6 +53,11 @@
 
         }
     }
+    a {
+        color:  #ffffff !important;
+        text-decoration: none;
+        background-color: transparent;
+    }
 {% endblock %}
 
 {% block content %}
@@ -84,14 +89,15 @@
             <thead class="text-center">
                 <tr class="bg-secondary text-white text-center" style="font-size:1rem">
                     <th>م</th>
-                    <th>سريال التعاقد</th>
-                    <th>اسم العميل</th>
-                    <th>رقم الهاتف</th>
-                    <th>المنطقة</th>
-                    <th>تفاصيل العنوان</th>
-                    <th>الخدمات</th>
-                    <th>حالة التحصيل</th>
-                    <th>سريال الفاتورة</th>
+                    <th><a href="#">سريال التعاقد</a></th>
+                    <th><a href="#">اسم العميل</a></th>
+                    <th><a href="#">رقم الهاتف</a></th>
+                    <th><a href="#">المنطقة</a></th>
+                    <th><a href="#">تفاصيل العنوان</th>
+                    <th><a href="#">الخدمات</a></th>
+                    <th><a href="#">حالة التحصيل</a></th>
+                    <th><a href="#">سريال الفاتورة</a></th>
+                    <th><a href="#">ملاحظات</a></th>
                     <th class="print-none">الخيارات</th>
                 </tr>
             </thead>
@@ -109,6 +115,7 @@
                         <span class="res"></span>
                     </td>
                     <td>لا يوجد</td>
+                    <td>{{contract.client.notes}}</td>
                     <td class="options print-none" >
                         {% if contract.client.missing_info %}
                             <input class="d-none" type="hidden" value={{contract.id}}>

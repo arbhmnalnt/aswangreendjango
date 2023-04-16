@@ -11,11 +11,42 @@
     <div class="row">
         <div class="col-6 text-right">
             <h5>إنشاء طلب تحصيل</h5>
-        </div>
+        </div>  
         <div class="col-3 mr-auto">
-            <button class="btn btn-primary">تأكيد الطلب</button>
+            <button class="btn btn-primary" id="confirmAndPrint" data-toggle="modal" data-target="#confirmModel" onclick="getCollectorsAjax()">طباعة الطلب</button>
         </div>
     </div>
+    <!-- Modal -->  
+    <div class="modal fade" id="confirmModel" tabindex="-1" role="dialog" aria-labelledby="confirmModelLabel" aria-hidden="true">
+        <div class="modal-dialog h4" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title ml-auto" id="exampleModalLabel">تأكيد طلب التحصيل</h4>
+                    <button type="button" class="close d-inline-block mr-auto" data-dismiss="modal" aria-label="Close">
+                    <span class="" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>المحصل</label>
+                        <select class="" id="collector">
+                    
+                        </select>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <label>تاريخ اصدار طلب التحصيل</label>
+                        <input type="datetime-local" class="" id="dateTimeCollectOrder">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">اغلاق</button>
+                    <button type="button" class="btn btn-primary" id="confirmCollectOrder" onclick="confirmCollectOrder()">تأكيد وحفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <hr>
     <div class="row mt-2">
         <div class="col-8 ">
@@ -46,7 +77,7 @@
             style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
             <thead class="text-center">
                 <tr class="bg-secondary text-white text-center" style="font-size:1rem">
-                    <th>الكل<input name="checkAll" id="checkAll" type="checkbox"></th>
+                    <th><input name="checkAll" id="checkAll" type="checkbox"> الكل</th>
                     <th>م</th>
                     <th>تاريخ التعاقد</th>
                     <th>اسم العميل</th>
@@ -67,8 +98,8 @@
                     <td>{{contract.client.phone}}</td>
                     <td>{{contract.client.area.name}}</td>
                     <td>{{contract.client.addressDetails}}</td>
-                    <td class="deserved ">{{contract.client.deserved}} جم</td>
-                    <td>{{contract.client.notes}}</td>
+                    <td class="deserved "><input class="text-center w-50 deservedMoney" disabled value="{{contract.client.deserved}}"> جم</td>
+                    <td>{{contract.service.notes}}</td>
 
                 </tr>
                 {% endfor %}
@@ -82,5 +113,86 @@
 </div>
 {% endblock %}
 {% block script %}
+// make default beahavour of check all exist inputs
+function defaultCheck(){
+    let allCheckInputs = document.querySelectorAll("input[type='checkbox']");
+    console.log(allCheckInputs)
+    allCheckInputs.forEach((checkbox)=>{
+        checkbox.checked = true;
+    })
+}
+
+function  getCollectorsAjax(){
+    // get all collectors to the collector select
+    // ajax request to get subServices
+    $.ajax('/DataEntry/getCollectors/', {
+        type: 'GET',  // http method
+        data: { },  // data to submit
+        success: function (data, status, xhr) {
+            <!-- let data2 = JSON.stringify(data) -->
+            
+            console.log('status: ' + status + ', data: ' + data[0].id);
+            for(i=0; i<= (data.length - 1); i++){
+                console.log(`data = > collector id => ${data[i].id}`)
+                $('select#collector').append(`<option value="${data[i].id}">${data[i].name}</option>`)
+            }
+            setTimeout(function(){
+                $("select#collector").chosen()
+                $(".chosen-single").css({
+                    'font-size' : '2rem',
+                    'width' : '170%',
+                    'height' : '2.5rem'
+                 });
+                $(".chosen-container-single, .chosen-single span").css({
+                    'height':'2rem'
+                });
+            }, 2000)
+            
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+                $('p').append('Error' + errorMessage);
+        }
+    });
+}
+
+function confirmCollectOrder() {
+    let tr = $('tr :checkbox:checked').closest('tr');
+    let data = {};
+    let collector = $("select#collector").val();
+    let dateTimeCollectOrder = $("input#dateTimeCollectOrder").val()
+
+    console.log("collector => ", collector , " // dateTimeCollectOrder => ", dateTimeCollectOrder)
+
+    // Add collector and dateTimeCollectOrder to the data object
+    data.collector = collector;
+    data.dateTimeCollectOrder = dateTimeCollectOrder;
+
+    tr.each(function() {
+        let requiredToPay = $(this).find('input.deservedMoney').val();
+        let clientId = $(this).attr('id');
+
+        if (requiredToPay !== undefined && clientId !== undefined) {
+            data[clientId] = requiredToPay;
+        }
+    });
+
+    console.log(data);
+
+    // Send the data to the Django backend via AJAX request
+    $.ajax({
+        url: '/my-django-url/',
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+
+
+defaultCheck()
 
 {% endblock %}

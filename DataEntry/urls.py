@@ -20,6 +20,8 @@ urlpatterns = [
     path('getServicesOfClient/', getServicesOfClient, name="getServicesOfClient"),
     path('ConfirmContract/', ConfirmContract, name="ConfirmContract"),
     path('getsubServices/' ,getsubServicesAll),
+    path('getCollectors/' ,getCollectorsAll.as_view()),
+    
     
 
 

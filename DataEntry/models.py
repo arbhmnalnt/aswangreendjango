@@ -121,15 +121,17 @@ class Area(TimeStampMixin,models.Model):
 class Client(TimeStampMixin,models.Model):
     # typee           = models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
     serialNum       = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom client number for future us as like his id in company or any use else
-    name            = models.CharField(max_length=50,null=True, blank=True, db_index=True)
+    name            = models.CharField(max_length=100,null=True, blank=True, db_index=True)
     phone           = models.CharField(max_length=11, null=True, blank=True, db_index=True)
     password        = models.CharField(max_length=150, null=True, blank=True, db_index=True)
     nationalId      = models.CharField(max_length=14, null=True, blank=True, db_index=True)
     area            = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True)
     streetName      = models.CharField(max_length=150, null=True, blank=True)
-    addressBuilding = models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
-    addressApartment= models.CharField(max_length=50,null=True, blank=True, help_text="تفاصيل الشقه")
+    addressBuilding = models.CharField(max_length=150,null=True, blank=True, help_text="تفاصيل العمارة السكنية")
+    addressApartment= models.CharField(max_length=150,null=True, blank=True, help_text="تفاصيل الشقه")
     addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
+    customFilter    = models.CharField(max_length=250, null=True, blank=True, help_text="فلتر مخصص")
+    contractDate    = models.DateField(null=True, blank=True)  # for clients with older contract date 
     created_prev_date = models.DateField(null=True, blank=True)
     activation_request= models.BooleanField(default=False)
     outsource         = models.BooleanField(default=False)

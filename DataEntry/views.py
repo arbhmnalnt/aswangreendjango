@@ -16,6 +16,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.views import View
+from django.db.models import Sum
+
 
 
 today = datetime.now()
@@ -24,6 +26,13 @@ todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
+
+class getCollectorsAll(APIView):
+    def get(self, request):
+        collectorsRcords = Employee.objects.all()
+        collectors = [{"id":collector.id, "name": collector.name} for collector in collectorsRcords if collector.job2 == "collector"]
+        return Response(collectors)
+
 
 class CancelContractView(View):
     def get(self, request, client_id):
@@ -529,6 +538,7 @@ def TnewContract2(request):
         serial          = request.POST['serial']
         clientName      = request.POST['name']
         phone           = request.POST['phone']
+        contractDate    = request.POST['contractDate']
         area            = Area.objects.get(pk=request.POST['area'])
         addressDetails  = request.POST['addressDetails']
         apartment       = isEmptyStr(request.POST['apartment'])
@@ -547,15 +557,16 @@ def TnewContract2(request):
                 servicePriceTypes = request.POST.getlist('servicePriceType[]')
                 servicePriceType = servicePriceTypes[indexx]
                 isServiceExist = checkServiceExist(serv,servicePrice, servicePriceType)
-
+                servcesNotes = request.POST.getlist('notes[]')
+                serviceNote  = servcesNotes[indexx]
+                servcesNotes = " - ".join(servcesNotes)
+                print(f"serviceNote => {serviceNote}  => {servcesNotes}")
                 print(f"checkServiceExist => {isServiceExist}")
                 if isServiceExist :
                     serviceId = getServiceId(serv, servicePrice ,servicePriceType)
                     servicesIdsList.append(serviceId)
+                
                 else:
-                    servcesNotes = request.POST.getlist('notes[]')
-                    serviceNote  = servcesNotes[indexx]
-
                     serviceTypes = request.POST.getlist('serviceType[]')
                     serviceType  = serviceTypes[indexx]
                     print(f"servicePrice=> {servicePrice}")
@@ -574,9 +585,30 @@ def TnewContract2(request):
         ##########
 
         # to be done
-        data2 = {"name":clientName, "clientId": clientId,"phone":phone, "nationalId":"", "Serial":serial, "area":area, "streetName":addressDetails,
-        "addressBuilding":apartment,"addressApartment": flat, "addressDetails": f" {addressDetails} - {apartment} - {flat}",
-        "services":servicesIdsListint,"referer":referer,"date":date,"userId":userId}
+        if clientId != "" or clientId != None :
+            client = Client.objects.get(pk=clientId)
+            print(f"client => {client}")
+            previous_notes = client.notes
+        else:
+            previous_notes = ''
+        data2 = {
+            "name": clientName,
+            "clientId": clientId,
+            "phone": phone,
+            "nationalId": "",
+            "Serial": serial,
+            "area": area,
+            "streetName": addressDetails,
+            "addressBuilding": apartment,
+            "addressApartment": flat,
+            "addressDetails": f"{addressDetails} - {apartment} - {flat}",
+            "services": servicesIdsListint,
+            "referer": referer,
+            "date": date,
+            "userId": userId,
+            "contractDate":contractDate,
+            "notes": f"{servcesNotes}"
+        }
 
 
         newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
@@ -639,6 +671,7 @@ def TnewContract(request):
         serial          = request.POST['serial']
         clientName      = request.POST['name']
         phone           = request.POST['phone']
+        contractDate    = request.POST['contractDate']
         area            = Area.objects.get(pk=request.POST['area'])
         addressDetails  = request.POST['addressDetails']
         apartment       = isEmptyStr(request.POST['apartment'])
@@ -657,13 +690,15 @@ def TnewContract(request):
                 servicePriceTypes = request.POST.getlist('servicePriceType[]')
                 servicePriceType = servicePriceTypes[indexx]
                 isServiceExist = checkServiceExist(serv,servicePrice, servicePriceType)
-
+                servcesNotes = request.POST.getlist('notes[]')
+                servcesNotes = " - ".join(servcesNotes)
+                serviceNote  = servcesNotes[indexx]
+                print(f"serviceNote => {serviceNote}  => {servcesNotes}")
                 print(f"checkServiceExist => {isServiceExist}")
                 if isServiceExist :
-                    serviceId = getServiceId(serv, servicePrice, servicePriceType)
+                    serviceId = getServiceId(serv, servicePrice ,servicePriceType)
+                    servicesIdsList.append(serviceId)
                 else:
-                    servcesNotes = request.POST.getlist('notes[]')
-                    serviceNote  = servcesNotes[indexx]
                     serviceTypes = request.POST.getlist('serviceType[]')
                     serviceType  = serviceTypes[indexx]
                     print(f"servicePrice=> {servicePrice}")
@@ -680,9 +715,28 @@ def TnewContract(request):
         ##########
 
         # to be done
-        data2 = {"name":clientName, "phone":phone, "nationalId":"", "Serial":serial, "area":area, "streetName":addressDetails,
-        "addressBuilding":apartment,"addressApartment": flat, "addressDetails": f" {addressDetails} - {apartment} - {flat}",
-        "services":servicesIdsListint,"referer":referer,"date":date,"userId":userId}
+        if clientId != "" or clientId != None :
+            previous_notes = clientId.notes
+        else:
+            previous_notes = ''
+        data2 = {
+            "name": clientName,
+            "clientId": clientId,
+            "phone": phone,
+            "nationalId": "",
+            "Serial": serial,
+            "area": area,
+            "streetName": addressDetails,
+            "addressBuilding": apartment,
+            "addressApartment": flat,
+            "addressDetails": f"{addressDetails} - {apartment} - {flat}",
+            "services": servicesIdsListint,
+            "referer": referer,
+            "date": date,
+            "userId": userId,
+            "contractDate":contractDate,
+            "notes": f"{servcesNotes}"
+        }
 
 
         newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
@@ -1096,8 +1150,24 @@ def collectManager():
         statue['count'] = followsCount
         # need to calculate payment of all clients and add everyone payement to it's desireved
         updatedCount = follows.update(collcetStatusNums="مطلوب الدفع")
+        clients = Client.objects.filter(is_deleted=False)
+        for client in clients:
+            clientFollows = FollowContractServices.objects.filter(
+                    client=client,
+                    collcetStatusNums="مطلوب الدفع",
+                    service__priceType="month",
+                    is_deleted=False
+                ).values('client').annotate(total_pay=Sum('total_amount'))
+            
+            client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
+            client.save()
+            
+            # print(f"client {client.id} client total deserved => {client.deserved}")
+
+
         statue['updatedCount'] = updatedCount
     else:
+        
         statue.msg = 'today not any of tahseal days'
 
     return statue
@@ -1452,7 +1522,8 @@ def create_new_client(dictt):
             'serialNum':dictt["Serial"],'name':dictt["name"],'phone':dictt["phone"],'nationalId':dictt["nationalId"], 'password':"",
             'area':Area.objects.filter(name=dictt["area"])[0],'streetName':dictt["streetName"],
             'addressBuilding':dictt["addressBuilding"],'addressApartment':dictt["addressApartment"],'addressDetails':dictt["addressDetails"],
-            'created_prev_date':dictt["date"],'created_by':Employee.objects.get(pk=dictt['userId'])
+            'created_prev_date':dictt["date"], 'notes':dictt["notes"] ,
+            'contractDate':dictt["contractDate"],'created_by':Employee.objects.get(pk=dictt['userId'])
         }
     )
     client_id = client.id
