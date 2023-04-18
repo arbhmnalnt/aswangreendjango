@@ -21,6 +21,7 @@ urlpatterns = [
     path('ConfirmContract/', ConfirmContract, name="ConfirmContract"),
     path('getsubServices/' ,getsubServicesAll),
     path('getCollectors/' ,getCollectorsAll.as_view()),
+    path('createNewCollectOrder/' ,createNewCollectOrder.as_view()),
     
     
 

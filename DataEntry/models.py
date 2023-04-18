@@ -158,6 +158,7 @@ class Contract(TimeStampMixin,models.Model):
     # subServices     = models.ManyToManyField('SubService',related_name='services')
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)
+    lastPay         = models.DateField(null=True, blank=True)
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
     notes           = models.TextField(max_length=250,null=True, blank=True)

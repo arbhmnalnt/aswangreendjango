@@ -2,8 +2,25 @@
 {% block title %}
 <title>طلب تحصيل جديد</title>
 {% endblock %}
-{% block style %}
 
+{% block style %}
+.form-check-inline .form-check-input{
+    position: static;
+    margin-top: 0;
+    margin-right: 0.3125rem;
+    margin-left: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+}
+.form-check-inline{
+    display: inline-flex;
+    align-items: center;
+    width: 13rem;
+    background: aqua;
+    padding: 5px;
+    margin: 5px;
+    font-weight : 900;
+}
 {% endblock %}
 
 {% block content %}
@@ -53,17 +70,29 @@
               <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                 المناطق
               </button>
-            <div class="collapse" id="collapseExample">
-                    {% for area in areas %}
-                    <div class="card card-body d-inline-block">
-                        <a class="btn btn-info text-white" href="#">{{area.name}}</a>
-                    </div>
-                    {% endfor %}
-            </div>
         </div>
         <div class="col-3 mr-auto">
-            <input class="form-control" placeholder="بحث">
-            <button class="btn btn-info mt-2">بحث</button>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="search">البحث:</label>
+                    <input type="text" class="form-control" name="search" placeholder="ابحث ...">
+                </div>
+                <hr>
+                <div class="form-group" style=" position: relative; left: 49rem; /* display: flex; */ width: 62rem; ">
+                    <div class="form-check collapse" id="collapseExample">
+                        <label for="areas">الفلترة بالمناطق : </label><br>
+                        {% for area in areas %}
+                        <div class="form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="areas[]" value="{{ area.id }}" id="area{{ area.id }}">
+                            <label class="form-check-label" for="area{{ area.id }}">{{ area.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr>
+                <button type="submit" class="btn btn-primary">البحث</button>
+            </form>
         </div>
     </div>
 </div>
@@ -73,11 +102,11 @@
         {{clientsCount}} عميل لم يتم التحصيل منه
         <div class="col-12">
             {% if isContracts %}
-            <table class="w-100 table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData"
+            <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered text-center" id="tblData"
             style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
             <thead class="text-center">
                 <tr class="bg-secondary text-white text-center" style="font-size:1rem">
-                    <th><input name="checkAll" id="checkAll" type="checkbox"> الكل</th>
+                    <th class="hide-column"><button name="checkAll" class="btn btn-info" id="checkAll" onclick="toggleSelect()">الكل</button>
                     <th>م</th>
                     <th>تاريخ التعاقد</th>
                     <th>اسم العميل</th>
@@ -85,22 +114,29 @@
                     <th>المنطقة</th>
                     <th>العنوان بالتفصيل</th>
                     <th>المستحق</th>
+                    <th>اخر دفع</th>
                     <th>الملاحظات</th>
                 </tr>
             </thead>
             <tbody>
                 {% for contract in contracts %}
                 <tr id="{{contract.id}}">
-                    <td><input name="contractSelect" class="contractSelect {{contract.id}}" type="checkbox"></td>
-                    <td>{{forloop.counter}}</td>
+                    <td class="hide-column"><input name="contractSelect" class="contractSelect {{contract.id}}" type="checkbox"></td>
+                    <td class="ml-2 mr-2">{{forloop.counter}}</td>
                     <td class="date">{{contract.created_prev_date|date:"d / m /Y" }}</td>
                     <td>{{contract.client.name}}</td>
                     <td>{{contract.client.phone}}</td>
                     <td>{{contract.client.area.name}}</td>
                     <td>{{contract.client.addressDetails}}</td>
                     <td class="deserved "><input class="text-center w-50 deservedMoney" disabled value="{{contract.client.deserved}}"> جم</td>
-                    <td>{{contract.service.notes}}</td>
-
+                    <td>01-02-2023</td>
+                    <td>
+                        {{contract.service.notes}}
+                        <br>
+                        <hr>
+                        <input  placeholder="ملاحظات">
+                    </td>
+                    
                 </tr>
                 {% endfor %}
             </tbody>
@@ -154,7 +190,71 @@ function  getCollectorsAjax(){
         }
     });
 }
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
+// print createNewCollectOrder
+
+//function NewCollectOrder() {}
+function NewCollectOrder() {
+    // Clone the table and remove unchecked rows and hidden columns
+    $('#tblData').css({
+        'height': 'auto',
+    })
+    var clonedTable = $('#tblData').clone();
+    clonedTable.find('tbody tr').each(function () {
+      if (!$(this).find('.contractSelect').is(':checked')) {
+        $(this).remove();
+      }
+    });
+    clonedTable.find('thead th, tbody td').each(function (index) {
+      if ($(this).hasClass('hide-column')) {
+        clonedTable.find('thead th:nth-child(' + (index + 1) + ')').remove();
+        clonedTable.find('tbody td:nth-child(' + (index + 1) + ')').remove();
+      }
+    });
+  
+    // Open a new window and print the table
+    
+    clonedTable.find('.deservedMoney').css({
+        'text-align': 'center',
+        'width'     : '3rem'
+    })
+    clonedTable.find('table').css({
+        'text-align':'center','direction':'rtl','display': 'block','height': 'auto','page-break-inside': 'avoid',
+    })
+    var newWin = window.open('', 'Print-Window');
+    newWin.document.write('<html><head><title>طباعة الطلب</title></head><body>');
+    newWin.document.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
+    newWin.document.write(clonedTable[0].outerHTML);
+    newWin.document.write('</body></html>');
+    newWin.document.close();
+    setTimeout(function(){
+        newWin.print();
+    },500)
+  }
+  
+  $(document).ready(function () {
+    // Toggle all checkboxes on header checkbox change
+    $('#check-all').on('change', function () {
+      $('.check-row').prop('checked', $(this).is(':checked'));
+    });
+});
+// -- 
 function confirmCollectOrder() {
     let tr = $('tr :checkbox:checked').closest('tr');
     let data = {};
@@ -166,6 +266,7 @@ function confirmCollectOrder() {
     // Add collector and dateTimeCollectOrder to the data object
     data.collector = collector;
     data.dateTimeCollectOrder = dateTimeCollectOrder;
+    data.csrfmiddlewaretoken = getCookie('csrftoken');
 
     tr.each(function() {
         let requiredToPay = $(this).find('input.deservedMoney').val();
@@ -177,10 +278,11 @@ function confirmCollectOrder() {
     });
 
     console.log(data);
+    NewCollectOrder()
 
     // Send the data to the Django backend via AJAX request
     $.ajax({
-        url: '/my-django-url/',
+        url: '/DataEntry/createNewCollectOrder/',
         type: 'POST',
         data: data,
         success: function(response) {
@@ -193,6 +295,9 @@ function confirmCollectOrder() {
 }
 
 
-defaultCheck()
+function toggleSelect(){
+    $(':checkbox').each(function () { this.checked = !this.checked; });
+}
+
 
 {% endblock %}

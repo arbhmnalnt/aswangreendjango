@@ -27,6 +27,59 @@ todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
 
+#@csrf_exempt
+
+class createNewCollectOrder(APIView):
+    def post(self, request):
+        data = request.POST
+        values = {}
+        for key, value in data.items():
+             values[key] = value
+        collectorId = values['collector']
+        collector = Employee.objects.get(pk=collectorId)
+        values['collector'] = collector
+        keys_only_dict = values.keys()
+        print()
+        clients = []
+        for client in keys_only_dict:
+            if client.isdigit():
+                try:
+                    # try to get a client with the given key
+                    # client_record = Client.objects.get(pk=client)
+                    clients.append(client)
+                except Client.DoesNotExist:
+                    # client does not exist, do nothing
+                    pass
+        areas = [Client.objects.get(pk=client).area.id  for client in clients]
+        # convert the datetime string to a datetime object
+        datetime_obj = datetime.strptime(values['dateTimeCollectOrder'], '%Y-%m-%dT%H:%M')
+        # extract the date part of the datetime object
+        date_obj = datetime_obj.date()
+        exclude_keys = ['collector', 'csrfmiddlewaretoken', 'dateTimeCollectOrder']
+
+        total = 0
+        for key, value in values.items():
+            if key not in exclude_keys or key.isdigit():
+                print(f"key of the value to be addedd => {key}")
+                if value.isdigit():
+                    total += int(value)
+                else:
+                    break
+
+        print("value => ", value)
+        client_instances = Client.objects.filter(id__in=clients)
+        areas_instance   = Area.objects.filter(id__in=areas) 
+        collect_order = CollectOrder.objects.create(
+            collector=values['collector'],
+            required=total,
+            created_prev_date=date_obj
+        )
+        collect_order.clients.set(client_instances)
+        collect_order.areas.set(areas_instance)
+        print('new_record => ', collect_order.id)
+        status = {'msg':'done', 'collectOrder': collect_order.id}
+        return Response(status)
+
 class getCollectorsAll(APIView):
     def get(self, request):
         collectorsRcords = Employee.objects.all()
@@ -317,43 +370,57 @@ def getsubServicesAll(request):
 
 
 def TnewCollectOrder(request):
-    print(f"request.session['group'] => {request.session.keys()}")
-    if 'group' not in request.session :
+    if 'group' not in request.session:
         return redirect('/cAccounts/login/')
-    else :
-        pass
+    
     if request.session['group'] == "tahsealAdmin":
         pass
     elif request.session['group'] == "dataEntryAdmin":
         return redirect('/DataEntry/TmainPage/?page=1')
     else:
         return HttpResponse("erorr here")
-    # thsi function responsible of callculate and make the collect for clients
-    collectManagerStatus = collectManager()
-    print(f"collectManagerStatus => {collectManagerStatus}")
+    
     areas = Area.objects.all()
     isContracts = True
+    contract_list = []
+    
     if request.method == 'POST':
-        pass
+        search_query = request.POST.get('search', '')
+        search_areas = request.POST.getlist('areas[]')
+        if search_query:
+            follows = FollowContractServices.objects.filter(
+                Q(collcetStatusNums="مطلوب الدفع"),
+                Q(client__name__icontains=search_query)       |
+                Q(client__phone__icontains=search_query)      |
+                Q(client__area__name__icontains=search_query) |
+                Q(client__serialNum__icontains=search_query) 
+            )
+        elif len(search_areas) >= 0:
+            follows = FollowContractServices.objects.filter(
+                Q(collcetStatusNums="مطلوب الدفع"),
+                Q(client__area__in=search_areas)   ,
+            )
+        else:
+            follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+        
+        for follow in follows:
+            contract = Contract.objects.get(client=follow.client)
+            if contract not in contract_list:
+                contract_list.append(contract)
+        count = len(contract_list)
     else:
-        contract_list = []
-        contract_list2 = []
         follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
         for follow in follows:
-            contract_list2.append(Contract.objects.get(client=follow.client))
-        count = len(contract_list2)
-        if count > 0:
-            contracts = [c for c in contract_list2 if  c in Contract.objects.all().order_by('-id')]
-            for contract in contracts:
-                if contract in contract_list:
-                    continue
-                else:
-                    contract_list.append(contract)
-        else:
-            isContracts = False
-        print(f"contract_list 111 => {contract_list}")
-        ctx = {'areas':areas, 'contracts':contract_list, 'clientsCount':count, 'isContracts':isContracts}
-        return render(request,'DataEntry/TnewCollectOrder.html',ctx)
+            contract = Contract.objects.get(client=follow.client)
+            if contract not in contract_list:
+                contract_list.append(contract)
+        count = len(contract_list)
+        
+    if count == 0:
+        isContracts = False
+        
+    ctx = {'areas':areas, 'contracts':contract_list, 'clientsCount':count, 'isContracts':isContracts}
+    return render(request,'DataEntry/TnewCollectOrder.html',ctx)
 
 class currentContractTableSearchFilter(APIView):
     def post(self, request):
