@@ -17,6 +17,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.views import View
 from django.db.models import Sum
+from django.views.generic import ListView, DetailView, UpdateView
+from django.urls import reverse_lazy
 
 
 
@@ -27,7 +29,21 @@ todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
 
-#@csrf_exempt
+class CollectOrderList(ListView):
+    model = CollectOrder
+    template_name = "DataEntry/collect_order_list.html"
+    context_object_name = "collect_orders"
+
+class CollectOrderDetail(DetailView):
+    model = CollectOrder
+    template_name = "DataEntry/collect_order_detail.html"
+    context_object_name = "collect_order"
+
+class CollectOrderUpdate(UpdateView):
+    model = CollectOrder
+    template_name = "DataEntry/collect_order_update.html"
+    fields = ['collector', 'clients', 'areas', 'month', 'confirmed', 'reason', 'required', 'created_prev_date', 'is_test']
+    success_url = reverse_lazy('TcurrentCollectOrder')
 
 class createNewCollectOrder(APIView):
     def post(self, request):

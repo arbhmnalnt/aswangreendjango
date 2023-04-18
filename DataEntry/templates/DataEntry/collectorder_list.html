@@ -1,0 +1,48 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>طلبات التحصيل الجارية</title>
+{% endblock %}
+{% block style %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>طلبات التحصيل الجارية</h1>
+    <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered" 
+    style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
+        <thead>
+            <tr>
+                <th>Collector</th>
+                <th>Month</th>
+                <th>Confirmed</th>
+                <th>Required</th>
+                <th>Created Prev Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for collect_order in collect_orders %}
+            <tr>
+                <td>{{ collect_order.collector }}</td>
+                <td>{{ collect_order.month }}</td>
+                <td>{{ collect_order.confirmed }}</td>
+                <td>{{ collect_order.required }}</td>
+                <td>{{ collect_order.created_prev_date }}</td>
+                <td>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}">Detail</a>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No Collect Orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}
+{% block script %}
+
+{% endblock %}
