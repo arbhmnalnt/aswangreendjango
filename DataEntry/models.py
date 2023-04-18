@@ -169,10 +169,12 @@ class FollowContractServices(TimeStampMixin,models.Model):
     PAID_NUM = 'تم الدفع'
     PAYMENT_REQUIRED_NUM = 'مطلوب الدفع'
     COLLECTING_DATE_NUM = 'فى انتظار ميعاد التحصيل'
+    UNCONFIRMED_PAYMENT = 'جارى التحصيل'
     COLLECT_STATUS_NUM = (
         (PAID_NUM, 'تم الدفع'),
         (PAYMENT_REQUIRED_NUM, 'مطلوب الدفع'),
         (COLLECTING_DATE_NUM, 'فى انتظار ميعاد التحصيل'),
+        (UNCONFIRMED_PAYMENT, 'جارى التحصيل'),
     )
     #
     DONE = "تم اداء الخدمة"

@@ -41,15 +41,17 @@ class createNewCollectOrder(APIView):
         keys_only_dict = values.keys()
         print()
         clients = []
-        for client in keys_only_dict:
-            if client.isdigit():
+        for contractId in keys_only_dict:
+            if contractId.isdigit():
                 try:
                     # try to get a client with the given key
                     # client_record = Client.objects.get(pk=client)
+                    client = Contract.objects.get(pk=contractId).client_id
                     clients.append(client)
                 except Client.DoesNotExist:
                     # client does not exist, do nothing
                     pass
+        follow_contracts = FollowContractServices.objects.filter(client_id__in=clients).update(collcetStatusNums='جارى التحصيل')
         areas = [Client.objects.get(pk=client).area.id  for client in clients]
         # convert the datetime string to a datetime object
         datetime_obj = datetime.strptime(values['dateTimeCollectOrder'], '%Y-%m-%dT%H:%M')
@@ -390,18 +392,19 @@ def TnewCollectOrder(request):
         if search_query:
             follows = FollowContractServices.objects.filter(
                 Q(collcetStatusNums="مطلوب الدفع"),
+                Q(),
                 Q(client__name__icontains=search_query)       |
                 Q(client__phone__icontains=search_query)      |
                 Q(client__area__name__icontains=search_query) |
                 Q(client__serialNum__icontains=search_query) 
-            )
+            ).order_by('-created_at')
         elif len(search_areas) >= 0:
             follows = FollowContractServices.objects.filter(
                 Q(collcetStatusNums="مطلوب الدفع"),
                 Q(client__area__in=search_areas)   ,
-            )
+            ).order_by('-created_at')
         else:
-            follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+            follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع").order_by('-created_at')
         
         for follow in follows:
             contract = Contract.objects.get(client=follow.client)
@@ -409,7 +412,7 @@ def TnewCollectOrder(request):
                 contract_list.append(contract)
         count = len(contract_list)
     else:
-        follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع")
+        follows = FollowContractServices.objects.filter(collcetStatusNums="مطلوب الدفع").order_by('-created_at')
         for follow in follows:
             contract = Contract.objects.get(client=follow.client)
             if contract not in contract_list:
@@ -606,6 +609,7 @@ def TnewContract2(request):
         clientName      = request.POST['name']
         phone           = request.POST['phone']
         contractDate    = request.POST['contractDate']
+        lastPay = request.POST['lastPay'] if 'lastPay' in request.POST else ''
         area            = Area.objects.get(pk=request.POST['area'])
         addressDetails  = request.POST['addressDetails']
         apartment       = isEmptyStr(request.POST['apartment'])
@@ -674,6 +678,7 @@ def TnewContract2(request):
             "date": date,
             "userId": userId,
             "contractDate":contractDate,
+            "lastPay":lastPay,
             "notes": f"{servcesNotes}"
         }
 
@@ -739,6 +744,7 @@ def TnewContract(request):
         clientName      = request.POST['name']
         phone           = request.POST['phone']
         contractDate    = request.POST['contractDate']
+        lastPay = request.POST['lastPay'] if 'lastPay' in request.POST else ''
         area            = Area.objects.get(pk=request.POST['area'])
         addressDetails  = request.POST['addressDetails']
         apartment       = isEmptyStr(request.POST['apartment'])
@@ -1551,16 +1557,13 @@ def create_new_contract(data, newClientId):
         serv = Service.objects.get(pk=service)
         services_set.add(serv)
         i += 1
-#     = Person.objects.update_or_create(
-#     first_name='John', last_name='Lennon',
-#     defaults={'first_name': 'Bob'},
-# )
     contract = Contract.objects.update_or_create(
         client=Client.objects.get(pk=newClientId),
         defaults={
             'serialNum':data["Serial"],'client':Client.objects.get(pk=newClientId),
             'belong_to':Employee.objects.get(pk=data['referer'] if data['referer'] != 0 else 3),
-            'created_prev_date':data['date'],'created_by':Employee.objects.get(pk=data['userId']), 'is_test':False
+            'created_prev_date':data['date'],'lastPay':data['lastPay'],
+            'created_by':Employee.objects.get(pk=data['userId']), 'is_test':False
         }
     )
     contract = Contract.objects.get(client=Client.objects.get(pk=newClientId))

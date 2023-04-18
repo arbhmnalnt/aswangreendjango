@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block style %}
-.form-check-inline .form-check-input{
+.form-check-inline .form-check-input, input[type=checkbox]{
     position: static;
     margin-top: 0;
     margin-right: 0.3125rem;
@@ -129,7 +129,7 @@
                     <td>{{contract.client.area.name}}</td>
                     <td>{{contract.client.addressDetails}}</td>
                     <td class="deserved "><input class="text-center w-50 deservedMoney" disabled value="{{contract.client.deserved}}"> جم</td>
-                    <td>01-02-2023</td>
+                    <td>{{contract.lastPay|date:"d / m /Y" }}</td>
                     <td>
                         {{contract.service.notes}}
                         <br>
@@ -246,6 +246,11 @@ function NewCollectOrder() {
     setTimeout(function(){
         newWin.print();
     },500)
+    
+    setTimeout(function(){
+        window.location.reload()
+    },2000)
+
   }
   
   $(document).ready(function () {

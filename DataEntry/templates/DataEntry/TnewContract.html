@@ -139,7 +139,7 @@
                    <p class=" mt-3 mb-1"><input class="form-control" value="{% if isClient %}{{clientRecord.serialNum}}{% endif %}" name="serial" placeholder="سريال العميل" onkeyup = 'checkSerial(this)'></p>
                    <p class="mt-1 border"><span class="" id="serialStatus"></span></p>
                    <p class=" mt-3"><input class="form-control" name="name" value="{% if isClient %}{{clientRecord.name}}{% endif %}" placeholder="اسم العميل"  oninput="this.className = ''"></p>
-                   <p><input class="form-control" name="phone" value="{% if isClient %}{{clientRecord.phone}}{% endif %}" placeholder="رقم الهاتف" oninput="this.className = ''"></p>
+                   <p><input class="form-control" name="phone" value="{% if isClient %}{{clientRecord.phone}}{% endif %}" placeholder="رقم الهاتف" maxlength="11" oninput="this.className = ''"></p>
                    <p class="select_holder">
                         <select name="area" class="form-control">
                             {% if isClient %}
@@ -158,6 +158,10 @@
                     <p>
                         <label class="form-control" for="contractDate">تاريخ التعاقد</label>
                         <input class="form-control" required="required" type="date" name="contractDate" placeholder="تاريخ التعاقد" id="contractDate">
+                    </p>
+                    <p>
+                        <label class="form-control" for="contractDate">تاريخ اخر دفع</label>
+                        <input class="form-control" type="date" name="lastPay" placeholder="تاريخ اخر دفع" id="lastPay">
                     </p>
                 </div>
 
