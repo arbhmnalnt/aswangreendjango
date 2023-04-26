@@ -123,13 +123,20 @@
                 <tr id="{{contract.id}}">
                     <td class="hide-column"><input name="contractSelect" class="contractSelect {{contract.id}}" type="checkbox"></td>
                     <td class="ml-2 mr-2">{{forloop.counter}}</td>
-                    <td class="date">{{contract.created_prev_date|date:"d / m /Y" }}</td>
+                    <td class="date" style="font-size:0.9rem; font-weight: bolder;">{{contract.created_prev_date|date:"Y/m/d" }}</td>
                     <td>{{contract.client.name}}</td>
                     <td>{{contract.client.phone}}</td>
                     <td>{{contract.client.area.name}}</td>
                     <td>{{contract.client.addressDetails}}</td>
-                    <td class="deserved "><input class="text-center w-50 deservedMoney" disabled value="{{contract.client.deserved}}"> جم</td>
-                    <td>{{contract.lastPay|date:"d / m /Y" }}</td>
+                    <td class="deserved ">
+                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.get_total_price}}"> جم
+                        <p>
+                            {% for service in contract.services.all %}
+                               <p> {{service.name}} -> {{service.price}}</p>
+                            {% endfor %}
+                        </p>
+                    </td>
+                    <td class="date" style="font-size:0.9rem; font-weight: bolder;">{{contract.lastPay|date:"Y/m/d" }}</td>
                     <td>
                         {{contract.service.notes}}
                         <br>
@@ -157,6 +164,8 @@ function defaultCheck(){
         checkbox.checked = true;
     })
 }
+
+defaultCheck()
 
 function  getCollectorsAjax(){
     // get all collectors to the collector select

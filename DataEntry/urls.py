@@ -24,7 +24,6 @@ urlpatterns = [
     path('createNewCollectOrder/' ,createNewCollectOrder.as_view()),
     path('TcurrentCollectOrder/' ,CollectOrderList.as_view(), name="TcurrentCollectOrder"),
     path('TcurrentCollectOrder/<int:pk>' ,CollectOrderDetail.as_view(), name="collect_order_detail"),
-    
     path('TcurrentCollectOrder/<int:pk>/update/' ,CollectOrderUpdate.as_view(), name="collect_order_update"),
     
     

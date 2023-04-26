@@ -55,10 +55,11 @@ class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
 
 class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
-    search_fields = ['name', 'serialNum','nationalId']
+    search_fields = ['name', 'serialNum']
     list_display = ('id','serialNum','name','phone','area','created_at')
 
 class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ['client__name', 'client__serialNum']
     list_display = ('id','client','get_services','serialNum','created_at')
     # optimizing the query for each service
     def get_queryset(self, request):

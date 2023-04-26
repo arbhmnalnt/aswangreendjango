@@ -3,10 +3,100 @@
 <title>طلبات التحصيل الجارية</title>
 {% endblock %}
 {% block style %}
+input[type=radio] {
+    position: static;
+    margin-top: 0;
+    margin-right: 0.3125rem;
+    margin-left: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+}
 {% endblock %}
 
 {% block content %}
 
+<table class="table text-center table-hover table-bordered m-auto" 
+    style="text-align:center;direction:rtl;height: auto;overflow-y: auto;">
+    <thead class="bg-dark text-white">
+        <tr>
+            <th>المحصل</th>
+            <th>تاريخ إصدار طلب التحصيل</th>
+            <th>تم تأكيده</th>
+            <th>العملاء</th>
+            <th>اجمالى المطلوب تحصيله</th>
+            <th>خيارات</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ collect_order.collector }}</td>
+            <td>{{ collect_order.created_prev_date|date:" d / m / Y"}}</td>
+            <td>
+                {% if collect_order.confirmed %} <span class="p-2 m-2 text-white bg-success">تم تأكيده</span>
+                {% else %} <span class="p-2 m-2 text-white bg-danger">لم يتم التأكيد</span>
+                {% endif %}
+            </td>
+            <td>
+                {% for client in collect_order.clients.all %}
+                    {{ client.name }}
+                    {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ collect_order.required }}</td>
+            <td>
+                <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/" class="m-2 btn btn-info">تعديل</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="text-center mt-2 mb-2">
+    <i class="fa fa-hand-o-down fa-2x text-white bg-info p-2" aria-hidden="true"></i>
+</p>
+<div class="row">
+    <div class="col-12">
+        <table class="table text-center table-hover table-bordered m-auto" 
+            style="text-align:center;direction:rtl;">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>العميل</th>
+                    <th>الخدمات</th>
+                    <th>الإجمالى</th>
+                    <th>سريال الفاتورة</th>
+                    <th>التأكيد</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts %}
+                    <tr>
+                        <td>{{ contract.client.name }}</td>
+                        <td>
+                            {% for service in contract.services.all %}
+                                <span class="p-2 m-2 bg-secondary text-white">{{service.name}} -> {{service.price}}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {{ contract.get_total_price }}
+                        </td>
+                        <td>
+                            <input type="number" id="billSerial " placeholder="سريال الفاتورة ">
+                        </td>
+                        <td class="text-right">
+                            <div class="form-group">
+                                <input type="radio" name="payStatue-{{contract}}" class="paid" value="paid">
+                                <label class="btn btn-success">تأكيد الدفع</label>
+                            </div>
+                            <div class="form-group ">
+                                <input type="radio" name="payStatue-{{contract}}" class="unpaid" value="unpaid">
+                                <label class="btn btn-danger">تأكيد عدم الدفع</label>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
 {% block script %}
 

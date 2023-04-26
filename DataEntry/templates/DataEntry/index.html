@@ -64,6 +64,9 @@
                 <a href="/DataEntry/TCurrentContract/" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">التعاقدات الحالية</button>
                 </a>
+                <a href="/DataEntry/TnewCollectOrder" class="">
+                  <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
+                </a>
                 {% elif user_group == "tahsealAdmin"%}
                 <a href="/DataEntry/TmainPage?page=1" class="">
                   <button class="btn btn-secondary w-100 m-2 text-right btn-custom">الصفحة الرئيسية</button>
@@ -75,6 +78,9 @@
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
                 </a>
                 {% else %}
+                <a href="/DataEntry/TnewCollectOrder" class="">
+                  <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
+              </a>
                 {% endif %}
                 {% endwith %}
     	    </div>
