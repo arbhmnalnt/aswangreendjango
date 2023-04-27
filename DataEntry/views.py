@@ -1245,7 +1245,7 @@ def collectManager():
     updatedCount = 0
     follows = FollowContractServices.objects.filter(is_deleted=False)
     for follow in follows :
-        print(f"follow id => {follow.id}")
+        # print(f"follow id => {follow.id}")
         if follow.collected_date == None:
             contractDate = Contract.objects.filter(client=follow.client, is_deleted=False)[0].created_prev_date
             lastPayDate = contractDate

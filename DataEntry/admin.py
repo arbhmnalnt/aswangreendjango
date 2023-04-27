@@ -72,7 +72,7 @@ class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ['client__name', 'client__area__name']
-    list_display = ('client','get_area','service','startingDate','serviceDueDate','serviceDueStatus','collcetStatusNums','collected_month','remain_amount','created_by','created_at_date')
+    list_display = ('client','get_area','service','ecd', 'collcetStatus', 'deservedAmount', 'collectedAmount', 'collectedDate', 'remainAmount', 'created_by')
 
     def get_area(self, obj):
         return obj.client.area.name

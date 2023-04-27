@@ -166,46 +166,27 @@ class Contract(TimeStampMixin,models.Model):
 
     def get_total_price(self):
         return sum(service.price for service in self.services.all())
+    
 class FollowContractServices(TimeStampMixin,models.Model):
-    #
-    PAID_NUM = 'تم الدفع'
-    PAYMENT_REQUIRED_NUM = 'مطلوب الدفع'
-    COLLECTING_DATE_NUM = 'فى انتظار ميعاد التحصيل'
-    UNCONFIRMED_PAYMENT = 'جارى التحصيل'
-    COLLECT_STATUS_NUM = (
-        (PAID_NUM, 'تم الدفع'),
-        (PAYMENT_REQUIRED_NUM, 'مطلوب الدفع'),
-        (COLLECTING_DATE_NUM, 'فى انتظار ميعاد التحصيل'),
-        (UNCONFIRMED_PAYMENT, 'جارى التحصيل'),
-    )
-    #
-    DONE = "تم اداء الخدمة"
-    NOT_DONE = "لم يتم اداء الخدمة"
-    CHOICES_SERV = (
-        (DONE, 'تم اداء الخدمة'),
-        (NOT_DONE, 'لم يتم اداء الخدمة')
-    )
-
+    COLLECT_STATUS = (
+    ('wecd', 'فى انتظار ميعاد التحصيل'),  # waiting Estimated collection date
+    ('pr', 'مطلوب الدفع'),                 # Payment required
+    ('pip', 'جارى الدفع'),                 # Payment in progress
+    ('pd', 'تم الدفع'),                    # payment done
+    ('lp', 'متأخر الدفع')                  # late payment 
+)
     client               = models.ForeignKey('Client', related_name='client', on_delete=models.CASCADE,null=True, blank=True)
-    area                 = models.CharField(max_length=50,null=True, blank=True, default='-')
     service              = models.ForeignKey('Service', related_name='service', on_delete=models.CASCADE,null=True, blank=True)
-    startingDate         = models.DateField(null=True, blank=True)
-    serviceDueDate       = models.DateField(null=True, blank=True, verbose_name="تاريخ اداء الخدمه")
-    serviceCollectDayStart    = models.IntegerField(null=True, blank=True, default=25, verbose_name="تاريخ بدء التحصيل")
-    serviceCollectDayEnd    = models.IntegerField(null=True, blank=True, default=5, verbose_name="تاريخ انهاء التحصيل")
-    serviceDueStatus     = models.CharField(max_length=50,null=True, blank=True, choices=CHOICES_SERV, default=NOT_DONE, verbose_name="حالة اداء الخدمة")
-    collcetStatusNums    = models.CharField(max_length=50,null=True, blank=True, choices=COLLECT_STATUS_NUM, default=COLLECTING_DATE_NUM,db_index=True)
-    total_amount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
-    collected_amount     = models.IntegerField(null=True, blank=True, default=0, verbose_name="المبلغ الذى تم تحصيله")
-    collected_month      = models.IntegerField(null=True, blank=True, verbose_name="رقم الشهر")
-    collected_date      = models.DateField(null=True, blank=True)
-    remain_amount        = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
+    ecd                  = models.DateField(null=True, blank=True, verbose_name="تاريخ  التحصيل المفترض")        # Estimated collection date
+    collcetStatus        = models.CharField(max_length=5,null=True, blank=True, choices=COLLECT_STATUS, default = 'wecd')
+    deservedAmount       = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
+    collectedAmount      = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
+    collectedDate        = models.DateField(null=True, blank=True, verbose_name="تاريخ التحصيل الفعلى")
+    remainAmount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     created_by           = models.ForeignKey('Employee', related_name='employee', on_delete=models.CASCADE,null=True, blank=True)
-    created_prev_date    = models.DateField(null=True, blank=True)
-    # source_outside       = models.BooleanField(default=False)   # not for any use just for a conflict
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
-    notes           = models.CharField(max_length=100,null=True, blank=True)
-    is_test         = models.BooleanField(default=True)
+    notes                = models.CharField(max_length=100,null=True, blank=True)
+    is_test              = models.BooleanField(default=True)
 
 class CollectOrder (TimeStampMixin,models.Model):
     collector            = models.ForeignKey('Employee', related_name='collector_employee', on_delete=models.CASCADE,null=True, blank=True, verbose_name="المحصل")
@@ -217,6 +198,11 @@ class CollectOrder (TimeStampMixin,models.Model):
     required             = models.IntegerField(default=0, verbose_name="المبلغ المطلوب تحصيله")
     created_prev_date    = models.DateField(null=True, blank=True)
     is_test              = models.BooleanField(default=True)
+
+class PayHistory(TimeStampMixin,models.Model):
+    client          = models.ForeignKey('Client', related_name='client_pay_history', on_delete=models.CASCADE,null=True, blank=True, db_index=True)
+    month           = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="الشهر")  # for month from range of 01 to 12
+    CollectOrder    = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True) 
 
 class SimpleService(TimeStampMixin,models.Model):
     name = models.CharField(max_length=100,null=True, blank=True)

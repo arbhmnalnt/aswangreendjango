@@ -21,6 +21,23 @@
     margin: 5px;
     font-weight : 900;
 }
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  th:hover {
+    background-color: #aaa;
+  }
+  
+  td {
+    padding: 8px;
+  }
 {% endblock %}
 
 {% block content %}
@@ -312,6 +329,5 @@ function confirmCollectOrder() {
 function toggleSelect(){
     $(':checkbox').each(function () { this.checked = !this.checked; });
 }
-
 
 {% endblock %}
