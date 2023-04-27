@@ -19,7 +19,6 @@ from django.views import View
 from django.db.models import Sum
 from django.views.generic import ListView, DetailView, UpdateView
 from django.urls import reverse_lazy
-from django.utils import timezone
 
 
 
@@ -39,17 +38,6 @@ class CollectOrderDetail(DetailView):
     model = CollectOrder
     template_name = "DataEntry/collect_order_detail.html"
     context_object_name = "collect_order"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Get the pk value from the URL
-        pk = self.kwargs['pk']
-        clients = CollectOrder.objects.get(pk=pk).clients.all()
-        context['clients']   = clients
-        contracts = []
-        for client in clients:
-            contracts.extend(Contract.objects.filter(client=client))
-        context['contracts'] = contracts
-        return context
 
 class CollectOrderUpdate(UpdateView):
     model = CollectOrder
@@ -79,10 +67,7 @@ class createNewCollectOrder(APIView):
                 except Client.DoesNotExist:
                     # client does not exist, do nothing
                     pass
-        for client in clients:
-            follow_contracts = FollowContractServices.objects.filter(client__id=client).update(collcetStatusNums='جارى التحصيل')
-
-        print(f"follow_contracts => {follow_contracts} because of clients ids => {clients}")
+        follow_contracts = FollowContractServices.objects.filter(client_id__in=clients).update(collcetStatusNums='جارى التحصيل')
         areas = [Client.objects.get(pk=client).area.id  for client in clients]
         # convert the datetime string to a datetime object
         datetime_obj = datetime.strptime(values['dateTimeCollectOrder'], '%Y-%m-%dT%H:%M')
@@ -403,15 +388,13 @@ def getsubServicesAll(request):
 
 
 def TnewCollectOrder(request):
-    collectManager()
     if 'group' not in request.session:
         return redirect('/cAccounts/login/')
     
     if request.session['group'] == "tahsealAdmin":
         pass
-    
     elif request.session['group'] == "dataEntryAdmin":
-        pass
+        return redirect('/DataEntry/TmainPage/?page=1')
     else:
         return HttpResponse("erorr here")
     
@@ -422,8 +405,7 @@ def TnewCollectOrder(request):
     if request.method == 'POST':
         search_query = request.POST.get('search', '')
         search_areas = request.POST.getlist('areas[]')
-        print(f"search_query => {search_query}")
-        if len(search_query) < 2:
+        if search_query:
             follows = FollowContractServices.objects.filter(
                 Q(collcetStatusNums="مطلوب الدفع"),
                 Q(),
@@ -901,7 +883,7 @@ def TmainPage(request):
 
     pages = getPageNums(Contract.objects.all().count(), listcount)
     # current collecr orders
-    orders               = CollectOrder.objects.filter(confirmed=False)
+    orders               = CollectOrder.objects.filter(month=month)
     ctx= {'remainingCollections':remainingCollections, "collected":collected, "currentClients":currentClients, "collectorsNum":collectorsNum,
         'items':contracts, 'contractsLen':contracts.count(), 'orders':orders, 'ordersLen':orders.count(),
         'pages':pages, 'listcount':listcount}
@@ -1242,86 +1224,42 @@ def test2(request):
 #==================================================================================================================================
 def collectManager():
     statue = {'msg':'start'}   # for debugging
-    updatedCount = 0
-    follows = FollowContractServices.objects.filter(is_deleted=False)
-    for follow in follows :
-        # print(f"follow id => {follow.id}")
-        if follow.collected_date == None:
-            contractDate = Contract.objects.filter(client=follow.client, is_deleted=False)[0].created_prev_date
-            lastPayDate = contractDate
-        else:
-            lastPayDate = follow.collected_date
-        thirtyDaysAfter = lastPayDate+ timezone.timedelta(days=30)
-        current = timezone.now()
-        current_date = current.date()
-        # print(f"type of thirtyDaysAfter is {type(thirtyDaysAfter)}")
+    ####  how to it
+    ## for sake of debugging the start and end of collect days wwill be from 4 to 5 only
+    ## get current day if it between  25 and 5 of the next month the start and end of the collecting then start the process
+    ##  get all follows for all contracts
+    ##  for every follow
+    tahselaStart = 4
+    tahsealEnd = 5
+    todaynum = 4
+    currentMonth = 4
+    if tahselaStart <= todaynum <= tahsealEnd:
+        follows = FollowContractServices.objects.filter(collected_month=4,  collcetStatusNums="فى انتظار ميعاد التحصيل", is_deleted=False)
+        followsCount = follows.count()
+        statue['count'] = followsCount
+        # need to calculate payment of all clients and add everyone payement to it's desireved
+        updatedCount = follows.update(collcetStatusNums="مطلوب الدفع")
+        clients = Client.objects.filter(is_deleted=False)
+        for client in clients:
+            clientFollows = FollowContractServices.objects.filter(
+                    client=client,
+                    collcetStatusNums="مطلوب الدفع",
+                    service__priceType="month",
+                    is_deleted=False
+                ).values('client').annotate(total_pay=Sum('total_amount'))
+            
+            client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
+            client.save()
+            
+            # print(f"client {client.id} client total deserved => {client.deserved}")
 
-        if thirtyDaysAfter < current_date:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} YES")
-            if follow.collcetStatusNums == "جارى التحصيل":
-                follow.collected_date = current_date
-            else:
-                follow.collcetStatusNums="مطلوب الدفع"
-            follow.save()
-        else:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} NO")
-            follow.collcetStatusNums="فى انتظار ميعاد التحصيل"
-            follow.save()
-    follows = FollowContractServices.objects.filter(collcetStatusNums="فى انتظار ميعاد التحصيل", is_deleted=False)
-    followsCount = follows.count()
-    statue['count'] = followsCount
-    clients = Client.objects.filter(is_deleted=False)
-    for client in clients:
-        clientFollows = FollowContractServices.objects.filter(
-                client=client,
-                collcetStatusNums="مطلوب الدفع",
-                service__priceType="month",
-                is_deleted=False
-            ).values('client').annotate(total_pay=Sum('total_amount'))
-        
-        client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
-        client.save()
+
         statue['updatedCount'] = updatedCount
-    return statue
-# def collectManager():
-#     statue = {'msg':'start'}   # for debugging
-#     ####  how to it
-#     ##  i want to get all follows that has the 
-#     ## 
-#     ##  
-#     ## 
-#     tahselaStart = 25
-#     tahsealEnd = 5
-#     today = datetime.now()
-#     todaynum = today.day
-#     currentMonth = today.month
-#     if tahselaStart <= todaynum <= tahsealEnd:
-#         follows = FollowContractServices.objects.filter(collected_month=currentMonth,  collcetStatusNums="فى انتظار ميعاد التحصيل", is_deleted=False)
-#         followsCount = follows.count()
-#         statue['count'] = followsCount
-#         # need to calculate payment of all clients and add everyone payement to it's desireved
-#         updatedCount = follows.update(collcetStatusNums="مطلوب الدفع", is_deleted=False)
-#         clients = Client.objects.filter(is_deleted=False)
-#         for client in clients:
-#             clientFollows = FollowContractServices.objects.filter(
-#                     client=client,
-#                     collcetStatusNums="مطلوب الدفع",
-#                     service__priceType="month",
-#                     is_deleted=False
-#                 ).values('client').annotate(total_pay=Sum('total_amount'))
-            
-#             client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
-#             client.save()
-            
-#             # print(f"client {client.id} client total deserved => {client.deserved}")
-
-
-#         statue['updatedCount'] = updatedCount
-#     else:
+    else:
         
-#         statue.msg = 'today not any of tahseal days'
+        statue.msg = 'today not any of tahseal days'
 
-#     return statue
+    return statue
 
 def getServiceId(service, servicePrice, servicePriceType) :
     serviceExist = Service.objects.get(name=service, price=servicePrice, priceType=servicePriceType)

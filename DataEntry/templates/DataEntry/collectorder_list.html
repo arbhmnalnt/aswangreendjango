@@ -8,40 +8,34 @@
 {% block content %}
 <div class="container-fluid">
     <h1>طلبات التحصيل الجارية</h1>
-    <hr>
-    <p class="h4">{{collect_orders.count}} طلب تحصيل</p>
-    <br>
-    <table class="table text-center table-hover table-bordered" 
+    <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered" 
     style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
-        <thead class="bg-dark text-white">
+        <thead>
             <tr>
-                <th>المحصل</th>
-                <th>تاريخ إصدار طلب التحصيل</th>
-                <th>تم تأكيده</th>
-                <th>اجمالى المطلوب تحصيله</th>
-                <th>خيارات</th>
+                <th>Collector</th>
+                <th>Month</th>
+                <th>Confirmed</th>
+                <th>Required</th>
+                <th>Created Prev Date</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for collect_order in collect_orders %}
             <tr>
                 <td>{{ collect_order.collector }}</td>
+                <td>{{ collect_order.month }}</td>
+                <td>{{ collect_order.confirmed }}</td>
+                <td>{{ collect_order.required }}</td>
                 <td>{{ collect_order.created_prev_date }}</td>
                 <td>
-                    {% if collect_order.confirmed %} <span class="p-2 m-2 text-white bg-success">تم تأكيده</span>
-                    {% else %} <span class="p-2 m-2 text-white bg-danger">لم يتم التأكيد</span>
-                    {% endif %}
-                </td>
-
-                <td>{{ collect_order.required }}</td>
-                <td>
-                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}" class="mr-5 ml-5 btn btn-primary">التفاصيل</a>
-                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/" class="ml-5 btn btn-info">تعديل</a>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}">Detail</a>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/">Edit</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6">لا توجد طلبات تحصيل جارية</td>
+                <td colspan="6">No Collect Orders found.</td>
             </tr>
             {% endfor %}
         </tbody>

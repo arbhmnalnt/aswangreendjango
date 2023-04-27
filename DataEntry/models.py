@@ -164,9 +164,6 @@ class Contract(TimeStampMixin,models.Model):
     notes           = models.TextField(max_length=250,null=True, blank=True)
     is_test         = models.BooleanField(default=True)
 
-    def get_total_price(self):
-        return sum(service.price for service in self.services.all())
-    
 class FollowContractServices(TimeStampMixin,models.Model):
     COLLECT_STATUS = (
     ('wecd', 'فى انتظار ميعاد التحصيل'),  # waiting Estimated collection date
