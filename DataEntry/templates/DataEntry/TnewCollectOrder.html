@@ -72,6 +72,14 @@ table {
                         <label>تاريخ اصدار طلب التحصيل</label>
                         <input type="datetime-local" class="" id="dateTimeCollectOrder">
                     </div>
+                    <div class="form-group">
+                        <label>رقم الدفتر الأولى</label>
+                        <input type="number" class="" id="firstRecordSerial">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الايصالات</label>
+                        <input type="number" class="" id="receiptsNum">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">اغلاق</button>
@@ -117,6 +125,19 @@ table {
 <div class="content-container p-2 mt-3" style="background-color:#F3F5F2">
     <div class="row">
         {{clientsCount}} عميل لم يتم التحصيل منه
+        <div class="editor_holder col-12">
+            <div class="row">
+                <div class="col-6 p-2 m-2 border">
+                    <label>تغيير كل المبالغ ب </label>
+                    <select id="changePayAmountsSelect">
+                        <option value="amount">قيمة معينة</option>
+                        <option value="percent">نسبة مئوية</option>
+                    </select>
+                    <input class="value" id="changePayAmountsValue">
+                    <button class="changePayAmounts" id="changePayAmounts">تطبيق</button>
+                </div>
+            </div>
+        </div>
         <div class="col-12">
             {% if isContracts %}
             <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered text-center" id="tblData"
@@ -129,7 +150,7 @@ table {
                     <th>اسم العميل</th>
                     <th>رقم الهاتف</th>
                     <th>المنطقة</th>
-                    <th>العنوان بالتفصيل</th>
+                    <th>تاريخ الدفع المفترض</th>
                     <th>المستحق</th>
                     <th>اخر دفع</th>
                     <th>الملاحظات</th>
@@ -144,8 +165,12 @@ table {
                     <td>{{contract.client.name}}</td>
                     <td>{{contract.client.phone}}</td>
                     <td>{{contract.client.area.name}}</td>
-                    <td>{{contract.client.addressDetails}}</td>
-                    <td class="deserved "><input class="text-center w-50 deservedMoney" disabled value="{{contract.client.deserved}}"> جم</td>
+                    <td>{{contract.ecd|date:"d / m /Y" }}</td>
+                    <td class="deserved ">
+                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.remainAmount}}"> جم
+                        <hr>
+                        <input class="text-center w-50 editPay" name="newPay" placeholder="تعديل السعر" value="{{contract.remainAmount}}"> جم
+                    </td>
                     <td>{{contract.lastPay|date:"d / m /Y" }}</td>
                     <td>
                         {{contract.service.notes}}
@@ -175,6 +200,8 @@ function defaultCheck(){
     })
 }
 
+defaultCheck()
+
 function  getCollectorsAjax(){
     // get all collectors to the collector select
     // ajax request to get subServices
@@ -193,7 +220,7 @@ function  getCollectorsAjax(){
                 $("select#collector").chosen()
                 $(".chosen-single").css({
                     'font-size' : '2rem',
-                    'width' : '170%',
+                    'width' : '150%',
                     'height' : '2.5rem'
                  });
                 $(".chosen-container-single, .chosen-single span").css({
@@ -281,14 +308,18 @@ function confirmCollectOrder() {
     let tr = $('tr :checkbox:checked').closest('tr');
     let data = {};
     let collector = $("select#collector").val();
-    let dateTimeCollectOrder = $("input#dateTimeCollectOrder").val()
+    let dateTimeCollectOrder     = $("input#dateTimeCollectOrder").val(),
+        firstRecordSerial        = $("#firstRecordSerial").val(),
+        receiptsNum              = $("#receiptsNum").val();
 
-    console.log("collector => ", collector , " // dateTimeCollectOrder => ", dateTimeCollectOrder)
+    console.log("firstRecordSerial => ", firstRecordSerial , " // receiptsNum => ", receiptsNum)
 
     // Add collector and dateTimeCollectOrder to the data object
-    data.collector = collector;
-    data.dateTimeCollectOrder = dateTimeCollectOrder;
-    data.csrfmiddlewaretoken = getCookie('csrftoken');
+    data.collector               = collector;
+    data.dateTimeCollectOrder   = dateTimeCollectOrder;
+    data.firstRecordSerial      = firstRecordSerial
+    data.receiptsNum            = receiptsNum
+    data.csrfmiddlewaretoken    = getCookie('csrftoken');
 
     tr.each(function() {
         let requiredToPay = $(this).find('input.deservedMoney').val();
@@ -320,5 +351,34 @@ function confirmCollectOrder() {
 function toggleSelect(){
     $(':checkbox').each(function () { this.checked = !this.checked; });
 }
+
+$(document).ready(function() {
+    $('.editPay').on('keyup', function() {
+      // Code to be executed on key up
+      var inputValue = $(this).val();
+      console.log(inputValue); // Example: log the input value to the console
+      $(this).siblings(".deservedMoney").attr("value", inputValue)
+      // You can use $(this) to refer to the input that was changed
+      // and $(this).val() to get the current value of that input
+    });
+});
+
+
+
+$(document).ready(function() {
+    $("#changePayAmounts").click(function(){
+        let select                  = $("select#changePayAmountsSelect").val(),
+            value   = $("#changePayAmountsValue").val()  ;
+        if (select=="amount"){
+            console.log("asmount")
+            $(".deservedMoney").attr("value", value)
+            $(".editPay").attr("value",value)
+        }else if(select=="percent"){
+            console.log("pressascntage")
+        }else{
+
+        }
+    })
+});
 
 {% endblock %}

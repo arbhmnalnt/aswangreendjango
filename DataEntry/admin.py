@@ -29,6 +29,9 @@ class SimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class RequestSimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'service')
 
+class CollectRecordAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('serial', 'receiptNum')
+     
 # ///
 admin.site.register(Typee, TypeeAdmin)
 admin.site.register(ContactRequestTypes, ContactRequestTypesAdmin)
@@ -37,6 +40,7 @@ admin.site.register(Offers, OffersAdmin)
 admin.site.register(SimpleService, SimpleServiceAdmin)
 admin.site.register(RequestSimpleService, RequestSimpleServiceAdmin)
 admin.site.register(SubService, SubServiceAdmin)
+
 
 # ///
 
@@ -49,16 +53,19 @@ class EmployeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return " - ".join([employee.name for employee in obj.employees.all()])
 
 class ServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('id','name' ,'typee','price','priceType','supervisor','fixedDeliveryDate','fixedPriceCollectDate')
+    actions = ['delete']
+    list_display = ('id','name' ,'price')
+    search_fields = ['name', 'id']
 
 class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
 
 class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
-    search_fields = ['name', 'serialNum','nationalId']
+    search_fields = ['name', 'serialNum']
     list_display = ('id','serialNum','name','phone','area','created_at')
 
 class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    search_fields = ['client__name', 'client__serialNum']
     list_display = ('id','client','get_services','serialNum','created_at')
     # optimizing the query for each service
     def get_queryset(self, request):
@@ -96,6 +103,7 @@ admin.site.register(Client, ClientAdmin)
 admin.site.register(Contract, ContractAdmin)
 admin.site.register(FollowContractServices, FollowContractServicesAdmin)
 admin.site.register(CollectOrder, CollectOrderAdmin)
+admin.site.register(CollectRecord, CollectRecordAdmin)
 
 
 

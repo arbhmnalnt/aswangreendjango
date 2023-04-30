@@ -72,12 +72,12 @@ def profile(request):
 
     elif user.groups.filter(name="dataEntryAdmin"):
         request.session['group'] = "dataEntryAdmin"
-        return redirect('/DataEntry/TmainPage')
+        return redirect('/DataEntry/')
 
     elif user.groups.filter(name="tahsealAdmin"):
         request.session['group'] = "tahsealAdmin"
         # print("admin here => ")
-        return redirect('/DataEntry/TmainPage')
+        return redirect('/DataEntry/tahseal/TallContracts/')
     
     elif user.groups.filter(name="ServiceManagerAdmin"):
         request.session['group'] = "ServiceManagerAdmin"

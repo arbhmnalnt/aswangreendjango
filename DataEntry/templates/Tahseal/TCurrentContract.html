@@ -1,4 +1,4 @@
-{% extends "DataEntry/index.html" %}
+{% extends "Tahseal/index.html" %}
 {% block title %}
 <title>التعاقدات الحالية</title>
 {% endblock %}
@@ -93,8 +93,6 @@
                     <th><a href="#">اسم العميل</a></th>
                     <th><a href="#">رقم الهاتف</a></th>
                     <th><a href="#">المنطقة</a></th>
-                    <th><a href="#">تفاصيل العنوان</th>
-                    <th><a href="#">فلتر مخصص</a></th>
                     <th><a href="#">الخدمات</a></th>
                     <th><a href="#">سريال الفاتورة</a></th>
                     <th><a href="#">ملاحظات</a></th>
@@ -109,14 +107,15 @@
                     <td>{{contract.client.name}}</td>
                     <td>{{contract.client.phone}}</td>
                     <td>{{contract.client.area.name}}</td>
-                    <td>{{contract.client.addressDetails}}</td>
-                    <td>{{contract.client.customFilter}}</td>
                     <td class="services">({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})</td>
                     </td>
                     <td>لا يوجد</td>
                     <td>{{contract.client.notes}}</td>
                     <td class="options print-none" >
-                            <a class="btn btn-info text-white h-100" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a>
+                            <!-- <a class="btn btn-info text-white h-100" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a> -->
+                        <button class="btn btn-info">دفع مسبق</button>
+                        <button class="btn btn-danger">تأجيل الدفع</button>
+                        <button class="btn btn-warning text-white mt-3">ايقاف الخدمة مؤقتا</button>
                     </td>
 
                 </tr>

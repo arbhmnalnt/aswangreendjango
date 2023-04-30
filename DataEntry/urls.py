@@ -9,19 +9,22 @@ app_name="DataEntry"
 
 urlpatterns = [
     # -- temp pages
-    path('', TmainPage, name="mainPage") ,
+    path('', TCurrentContract, name="mainPage") ,
     path('TmainPage/', TmainPage, name="TmainPage") ,
     path('TnewContract/', TnewContract, name="TnewContract"),
     path('TnewContract2/', TnewContract2, name="TnewContract2"),
     path('TCurrentContract/', TCurrentContract, name="TCurrentContract"),
     path('TgetcollcetStatus/', TgetcollcetStatus, name="TgetcollcetStatus"),
     path('TnewCollectOrder/', TnewCollectOrder, name="TnewCollectOrder"),
+    # -- temp pages for tahseal view
+    path('tahseal/TallContracts/', TallContracts, name="TallContracts"),
     path('checkClientSerial/', checkClientSerial, name="checkClientSerial"),
     path('getServicesOfClient/', getServicesOfClient, name="getServicesOfClient"),
     path('ConfirmContract/', ConfirmContract, name="ConfirmContract"),
     path('getsubServices/' ,getsubServicesAll),
     path('getCollectors/' ,getCollectorsAll.as_view()),
     path('createNewCollectOrder/' ,createNewCollectOrder.as_view()),
+    # contracts tahseal also
     path('TcurrentCollectOrder/' ,CollectOrderList.as_view(), name="TcurrentCollectOrder"),
     path('TcurrentCollectOrder/<int:pk>' ,CollectOrderDetail.as_view(), name="collect_order_detail"),
     

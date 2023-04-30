@@ -157,11 +157,9 @@
                     </p>
                     <p>
                         <label class="form-control" for="contractDate">تاريخ التعاقد</label>
-                        <input class="form-control" required="required" type="date" name="contractDate" placeholder="تاريخ التعاقد" id="contractDate">
-                    </p>
-                    <p>
-                        <label class="form-control" for="contractDate">تاريخ اخر دفع</label>
-                        <input class="form-control" type="date" name="lastPay" placeholder="تاريخ اخر دفع" id="lastPay">
+                        <!-- To set a default value for an HTML input element with the type "date", you can use the "value" attribute and set it to a
+                         date in the format "YYYY-MM-DD". -->
+                        <input class="form-control" required="required" type="date" value="{{clientRecord.created_prev_date|date:'Y-m-d'}}" name="contractDate" placeholder="تاريخ التعاقد" id="contractDate">
                     </p>
                 </div>
 
@@ -211,18 +209,19 @@
                         <div class="service p-2">
                             <div class="service-holer border d-flex">
                                 <div class="service-number mt-3">1.</div>
-                                <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة" name="service[]">
+                                <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة"
+                                 name="service[]" value="">
                                 <input type="number" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice[]">
                                 <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType[]">
                                     <option selected disabled class="notValidChoose">اختر</option>
-                                    <option value="once">خدمة لمرة واحدة</option>
-                                    <option value="continuous" selected>خدمة مستمرة</option>
+                                    <!-- <option value="once">خدمة لمرة واحدة</option> -->
+                                    <option value="continuous" selected>شهرى</option>
                                 </select>
                                 <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType[]">
                                     <option selected disabled class="notValidChoose">اختر</option>
-                                    <option value="once">مرة واحدة</option>
-                                    <option value="weekly">اسبوعيا</option>
-                                    <option value="month" selected>شهر</option>
+                                    <!-- <option value="once">مرة واحدة</option>
+                                    <option value="weekly">اسبوعيا</option> -->
+                                    <option value="month" selected>شهرى</option>
                                 </select>
                                 <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes[]">
                                 <div class="service-actions">
@@ -234,7 +233,7 @@
                     </div>
                     <div class="row">
                         <div class="col-4">
-                            <button id="addNewServiceBtn" class="btn text-white mb-5" style="background-color: #6610f2;">إضافة خدمة جديدة</button>
+                            <!-- <button id="addNewServiceBtn" class="btn text-white mb-5" style="background-color: #6610f2;">إضافة خدمة جديدة</button> -->
                         </div>
                     </div>
                 </div>
