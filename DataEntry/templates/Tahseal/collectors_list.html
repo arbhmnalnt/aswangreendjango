@@ -1,0 +1,35 @@
+{% extends "Tahseal/index.html" %}
+{% block title %}
+<title>التعاقدات الحالية</title>
+{% endblock %}
+{% block style %}
+    
+{% endblock %}
+
+{% block content %}
+<div class="content-container pt-2" style="background-color:#F3F5F2">
+    <div class="row">
+        <table class="col-12 table text-center h4 table-striped w-100 table-hover table-bordered text-center" id="tblData"
+        style="text-align:center;direction:rtl;height: 62vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th class="h2">م</th>
+                    <th class="h2">اسم المحصل</th>
+                    <th class="h2">عدد طلبات التحصيل</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, count in collectors_data.items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="/DataEntry/Tcollectors/{{ key.1 }}">{{key.0}}</a></td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

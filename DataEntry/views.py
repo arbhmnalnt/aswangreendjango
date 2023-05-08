@@ -21,13 +21,51 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.urls import reverse_lazy
 from django.utils import timezone
 
-
 #
 today = datetime.now()
 todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
     
+class collectorDetails(DetailView):
+    model = Employee
+    template_name = "Tahseal/collector_order_details.html"
+    context_object_name = "collect_order"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the pk value from the URL
+        collectorId = self.kwargs['pk']
+        collect_orders = CollectOrder.objects.filter(collector__id=collectorId)
+        context['collects']    = CollectOrder.objects.filter(collector__id=collectorId).order_by('-created_at')
+        #Retrieve CollectRecord objects associated with each CollectOrder
+        collect_records = []
+        for collect_order in collect_orders:
+            collect_records.extend(list(collect_order.collectrecord_set.all()))
+        context['collect_records'] = collect_records
+        context['collector']   = CollectOrder.objects.filter(collector__id=collectorId)[0].collector.name
+        
+        return context
+
+def confirmCollectOrder(request):
+    data = {}
+    collectOrderId = request.GET.get('collectOrder')
+    done = CollectOrder.objects.filter(pk=collectOrderId).update(
+        confirmed = True
+    )
+    data['msg'] = done
+    return JsonResponse(data)
+def saveReceipt(request):
+    data = {}
+    followId            = request.GET.get('followId')
+    collectedAmount     = request.GET.get('collectedAmount')
+    CollectRecordSerial = request.GET.get('CollectRecordSerial')
+    receiptSerial       = request.GET.get('receiptSerial')
+    collectOrderId      = request.GET.get('collectOrderId')
+    saveReceiptToFollow(followId, collectedAmount,CollectRecordSerial, receiptSerial, collectOrderId)
+    data['msg'] = 'تم الحفظ'
+    return JsonResponse(data)
+
 @login_required
 def TallContracts(request):
     listcount = 15
@@ -55,10 +93,29 @@ def TallContracts(request):
         contracts = paginator.page(1)
     except EmptyPage:
         contracts = paginator.page(paginator.num_pages)
-
-    ctx = {'contracts_list':contracts_list, 'contracts':contracts}
+    collectors = Employee.objects.filter(jobTitle="محصل")
+    ctx = {'contracts_list':contracts_list, 'collectors':collectors, 'contracts':contracts}
     return render(request, 'Tahseal/TCurrentContract.html', ctx)
 
+class collectorsList(ListView):
+    model = CollectOrder
+    template_name = "Tahseal/collectors_list.html"
+    context_object_name = "collect_orders"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        collectors_data = {}
+        collects = CollectOrder.objects.all()
+        for collect in collects:
+            name = collect.collector.name
+            id   = collect.collector.id
+            key = (name, id)
+            if key in collectors_data:
+                collectors_data[key] += 1
+            else:
+                collectors_data[key] = 1
+        context['collectors_data'] = collectors_data
+        return context
 
 class CollectOrderList(ListView):
     model = CollectOrder
@@ -73,12 +130,19 @@ class CollectOrderDetail(DetailView):
         context = super().get_context_data(**kwargs)
         # Get the pk value from the URL
         pk = self.kwargs['pk']
+        context['clientsNum']    = CollectOrder.objects.get(pk=pk).clients.all().count()
+        
+        context['collectRecord'] = CollectRecord.objects.get(collectOrder_id=pk)
+        # context['collectRecordReceiptNum']  = CollectRecord.objects.get(collectOrder_id=pk).collectionRecord.receiptNum
         clients = CollectOrder.objects.get(pk=pk).clients.all()
         context['clients']   = clients
         contracts = []
+        follows   = []
         for client in clients:
             contracts.extend(Contract.objects.filter(client=client))
+            follows.extend(FollowContractServices.objects.filter(client=client))
         context['contracts'] = contracts
+        context['follows']   = follows
         return context
 
 class CollectOrderUpdate(UpdateView):
@@ -118,9 +182,11 @@ class createNewCollectOrder(APIView):
         print(f"follow_contracts => {follow_contracts} because of clients ids => {clients}")
         areas = [Client.objects.get(pk=client).area.id  for client in clients]
         # convert the datetime string to a datetime object
+        from datetime import datetime
         datetime_obj = datetime.strptime(values['dateTimeCollectOrder'], '%Y-%m-%dT%H:%M')
         # extract the date part of the datetime object
         date_obj = datetime_obj.date()
+        collectMonth = date_obj.month
         exclude_keys = ['collector', 'csrfmiddlewaretoken', 'dateTimeCollectOrder']
 
         total = 0
@@ -137,9 +203,19 @@ class createNewCollectOrder(APIView):
         areas_instance   = Area.objects.filter(id__in=areas) 
         collect_order = CollectOrder.objects.create(
             collector=values['collector'],
+            month = collectMonth,
             required=total,
             created_prev_date=date_obj
         )
+        import datetime
+
+# # create a datetime object
+# my_date = datetime.datetime.now().date()
+
+# # get the month number
+# month_number = my_date.month
+
+# print(month_number)  #
         collect_order.clients.set(client_instances)
         collect_order.areas.set(areas_instance)
         collectOrderId = collect_order.id
@@ -151,6 +227,8 @@ class createNewCollectOrder(APIView):
         print('new_record => ', collectOrderId)
         status = {'msg':'done', 'collectOrder': collectOrderId, 'newcollectRecord id ': newcollectRecord.id}
         return Response(status)
+
+
 
 class getCollectorsAll(APIView):
     def get(self, request):
@@ -452,7 +530,7 @@ def TnewCollectOrder(request):
         pass
     else:
         return HttpResponse("erorr here")
-    collectManager()
+    # collectManager()
     areas = Area.objects.all()
     isContracts = True
     contract_list = []
@@ -460,23 +538,30 @@ def TnewCollectOrder(request):
     if request.method == 'POST':
         search_query = request.POST.get('search', '')
         search_areas = request.POST.getlist('areas[]')
+        words = search_query.split()
+        start_word = words[0] if words else ''
         print(f"search_query => {search_query}")
-        if len(search_query) < 2:
+        if start_word == "شهر":
+
             follows = FollowContractServices.objects.filter(
-                Q(collcetStatus="pr"),
-                Q(),
-                Q(client__name__icontains=search_query)       |
-                Q(client__phone__icontains=search_query)      |
-                Q(client__area__name__icontains=search_query) |
-                Q(client__serialNum__icontains=search_query) 
+                 (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')),Q(ecd__month=words[1], is_deleted=False)
+            ).order_by('-created_at')
+        elif len(search_query) < 2:
+            follows = FollowContractServices.objects.filter(
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(collcetStatus="pr", is_deleted=False),
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(),
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__name__icontains=search_query, is_deleted=False)       |
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__phone__icontains=search_query, is_deleted=False)      |
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__area__name__icontains=search_query, is_deleted=False) |
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__serialNum__icontains=search_query, is_deleted=False) 
             ).order_by('-created_at')
         elif len(search_areas) >= 0:
             follows = FollowContractServices.objects.filter(
-                Q(collcetStatus="pr"),
-                Q(client__area__in=search_areas)   ,
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(collcetStatus="pr", is_deleted=False),
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__area__in=search_areas, is_deleted=False)   ,
             ).order_by('-created_at')
         else:
-            follows = FollowContractServices.objects.filter(collcetStatus="pw").order_by('-created_at')
+            follows = FollowContractServices.objects.filter((Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), is_deleted=False).order_by('-created_at')
         
         for follow in follows:
             contract = Contract.objects.get(client=follow.client)
@@ -675,7 +760,6 @@ def TnewContract2(request):
     servicesList = ["service-"+str(service.id) for service in services]
     isClient       = False
     if request.method == 'POST':
-        print("here => 4")
         date            = request.POST['date']    # todayUser
         clientId        = request.POST['clientId']
         Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False)
@@ -807,7 +891,6 @@ def TnewContract(request):
     continueContractsRecords = Client.objects.filter(missing_info=True, is_deleted=False)
     isClient       = False
     if request.method == 'POST':
-        print("here => 2")
         date            = request.POST['date']    # todayUser
         clientId        = request.POST['clientId']
         if clientId == 0:
@@ -826,7 +909,6 @@ def TnewContract(request):
         apartment       = isEmptyStr(request.POST['apartment'])
         flat            = isEmptyStr(request.POST['float'])
         servicesIdsList = request.POST['servicesId']
-        print("here => 1")
         print(f"len servicesIdsList => {len(servicesIdsList)}")
         if len(servicesIdsList) <= 1 :
             servicesIdsList = []
@@ -937,7 +1019,7 @@ def TmainPage(request):
     remainingCollections = len(peopleTocollectFrom())
     collected            = len(peopleCollectedFrom())
     currentClients       = Contract.objects.all().count()
-    collectorsNum        = Employee.objects.filter(jobTitle="موظف تحصيل").count()
+    collectorsNum        = Employee.objects.filter(jobTitle="محصل").count()
     # latest contracts
     contracts            = Contract.objects.all().order_by('-id')
 
@@ -1182,7 +1264,7 @@ class recentContracts(APIView):
 class mainPageStatsFirst(APIView):
     def get(self, request):
         data = {"remainingCollections":len(peopleTocollectFrom()), "collected":len(peopleCollectedFrom()), "currentClients":Contract.objects.all().count(),
-        "collectorsNum":Employee.objects.filter(jobTitle="موظف تحصيل").count()}
+        "collectorsNum":Employee.objects.filter(jobTitle="محصل").count()}
         return Response(data)
 # end of main page apis
 
@@ -1291,6 +1373,51 @@ def test2(request):
     # make a contract with this service to the client 
     # make a follow service for the client with it's contract and service
 
+def saveReceiptToFollow(followId, collectedAmount, CollectRecordSerial, receiptSerial, collectOrderId):
+    from datetime import datetime
+    todayDate = datetime.today()
+    remainAmount   = FollowContractServices.objects.get(pk=followId).remainAmount - int(collectedAmount)
+    deservedAmount = FollowContractServices.objects.get(pk=followId).deservedAmount - int(collectedAmount)
+    print(f'remainAmount => {remainAmount}')
+    if True :
+        follow = FollowContractServices.objects.filter(is_deleted=False,pk=followId)
+        
+        follow.update(
+            collectedConfirmDate=todayDate, collcetStatus='pd',
+            remainAmount = remainAmount, collectedAmount = collectedAmount,
+            deservedAmount = deservedAmount, lastReceiptSerial=receiptSerial,
+            CollectRecordSerial = CollectRecordSerial
+            
+        )
+        follow = FollowContractServices.objects.get(is_deleted=False,pk=followId)
+        collectOrderId = collectOrderId
+        #  save pay data to payHistory table
+        try:
+            payhistoryRecord = PayHistory.objects.create(
+                client=follow.client,
+                ecd=follow.ecd,
+                CollectOrder=CollectOrder.objects.get(pk=collectOrderId),
+                serial=follow.CollectRecordSerial,
+                receiptNum=receiptSerial
+            )
+            print("created and saved ==>> {payhistoryRecord.id}")
+        except Exception as e:
+            # handle the database error
+            print("poroplem happens here =>  ")
+            print(e)
+        # payhistoryRecord.save()
+
+        clientId = follow.client.id
+        Client.objects.filter(is_deleted=False, pk=clientId).update(
+            deserved = deservedAmount, lastReceiptSerial=receiptSerial
+        )
+        print("all Done 3")
+        Contract.objects.filter(client__id=clientId).update(
+            lastReceiptSerial=receiptSerial
+        )
+        print("all Done")
+
+
 def autoServiceAdd():
     print(f"autoServiceAdd => started")
     status = {'msg':'-'}
@@ -1345,10 +1472,23 @@ def correctCollectMonth():
             follow.collcetStatus="wecd"
             follow.save()
 
+def resetAllTablesToTestTheSystem():
+    follows = FollowContractServices.objects.filter(is_deleted=False).update(collectedDate=None, collcetStatus='wecd')
+    CollectOrder.objects.filter(is_deleted=False).delete()
+    CollectOrder.objects.filter(is_deleted=False).delete()
+    # collectorder
+    # records_to_delete = MyModel.objects.filter(name='John')
+
+    # Delete the records
+    # records_to_delete.delete()
+    print(f"DONE ")
+
+
 def collectManager():
     # temprory use now only
     # print(f" # temprory use now only")
-    # correctCollectMonth()
+    correctCollectMonth()
+    # resetAllTablesToTestTheSystem()
 
     statue = {'msg':'start'}   # for debugging
     updatedCount = 0

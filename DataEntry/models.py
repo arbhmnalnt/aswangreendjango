@@ -143,6 +143,7 @@ class Client(TimeStampMixin,models.Model):
     deserved        = models.IntegerField(default=0, help_text="إجمالى المستحق على العميل")
     # for dateentry needs
     serviceId       = models.PositiveSmallIntegerField(null=True, blank=True)
+    lastReceiptSerial    = models.PositiveIntegerField(null=True, blank=True, verbose_name="اخر سريال دفع")
 
 
 
@@ -154,6 +155,7 @@ class Contract(TimeStampMixin,models.Model):
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)
     lastPay         = models.DateField(null=True, blank=True)
+    lastReceiptSerial    = models.PositiveIntegerField(null=True, blank=True, verbose_name="اخر سريال دفع")
     ecd             =  models.DateField(null=True, blank=True, verbose_name="تاريخ الدفع المفترض") # Estimated collection date
     remainAmount    = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
@@ -176,8 +178,11 @@ class FollowContractServices(TimeStampMixin,models.Model):
     deservedAmount       = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
     collectedAmount      = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
     collectedDate        = models.DateField(null=True, blank=True, verbose_name="تاريخ التحصيل الفعلى")
+    collectedConfirmDate = models.DateField(null=True, blank=True, verbose_name="تاريخ تأكيد التحصيل الفعلى")
     remainAmount         = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المتبقى")
     collectMonth         = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="شهر التحصيل")
+    lastReceiptSerial    = models.PositiveIntegerField(null=True, blank=True, verbose_name="اخر سريال دفع")
+    CollectRecordSerial  = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
     year                 =  models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="السنة")
     created_by           = models.ForeignKey('Employee', related_name='employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by          = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
@@ -195,20 +200,34 @@ class CollectOrder (TimeStampMixin,models.Model):
     created_prev_date    = models.DateField(null=True, blank=True)
     is_test              = models.BooleanField(default=True)
 
+# class CollectRecord(TimeStampMixin,models.Model):   # التحصيل دفتر
+#     collectOrder        = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True, verbose_name="طلب التحصيل")
+#     serial              = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
+#     receiptNum          = models.PositiveIntegerField(null=True, blank=True, verbose_name="عدد الايصالات")
+
 class CollectRecord(TimeStampMixin,models.Model):   # التحصيل دفتر
     collectOrder        = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True, verbose_name="طلب التحصيل")
-    serial              = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
-    receiptNum          = models.PositiveIntegerField(null=True, blank=True, verbose_name="عدد الايصالات")
+    collectionRecord    = models.ManyToManyField('collectionRecord',related_name='services')
 
     def __str__(self):
-        return str(self.serial)
+        return str(self.pk)
     
+# def class for collect
+class collectionRecord(TimeStampMixin,models.Model):   # التحصيل دفتر
+    serial              = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
+    receiptNum          = models.PositiveIntegerField(default=50, null=True, blank=True, verbose_name="عدد الايصالات")
+    
+    def __str__(self):
+        return str(self.serial)
+
 
 
 class PayHistory(TimeStampMixin,models.Model):
     client          = models.ForeignKey('Client', related_name='client_pay_history', on_delete=models.CASCADE,null=True, blank=True, db_index=True)
+    ecd             = models.DateField(blank=True, null=True)
     month           = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="الشهر")  # for month from range of 01 to 12
     CollectOrder    = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True) 
+    serial          = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
     receiptNum      = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الايصال")
     
 

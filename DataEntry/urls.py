@@ -27,8 +27,15 @@ urlpatterns = [
     # contracts tahseal also
     path('TcurrentCollectOrder/' ,CollectOrderList.as_view(), name="TcurrentCollectOrder"),
     path('TcurrentCollectOrder/<int:pk>' ,CollectOrderDetail.as_view(), name="collect_order_detail"),
-    
     path('TcurrentCollectOrder/<int:pk>/update/' ,CollectOrderUpdate.as_view(), name="collect_order_update"),
+    # collectors data
+    
+    path('Tcollectors/' ,collectorsList.as_view(), name="collectorsList"),
+    path('Tcollectors/<int:pk>' ,collectorDetails.as_view(), name="collectorOrders"),
+    # apis without view for tahseal
+    path('saveReceipt/' ,saveReceipt),
+    path('confirmCollectOrder/' ,confirmCollectOrder),
+    
     
     
     

@@ -113,7 +113,13 @@
                     <td>{{contract.client.customFilter}}</td>
                     <td class="services">({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})</td>
                     </td>
-                    <td>لا يوجد</td>
+                    <td>
+                        {% if contract.lastReceiptSerial %}
+                            {{contract.lastReceiptSerial}}
+                        {% else %}
+                        {% endif %}
+
+                    </td>
                     <td>{{contract.client.notes}}</td>
                     <td class="options print-none" >
                             <a class="btn btn-info text-white h-100" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a>

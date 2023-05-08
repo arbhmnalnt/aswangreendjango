@@ -8,16 +8,16 @@
 {% block content %}
 <div class="container-fluid">
     <h1>طلبات التحصيل الجارية</h1>
-    <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered" 
-    style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
+    <table class="w-100 table text-center table-striped table-hover table-bordered" 
+    style="text-align:center;direction:rtl;overflow-y: auto;">
         <thead>
             <tr>
-                <th>Collector</th>
-                <th>Month</th>
-                <th>Confirmed</th>
-                <th>Required</th>
-                <th>Created Prev Date</th>
-                <th>Actions</th>
+                <th>المحصل</th>
+                <th>الشهر</th>
+                <th>تم تأكيده</th>
+                <th>إجمالى المطلوب</th>
+                <th>تاريخ الطلب</th>
+                <th>اجراءات</th>
             </tr>
         </thead>
         <tbody>
@@ -25,12 +25,18 @@
             <tr>
                 <td>{{ collect_order.collector }}</td>
                 <td>{{ collect_order.month }}</td>
-                <td>{{ collect_order.confirmed }}</td>
-                <td>{{ collect_order.required }}</td>
-                <td>{{ collect_order.created_prev_date }}</td>
                 <td>
-                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}">Detail</a>
-                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/">Edit</a>
+                    {% if collect_order.confirmed %}
+                    <span class="p-2 m-2 bg-success text-white">تم التأكيد</span>
+                    {% else %}
+                    <span class="p-2 m-2 bg-danger text-white">غير مؤكد</span>
+                    {% endif %}
+                </td>
+                <td>{{ collect_order.required }}</td>
+                <td>{{ collect_order.created_prev_date|date:'d / m / Y' }}</td>
+                <td>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}" class="btn btn-primary ml-5">التفاصيل / التأكيد</a>
+                    <a href="/DataEntry/TcurrentCollectOrder/{{collect_order.pk}}/update/" class="btn btn-info mr-5">تعديل</a>
                 </td>
             </tr>
             {% empty %}

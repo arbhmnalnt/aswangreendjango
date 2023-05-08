@@ -30,8 +30,19 @@ class RequestSimpleServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('client', 'service')
 
 class CollectRecordAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('serial', 'receiptNum')
+    list_display = ('pk',)
+
+    
      
+class PayHistoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'client', 'ecd', 'serial')
+
+class collectionRecordAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'get_collectOrder')
+
+    def get_collectOrder(self, obj):
+        return obj
+    
 # ///
 admin.site.register(Typee, TypeeAdmin)
 admin.site.register(ContactRequestTypes, ContactRequestTypesAdmin)
@@ -40,6 +51,7 @@ admin.site.register(Offers, OffersAdmin)
 admin.site.register(SimpleService, SimpleServiceAdmin)
 admin.site.register(RequestSimpleService, RequestSimpleServiceAdmin)
 admin.site.register(SubService, SubServiceAdmin)
+admin.site.register(collectionRecord, collectionRecordAdmin)
 
 
 # ///
@@ -77,7 +89,7 @@ class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    search_fields = ['client__name', 'client__area__name']
+    search_fields = ['pk','client__name', 'client__area__name']
     list_display = ('client','get_area','service','ecd', 'collcetStatus', 'deservedAmount', 'collectedAmount', 'collectedDate', 'remainAmount', 'created_by')
 
     def get_area(self, obj):
@@ -104,6 +116,7 @@ admin.site.register(Contract, ContractAdmin)
 admin.site.register(FollowContractServices, FollowContractServicesAdmin)
 admin.site.register(CollectOrder, CollectOrderAdmin)
 admin.site.register(CollectRecord, CollectRecordAdmin)
+admin.site.register(PayHistory,  PayHistoryAdmin)
 
 
 

@@ -1,0 +1,47 @@
+{% extends "Tahseal/index.html" %}
+{% block title %}
+<title>المحصل {{collector}}</title>
+{% endblock %}
+{% block style %}
+    
+{% endblock %}
+
+{% block content %}
+<div class="content-container pt-2" style="background-color:#F3F5F2">
+    <div class="row">
+        <table class="col-12 table text-center h4 table-striped w-100 table-hover table-bordered text-center" id="tblData"
+        style="text-align:center;direction:rtl;height: 62vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th class="h2">م</th>
+                    <th class="h2">تاريخ اصدار الطلب</th>
+                    <th class="h2">ارقام الدفاتر</th>
+                    <th class="h2">عدد الايصالات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for collect in collects %}
+                {% for record in collect.collectrecord_set.all %}
+                    <tr class="{{record.id}}">
+                        <td>{{  forloop.parentloop.counter0|add:forloop.counter0|add:1  }}</td>
+                        <td>{{ collect.created_at|date:'Y/m/d' }}</td>
+                        <td>
+                            {% for r in record.collectionRecord.all %}
+                            {{ r.serial }} | 
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for r in record.collectionRecord.all %}
+                            {{ r.receiptNum }} |
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}
