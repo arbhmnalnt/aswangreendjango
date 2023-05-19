@@ -26,6 +26,11 @@ today = datetime.now()
 todayDate = datetime.today().strftime("%Y-%m-%d")  #this is used in the page
 todayUser = datetime.today().strftime("%d-%m-%Y")
 month = today.month
+
+def needReview(request):
+    data = {}
+    data['msg'] = "done"
+    return JsonResponse(data)
     
 class collectorDetails(DetailView):
     model = Employee
@@ -530,7 +535,7 @@ def TnewCollectOrder(request):
         pass
     else:
         return HttpResponse("erorr here")
-    # collectManager()
+    collectManager()
     areas = Area.objects.all()
     isContracts = True
     contract_list = []
@@ -1514,14 +1519,14 @@ def collectManager():
         # print(f"type of thirtyDaysAfter is {type(thirtyDaysAfter)}")
 
         if thirtyDaysAfter < current_date:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} YES")
+            print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} YES")
             if follow.collcetStatus == "pip":
                 follow.collectedDate = current_date
             else:
                 follow.collcetStatus="pr"
             follow.save()
         else:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} NO")
+            print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} NO")
             follow.collcetStatus="wecd"
             follow.save()
     follows = FollowContractServices.objects.filter(collcetStatus="wecd", is_deleted=False)

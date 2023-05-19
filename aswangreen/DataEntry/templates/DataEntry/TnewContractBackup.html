@@ -1,0 +1,465 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>الصفحة الرئيسية</title>
+{% endblock %}
+{% block style %}
+    .d-flex p {
+        width: 18%;
+    }
+    /* Style the form */
+    #regForm {
+      background-color: #ffffff;
+      margin: 100px auto;
+      padding: 40px;
+      width: 70%;
+      min-width: 300px;
+    }
+
+    /* Style the input fields */
+    input {
+      padding: 10px;
+      width: 100%;
+      font-size: 17px;
+      font-family: Raleway;
+      border: 1px solid #aaaaaa;
+    }
+
+    /* Mark input boxes that gets an error on validation: */
+    input.invalid {
+      background-color: #ffdddd;
+    }
+
+    /* Hide all steps by default: */
+    .tab {
+      display: none;
+    }
+
+    /* Make circles that indicate the steps of the form: */
+    .step {
+      height: 15px;
+      width: 15px;
+      margin: 0 2px;
+      background-color: #bbbbbb;
+      border: none;
+      border-radius: 50%;
+      display: inline-block;
+      opacity: 0.5;
+    }
+
+    /* Mark the active step: */
+    .step.active {
+      opacity: 1;
+    }
+
+    /* Mark the steps that are finished and valid: */
+    .step.finish {
+      background-color: #04AA6D;
+    }
+    .carousel-control-next, .carousel-control-prev{
+        width:5% !important;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="content-container" style="background-color:#F3F5F2">
+    <div class="row pt-3">
+        <div class="col-12 text-center text-info">
+            <h2 class="text-info pb-2">
+                {% if isServiceManagerAdmin %} 
+                ادارة الخدمات
+                {% else %}
+                إكمال التعاقدات أو تعاقد جديد
+                {% endif %}
+            </h2>
+            
+        </div>
+    </div>
+    <div class="continue-contrcats row {% if isClient %} d-none {% endif %}">
+        <h6 class="bg-white text-danger p-2 col-12">
+            <span id="num">{{contracts|length }}</span> : طلب قيد الانتظار
+        </h6>
+
+        <div id="" class="col-12 m-auto text-center" style="overflow:hidden; overflow-x:auto">
+            <div class="row" id="holder_scroll" style="width:300%">
+                {%for client1 in contracts%}
+                <span class="d-inline-block m-2" style="width:300px">
+                    <div>
+                        <div class="d-inline-block mb-0 text-right h6 bg-white w-100 p-4 clientHolder"  style="height:330px">
+                            <p class="text-right lead">حساب التعاقد</p>
+                            <hr>
+                            <p class="h5">{{client1.name}}</p>
+                            <p class="h5 lead">
+                                {% if client1.phone is None%}
+                                    غير موجود
+                                {% else %}
+                                    0{{client1.phone}}
+                                {% endif %}
+                            </p>
+                            <hr>
+                            <p>الخدمة / الخدمات</p>
+                            <input type="hidden" class="d-none" id="clientId" value="{{client1.id}}">
+                            <p class="services lead"></p>
+                            <p class="h5">العنوان</p>
+                            <p class="lead">{% if client1.addressDetails == None %}{{client1.area.name}}{% else %}{{client1.addressDetails}}{% endif %}</p>
+                        </div>
+                        <p class="bg-white w-100 p-4 mt-0 text-right">
+                            <a class="border-bottom ml-5 btn btn-primary" href="/DataEntry/TnewContract2?clientId={{client1.id}}">إكمال التعاقد</a>
+                            <a class="text-dark border-bottom" href="/DataEntry/cancelContract/{{client1.id}}">الغاء الطلب</a>
+                        </p>
+                    </div>
+                </span>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2 mt-2 {% if isClient %} d-none {% else %} {% endif %}">
+        <div class="col-4">
+            <button id="newContractShow" class="btn btn-primary w-100 mb-2">ادخال تعاقد جديد</button>
+        </div>
+    </div>
+    <input id="isClient" value="{{isClient}}" type="hidden" class="d-none">
+    <div class="row new-contract-holder" style="">
+        <div class="{%if isServiceManagerAdmin%}col-12 ml-auto{%else%}col-10{%endif%} text-center">
+            <form id="regForm" class="mt-0 w-100" method="post" name="new Contract" required="required" action="#">
+                <input id="servicesId" name="servicesId" type="hidden" class="notNew d-none">
+                <input name="userId" value="{{request.user.id}}"  type="hidden" class="notNew d-none">
+                <input name="clientId" value="{{clientId}}"   type="hidden" class="notNew d-none">
+                <h1>
+                    {% if isClient and isServiceManagerAdmin%}
+                    {% elif isClient %}
+                        اكمال تعاقد
+                    {% else %}
+                        ادخال تعاقد جديد
+                    {% endif %}
+                </h1>
+                <!-- One "tab" for each step in the form: -->
+                {% csrf_token %}
+                <div class="tab {%if isServiceManagerAdmin%}d-none{%else%}{%endif%}">بيانات العميل :{{clientRecord.id}}
+                   <p class=" mt-3 mb-1"><input class="form-control" value="{% if isClient %}{{clientRecord.serialNum}}{% endif %}" name="serial" placeholder="سريال العميل" onkeyup = 'checkSerial(this)'></p>
+                   <p class="mt-1 border"><span class="" id="serialStatus"></span></p>
+                   <p class=" mt-3"><input class="form-control" name="name" value="{% if isClient %}{{clientRecord.name}}{% endif %}" placeholder="اسم العميل"  oninput="this.className = ''"></p>
+                   <p><input class="form-control" name="phone" value="{% if isClient %}{{clientRecord.phone}}{% endif %}" placeholder="رقم الهاتف" oninput="this.className = ''"></p>
+                   <p class="select_holder">
+                        <select name="area" class="form-control">
+                            {% if isClient %}
+                            <option value="{{clientRecord.area.id}}">{{clientRecord.area.name}}</option>
+                            <hr>
+                            {% for area in areas %}
+                            <option value="{{area.id}}">{{area.name}}</option>
+                            {%endfor%}
+                            {% else %}
+                            {% for area in areas %}
+                            <option value="{{area.id}}">{{area.name}}</option>
+                            {%endfor%}
+                            {% endif %}
+                      </select>
+                    </p>
+                </div>
+
+                <div class="tab">الخطوة 2 من 3 :
+                    <input type="hidden" value={{today}} id="today" name="date">
+                  <p><input required="required" type=""  pattern=".{7,}" value="{% if isClient %}{{clientRecord.addressDetails}}{% endif %}" name="addressDetails" class="form-control" placeholder="العنوان بالتفصيل"></p>
+                  <hr>
+                  <label class="text-info border p-2">إختيارى</label>
+                  <p><input placeholder="العمارة" name="apartment" value="{% if isClient %}{{clientRecord.addressBuilding}}{% else %}-{% endif %}" class="form-control" placeholder="العمارة"></p>
+                  <p><input placeholder="الشقة" name="float" value="{% if isClient %}{{clientRecord.addressBuilding}}{% else %}-{% endif %}" class="form-control" placeholder="الشقة"></p>
+                  <label>حساب التعاقد ل</label>
+                  <p>
+                      <select name="referer" class="form-control">
+                          {% if isClient %}
+                            {% if clientRecord.belongs_to == None %}
+                                <option value="3" selected>-</option>
+                                {% for employee in employees %}
+                                <option value="{{employee.id}}">{{employee.name}}</option>
+                                {%endfor%}
+                            {% else %}
+                                <option value=0></option>
+                            {% endif %}
+                            <option value="{{clientRecord.belongs_to.id}}">{{clientRecord.belongs_to.name}}</option>
+                          {% else %}
+                            <option value="0" selected="selected">-</option>
+                            {% for employee in employees %}
+                            <option value="{{employee.id}}">{{employee.name}}</option>
+                            {%endfor%}
+                          {% endif %}
+                      </select>
+                  </p>
+                </div>
+                <div class="tab {%if isServiceManagerAdmin%}d-block{%else%}{%endif%}">الخدمات:
+                    <p class="border p-2 text-danger">{%for serv in clientContract.services.all%}{{serv.name}} {{serv.price}}
+                        {%if serv.typee == "once"%} مرة واحدة
+                        {%elif serv.typee == "month"%} شهرى
+                        {% endif %}
+                        & {% endfor %}</p>
+                    <div class="d-flex">
+                        <p>الخدمة</p>
+                        <p>السعر</p>
+                        <p>نوع الخدمة</p>
+                        <p>الدفع</p>
+                        <p>ملاحظات</p>
+                    </div>
+                    <div class="services-list">
+                        <div class="service p-2">
+                            <div class="service-holer border d-flex">
+                                <div class="service-number mt-3">1.</div>
+                                <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة" name="service[]">
+                                <input type="number" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice[]">
+                                <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType[]">
+                                    <option selected disabled class="notValidChoose">اختر</option>
+                                    <option value="once">خدمة لمرة واحدة</option>
+                                    <option value="continuous">خدمة مستمرة</option>
+                                </select>
+                                <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType[]">
+                                    <option selected disabled class="notValidChoose">اختر</option>
+                                    <option value="once">مرة واحدة</option>
+                                    <option value="weekly">اسبوعيا</option>
+                                    <option value="month">شهر</option>
+                                </select>
+                                <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes[]">
+                                <div class="service-actions">
+                                    <button class="delete-service btn btn-danger">حذف الخدمة</button>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <button id="addNewServiceBtn" class="btn text-white mb-5" style="background-color: #6610f2;">إضافة خدمة جديدة</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="overflow:auto;">
+                  <div style="float:right;">
+                      {%if isServiceManagerAdmin%}
+                      <input type="submit" class="btn btn-primary" value="تأكيد">
+                      {%else%}
+                      <button type="button"class="btn btn-primary {%if isServiceManagerAdmin%}d-nonee{%else%}{%endif%}" id="nextBtn" onclick="nextPrev(1)">التالى</button>
+                      {%endif%}
+                      
+                      <button type="button" class="btn btn-info {%if isServiceManagerAdmin%}d-none{%else%}{%endif%}" id="prevBtn" onclick="nextPrev(-1)">السابق</button>
+                  </div>
+                </div>
+
+                <!-- Circles which indicates the steps of the form: -->
+                <div style="text-align:center;margin-top:40px;">
+                  <span class="step"></span>
+                  <span class="step"></span>
+                  <span class="step"></span>
+                </div>
+
+                </form>
+            --
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+$(document).ready(function() {
+    // Add a new service to the list
+    $('#add-service').click(function() {
+        var newService = $('.service').first().clone();
+        newService.find('input').val('');
+        newService.find('select').prop('selectedIndex', 0);
+        newService.appendTo('#services-list');
+    });
+
+    // Remove a service from the list
+    $(document).on('click', '.delete-service', function() {
+        $(this).closest('.service-holer').remove();
+    });
+});
+{% if isServiceManagerAdmin%}
+    $(".serviceId").each(function(){
+        let serviceId = $(this).attr("serviceId");
+        // ajax request to get subServices
+        $.ajax('/DataEntry/getsubServices/', {
+            type: 'GET',  // http method
+            data: { mainService: serviceId },  // data to submit
+            success: function (data, status, xhr) {
+                <!-- let data2 = JSON.stringify(data) -->
+                
+                console.log('status: ' + status + ', data: ' + data.subServcices[0].serviceName);
+                $('select#subServices').append(`<option value="test">test</option>`)
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                    $('p').append('Error' + errorMessage);
+            }
+        });
+    })
+
+
+    var isFilled = $('input[class="note"]', 'form').filter(function() {
+        return $.trim(this.value).length;  //text inputs have a value
+    }).length;                             //get the selector length
+
+    $("input[type='submit']").click(function(e){
+        console.log("Sa")
+        //if selector contains at least one filled in text input, submit form
+        if (isFilled) {
+            console.log("test => ", isFilled())
+        }
+        e.preventDefault()
+    })
+
+{% else %}
+setInterval(function(){
+    // console.log("keep going >> ")
+    var selected = [];
+    $('input[type=checkbox]').each(function() {
+       if ($(this).is(":checked")) {
+           let serviceId = $(this).parents("tr").attr("id");
+           selected.push(serviceId)
+       }
+       else{
+            let serviceId = $(this).parents("tr").attr("id");
+            //
+            var index = selected.indexOf(serviceId);
+            if (index !== -1) {
+              array.splice(index, 1);
+            }
+       }
+       $("#servicesId").attr('value', selected)
+    })
+
+},400)
+
+function checkSerial(el){
+
+    let serialVal = el.value
+    //console.log(serialVal);
+    $.ajax({
+        url : `/DataEntry/checkClientSerial/`, //
+        type : 'GET',
+        data : {
+            'serial' : serialVal  //
+        },
+        dataType:'json',
+        success : function(data) {
+            console.log('Data: '+data.responseText); // Success callback
+            if(data.responseText=="found"){
+                $("#serialStatus").html(`<span class="bg-danger text-white d-block p-1">الرقم مسجل لعميل اخر</span>`)
+            }else if (data.responseText=="not found"){
+            $("#serialStatus").html(`<span class="bg-success text-white d-block p-1">الرقم متاح</span>`)
+            }
+        },
+        error : function(request,error){
+            //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+        }
+    });
+
+}
+if($("#isClient").val()=="True"){
+    $(".new-contract-holder").show()
+}else{
+    $(".new-contract-holder").hide()
+}
+$("#newContractShow").click(function(){
+    $(".continue-contrcats").hide()
+    $(".new-contract-holder").show()
+})
+
+let num = $("#num").text();
+if (num > 0){
+    width = num*40
+}else{
+    width = 40
+}
+//console.log(width)
+$("#holder_scroll").width(width+'%')
+
+$(".clientHolder").each(function(){
+    let el = $(this);
+    let clientId = $(this).find("input#clientId").val();
+    $.ajax({
+        url : `https://aswangreen2.pythonanywhere.com/DataEntry/getServicesOfClient/`,
+        type : 'GET',
+        data : {
+            'clientId' : clientId
+        },
+        dataType:'json',
+        success : function(data) {
+            // console.log('services2 => '+data.services2); // Success callback
+            // console.log(`element => `, el)
+            el.find("p.services").html(`<span class="">${data.services2}</span>`)
+        },
+        error : function(request,error){
+            //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+        }
+    });
+})
+
+// add new service script
+$("button#addNewServiceBtn").click(function(e){
+    e.preventDefault();
+    CreateNewServiceRow()
+})
+
+function CreateNewServiceRow(){
+    let newNumber = getNewServiceNumber();
+    <!-- alert(`working ${newNumber}`) -->
+    var isInputsNotEmpty =  checkAllInputsNotEmpty();
+    console.log(isInputsNotEmpty)
+    if (isInputsNotEmpty){
+        addNewServiceInputs(newNumber)
+    }
+    else{
+        alert("بعض الحقول فارغة الرجاء اعادة التأكد من ادخال البيانات")
+    }
+}
+
+function  getNewServiceNumber(){
+    let currentLastNumber = $(".service-holer").length,
+        newNumber = currentLastNumber + 1;
+    return newNumber;
+}
+
+
+function checkAllInputsNotEmpty(){
+    let isValid = true;
+    $('input').not('.notNew').each(function() {
+        if(!$(this).val()){
+            console.log($(this))
+            $(this).addClass('invalid')
+            alert("بعض الحقول فارغة الرجاء اعادة التأكد من ادخال البيانات")
+            isValid = false;
+        }
+        else{
+            isValid = true;
+        }
+    });
+    return isValid;
+}
+
+function addNewServiceInputs(newNumber){
+    // Select the element after which the new element will be added
+    const $existingElement = $('div.service-holer:last');
+
+    // Create a new element and append it after the existing element
+    $(`<div class="service-holer border d-flex">
+        <div class="service-number mt-3">${newNumber}.</div>
+        <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة" name="service[]">
+        <input type="text" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice[]">
+        <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType[]">
+            <option selected disabled class="notValidChoose">اختر</option>
+            <option value="once">خدمة لمرة واحدة</option>
+            <option value="continuous">خدمة مستمرة</option>
+        </select>
+        <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType[]">
+            <option selected disabled class="notValidChoose">اختر</option>
+            <option value="once">مرة واحدة</option>
+            <option value="weekly">اسبوعيا</option>
+            <option value="month">شهر</option>
+        </select>
+        <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes[]">
+        <div class="service-actions">
+            <button class="delete-service btn btn-danger">حذف الخدمة</button>
+        </div>
+        <hr>
+    </div>`).insertAfter($existingElement);
+}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+[core]
+        editor = vim
+        pager = less
+
+[color]
+        diff = auto
+        status = auto
+        branch = auto
+        interactive = auto
+        pager = true
+        ui = auto
+
+[alias]
+        hist = log --graph --oneline --decorate
+        st = status
+
+[user]
+	email = ahmedsayed124680@gmail.com
+	name = Ahmed_Sayed

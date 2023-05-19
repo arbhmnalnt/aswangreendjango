@@ -140,8 +140,8 @@ table {
         </div>
         <div class="col-12">
             {% if isContracts %}
-            <table class="w-100 table text-center table-responsive table-striped w-100 table-hover table-bordered text-center" id="tblData"
-            style="text-align:center;direction:rtl;display: block;height: 59vh;overflow-y: auto;">
+            <table class="w-100 table text-center table-responsive table-striped table-hover table-bordered text-center" id="tblData"
+            style="text-align:center;direction:rtl;height: 59vh;overflow-y: auto;">
             <thead class="text-center">
                 <tr class="bg-secondary text-white text-center" style="font-size:1rem">
                     <th class="hide-column"><button name="checkAll" class="btn btn-info" id="checkAll" onclick="toggleSelect()">الكل</button>
@@ -154,6 +154,7 @@ table {
                     <th>المستحق</th>
                     <th>اخر دفع</th>
                     <th>الملاحظات</th>
+                    <th>طلب مراجعة</th>
                 </tr>
             </thead>
             <tbody>
@@ -177,6 +178,14 @@ table {
                         <br>
                         <hr>
                         <input  placeholder="ملاحظات">
+                    </td>
+                    <td>
+                        {% if contract.needReview == true  %}
+                            <span class="p-2 m-2 bg-success text-white">تمت المراجعة</span>
+                        {% else %}
+                            <a class="btn btn-danger" href="/needReview/{{contract.id}}">طلب مراجعة</a>
+                        {% endif %}
+                        
                     </td>
                     
                 </tr>

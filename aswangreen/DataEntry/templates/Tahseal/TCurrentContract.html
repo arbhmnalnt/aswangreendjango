@@ -1,0 +1,462 @@
+{% extends "Tahseal/index.html" %}
+{% block title %}
+<title>التعاقدات الحالية</title>
+{% endblock %}
+{% block style %}
+    .vertical-buttons {
+      flex-direction: column;
+    }
+
+    .top-margin {
+      margin-top: .5em;
+    }
+    td,th{
+        text-align:center !important
+    }
+
+    .serv::after {
+        content: ' - ';
+    }
+
+    .serv:last-child::after {
+        content: '';
+    }
+
+    #tblData{
+        font-size: 1rem;
+        height: 80vh;
+        overflow-y: auto;
+        display: inline-block;
+    }
+
+
+
+    @media print {
+        body * {
+            visibility: hidden;
+
+        }
+
+        th.print-none{
+            display: none !important;
+        }
+
+        #tblData, #tblData * {
+            visibility: visible;
+            height: auto !important
+        }
+
+        #tblData {
+            position: absolute;
+            left: 0;
+            top: 0;
+
+        }
+    }
+    a {
+        color:  #ffffff !important;
+        text-decoration: none;
+        background-color: transparent;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="content-container pt-2" style="background-color:#F3F5F2">
+    <div class="row">
+    </div>
+    <div class="row">
+        <div class="col-3 m-auto">
+            <span class="btn btn-primary text-white p-2 d-inline-block">إجمالى التعاقدات
+            </span>
+            <span class="bg-dark text-white p-3">
+            {{contracts_list.count}}
+            </span>
+        </div>
+        <div class="col-4 m-auto">
+            <p>
+
+                <input class="input w-100 text-center" id="input_search" placeholder="بحث بالاسم-السريال-المنطقة-الخدمات">
+                <a href="#" class="btn btn-danger mt-2 w-100" id="search">البحث / الفلترة</a>
+            </p>
+        </div>
+        <div class="col-3 text-center m-auto">
+            <button class="btn btn-success w-100" onclick="printDoc()">طباعة</button>
+        </div>
+    </div>
+    <div class="row">
+        <table class="col-12 table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData"
+        style="text-align:center;direction:rtl;display: block;height: 62vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th>م</th>
+                    <th><a href="#">سريال التعاقد</a></th>
+                    <th><a href="#">اسم العميل</a></th>
+                    <th><a href="#">رقم الهاتف</a></th>
+                    <th>تاريخ الدفع المفترض</th>
+                    <th><a href="#">المنطقة</a></th>
+                    <th><a href="#">الخدمات</a></th>
+                    <th><a href="#">سريال اخر فاتورة</a></th>
+                    <th><a href="#">ملاحظات</a></th>
+                    <th class="print-none">الخيارات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts_list %}
+                <tr id="{{contract.serialNum}}">
+                    <td>{{forloop.counter}}</td>
+                    <td class="serial">{{contract.serialNum}}</td>
+                    <td>{{contract.client.name}}</td>
+                    <td>{{contract.client.phone}}</td>
+                    <td>{{contract.ecd|date:'Y/m/d'}}</td>
+                    <td>{{contract.client.area.name}}</td>
+                    <td class="services">({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})</td>
+                    </td>
+                    <td>
+                        {% if contract.lastReceiptSerial != None %}
+                            {{contract.lastReceiptSerial}}
+                        {% else %}
+                        {% endif %}
+
+                    </td>
+                    <td>{{contract.client.notes}}</td>
+                    <td class="options print-none" >
+                            <!-- <a class="btn btn-info text-white h-100" href="/DataEntry/TnewContract2/?clientId={{contract.client.id}}">تعديل البيانات</a> -->
+                        <button class="btn btn-info m-3 prePaid" data-toggle="modal" data-target="#prePaid">دفع مسبق</button>
+                        <button class="btn btn-primary m-3 manualPayment" data-toggle="modal" data-contract="{{contract.serialNum}}" data-target="#manualPayment">دفع يدوى</button>
+                        <button class="btn btn-danger PaymentDeferment" data-toggle="modal" data-target="#PaymentDeferment">تأجيل الدفع</button>
+                        <button class="btn btn-warning text-white m-1 tsts" data-toggle="modal" data-target="#tsts">ايقاف الخدمة مؤقتا</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    {% if contracts.has_other_pages %}
+        <ul class="pagination">
+            {% if contracts.has_previous %}
+                <li class="waves-effect"><a href="?page=
+                        {{ contracts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i
+                        class="material-icons">السابق</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">السابق</i></a></li>
+            {% endif %}
+            {% for num in contracts.paginator.page_range %}
+                {% if contracts.number == num %}
+                    <li class="active"><a href="#!">{{ num }}</a></li>
+                {% else %}
+                    <li class="waves-effect"><a
+                            href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if contracts.has_next %}
+                <li class="waves-effect"><a
+                        href="?page={{ contracts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i
+                        class="material-icons">التالى</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">التالى</i></a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>
+
+<!-- tsts  Temporarily suspend the service modal -->
+
+<!-- Modal -->
+<div class="modal fade" id="tsts" tabindex="-1" role="dialog" aria-labelledby="tstsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">إيقاف الخدمة مؤقتا</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="required form">
+                    <div class="form-group">
+                        <label for="contractId">رقم التعاقد</label>
+                        <input type="number" disabled readonly name="contractId" class="contractId text-center" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">ايقاف الخدمة حتى تاريخ</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">سبب الايقاف</label>
+                        <input type="text" class="form-control" name="reason" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">رجوع</button>
+                <button type="button" class="btn btn-primary"id="tstsSubmitBtn">تأكيد وحفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PaymentDeferment modal -->
+<div class="modal fade" id="PaymentDeferment" tabindex="-1" role="dialog" aria-labelledby="PaymentDefermenttTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">تأجيل الدفع</h5>
+                <button type="button" class="close mr-auto" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="contractId">رقم التعاقد</label>
+                        <input type="number" disabled readonly name="contractId" class="contractId text-center" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">تأجيل الدفع حتى تاريخ</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">سبب التأجيل</label>
+                        <input type="text" class="form-control" name="reason" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">رجوع</button>
+                <button type="button" id="PaymentDefermentSubmitBtn" class="btn btn-primary">تأكيد وحفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--  prePaid  Modal -->
+<div class="modal fade" id="prePaid" tabindex="-1" role="dialog" aria-labelledby="prePaidtTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">دفع مسبق</h5>
+                <button type="button" class="close mr-auto" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="contractId">رقم التعاقد</label>
+                        <input type="number" disabled readonly name="contractId" class="contractId text-center" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">تاريخ الدفع</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="collector-name">المحصل</label>
+                        <select class="form-control">
+                            {% for collector in collectors %}
+                                <option value="{{collector.id}}">{{collector.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="serialNumber">رقم الدفتر</label>
+                        <input type="text" class="form-control" id="serialNumber" name="serialNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="receptSerial">سريال الفاتورة</label>
+                        <input type="text" class="form-control" id="receptSerial" name="receptSerial">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">رجوع</button>
+                <button type="submit" id="prePaidSubmitBtn" class="btn btn-primary">تأكيد وحفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--  manual payment  Modal -->
+<div class="modal fade" id="manualPayment" tabindex="-1" role="dialog" aria-labelledby="manualPaymentTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">دفع يدوى</h5>
+                <button type="button" class="close mr-auto" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="contractId">رقم التعاقد</label>
+                        <input type="number" disabled readonly name="contractId" class="contractId text-center" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">تاريخ الدفع</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="collector-name">المحصل</label>
+                        <select class="form-control">
+                            {% for collector in collectors %}
+                                <option value="{{collector.id}}">{{collector.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="serialNumber">رقم الدفتر</label>
+                        <input type="text" class="form-control" id="serialNumber" name="serialNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="receptSerial">سريال الفاتورة</label>
+                        <input type="text" class="form-control" id="receptSerial" name="receptSerial">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">رجوع</button>
+                <button type="submit" id="manualPaymentSubmitBtn" class="btn btn-primary">تأكيد وحفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+
+function printDoc(){
+    $('.print-none').hide();
+    $('#tblData').printThis();
+    setTimeout(function(){
+        $('.print-none').show();
+    },500)
+}
+// search
+document.getElementById("input_search").addEventListener("keyup", function(event){
+    let el = $(this)
+  // event.preventDefault()
+  let val = $("#input_search").val();
+  console.log(val)
+  if(val.length>0){
+    $("#search").attr(`href`, `/DataEntry/tahseal/TallContracts/?q=${val}`)
+  }
+});
+
+
+$(".options_dialog").each(function(){
+
+    $(this).click(function(){
+
+
+        Swal.fire({
+          title: 'تأكيد صحة البيانات',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'حفظ البيانات',
+          denyButtonText: 'يحتاج الى تعديل',
+          cancelButtonText: 'الغاء',
+          reverseButtons: true,
+        }).then((result) => {
+          /* Read more about isConfirmed, isDenied below */
+          if (result.isConfirmed) {
+            let contractId = $(this).parent().siblings('.serial').text();
+            $.ajax({
+                url : `https://aswangreen2.pythonanywhere.com/DataEntry/ConfirmContract/`, //
+                type : 'GET',
+                data : {
+                    'contractId' : contractId  //
+                },
+                dataType:'json',
+                success : function(data) {
+                    //console.log('Data: '+data.msg); // Success callback
+                    //console.log(el)
+                    // $(el).children(".res").html(`<span class="bg-primary text-white d-block p-1 btn">${data.followsStatus}</span>`)
+
+                },
+                error : function(request,error){
+                    //console.log("Request: "+JSON.stringify(request.responseText)); // Error callback
+                }
+            });
+            Swal.fire('تم الحفظ', '', 'success')
+            // window.location.reload(true);
+          } else if (result.isDenied) {
+            Swal.fire('Changes are not saved', '', 'info')
+          }
+        })
+    })
+})
+
+// tsts    Temporarily suspend the service section
+$("button.tsts").click(function(){
+    console.log("test")
+    let contractId = $(this).closest('tr').attr("id");
+    console.log(` contractId => ${contractId} `)
+    $("#tsts").find('input.contractId').attr('value', contractId)
+    $("this").closest('tr').attr("class", 'd-none')
+
+})
+$("button#tstsSubmitBtn").click(function(){
+    // collect this data and send to backend save it and reload the page_range
+    let contractId = $("#tsts").find('input[name="contractId"]').val(),
+        date       = $("#tsts").find('input[name="date"]').val(),
+        reason     = $("#tsts").find('input[name="reason"]').val();
+
+    console.log(" contractId contractId v ", contractId, date, reason)
+    $.ajax({
+        type: "POST",
+        url: "/DataEntry/tempStop/",
+        data: {contractId: contractId, date: date, reason:reason},
+        success: function(response){
+            console.log(response);
+        }
+    });
+    alert("سيتم حفظ بيانات ايقاف الخدمة مؤقتا")
+    $('#tsts').modal('hide')
+})
+
+// PaymentDeferment section
+$("button.PaymentDeferment").click(function(){
+    let contractId = $(this).closest('tr').attr("id");
+    console.log(` contractId => ${contractId} `)
+    $("#prePaid").find('input.contractId').attr('value', contractId)
+
+
+})
+$("button#PaymentDefermentSubmitBtn").click(function(){
+    // collect this data and send to backend save it and reload the page_range
+    alert("سيتم حفظ بيانات الدفع المؤجل")
+    $('#PaymentDeferment').modal('hide')
+})
+
+// prePaid payement section
+$("button.prePaid").click(function(){
+    let contractId = $(this).closest('tr').attr("id");
+    console.log(` contractId => ${contractId} `)
+    $("#prePaid").find('input.contractId').attr('value', contractId)
+
+
+})
+$("button#prePaidSubmitBtn").click(function(){
+    // collect this data and send to backend save it and reload the page_range
+    alert("سيتم حفظ بيانات الدفع المسبق")
+    $('#prePaid').modal('hide')
+})
+
+// manual payement section
+$("button.manualPayment").click(function(){
+    let contractId = $(this).closest('tr').attr("id");
+    console.log(` contractId => ${contractId} `)
+    $("#manualPayment").find('input.contractId').attr('value', contractId)
+
+
+})
+$("button#manualPaymentSubmitBtn").click(function(){
+    // collect this data and send to backend save it and reload the page_range
+    alert("سيتم حفظ بيانات الدفع اليدوى")
+    $('#manualPayment').modal('hide')
+})
+
+{% endblock %}

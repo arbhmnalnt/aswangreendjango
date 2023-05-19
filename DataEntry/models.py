@@ -116,7 +116,7 @@ class Client(TimeStampMixin,models.Model):
     # typee           = models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
     serialNum       = models.IntegerField(null=True, blank=True, unique=True, db_index=True, verbose_name="الرقم التعريفى") # custom client number for future us as like his id in company or any use else
     name            = models.CharField(max_length=100,null=True, blank=True, db_index=True)
-    phone           = models.CharField(max_length=11, null=True, blank=True, db_index=True)
+    phone           = models.CharField(max_length=100, null=True, blank=True, db_index=True)
     password        = models.CharField(max_length=150, null=True, blank=True, db_index=True)
     nationalId      = models.CharField(max_length=14, null=True, blank=True, db_index=True)
     area            = models.ForeignKey('Area', related_name='area', on_delete=models.CASCADE,null=True, blank=True)
@@ -126,8 +126,8 @@ class Client(TimeStampMixin,models.Model):
     addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     customFilter    = models.CharField(max_length=250, null=True, blank=True, help_text="فلتر مخصص")
     created_prev_date = models.DateField(null=True, blank=True)
-    activation_request= models.BooleanField(default=False)
-    outsource         = models.BooleanField(default=False)
+    needReview      = models.BooleanField(default=False)
+    outsource       = models.BooleanField(default=False)
     created_by      = models.ForeignKey('Employee', related_name='client_created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', related_name='client_modified_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     belongs_to      = models.ForeignKey('Employee', related_name='belongs_to_employee' , on_delete=models.CASCADE,null=True, blank=True)
@@ -161,6 +161,7 @@ class Contract(TimeStampMixin,models.Model):
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
     notes           = models.TextField(max_length=250,null=True, blank=True)
+    needReview      = models.BooleanField(default=False)
     is_test         = models.BooleanField(default=True)
 
 class FollowContractServices(TimeStampMixin,models.Model):

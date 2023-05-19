@@ -1,0 +1,1 @@
+python -Xutf8  manage.py dumpdata --natural-foreign -e sessions -e contenttypes -e auth.Permission  > localDatabackup.json

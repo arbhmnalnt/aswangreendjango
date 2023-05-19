@@ -1,0 +1,393 @@
+{% extends "DataEntry/index.html" %}
+{% block title %}
+<title>طلب تحصيل جديد</title>
+{% endblock %}
+
+{% block style %}
+.form-check-inline .form-check-input, input[type=checkbox]{
+    position: static;
+    margin-top: 0;
+    margin-right: 0.3125rem;
+    margin-left: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+}
+.form-check-inline{
+    display: inline-flex;
+    align-items: center;
+    width: 13rem;
+    background: aqua;
+    padding: 5px;
+    margin: 5px;
+    font-weight : 900;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  th:hover {
+    background-color: #aaa;
+  }
+  
+  td {
+    padding: 8px;
+  }
+{% endblock %}
+
+{% block content %}
+<div class="content-container p-2" style="background-color:#F3F5F2">
+    <div class="row">
+        <div class="col-6 text-right">
+            <h5>إنشاء طلب تحصيل</h5>
+        </div>  
+        <div class="col-3 mr-auto">
+            <button class="btn btn-primary" id="confirmAndPrint" data-toggle="modal" data-target="#confirmModel" onclick="getCollectorsAjax()">طباعة الطلب</button>
+        </div>
+    </div>
+    <!-- Modal -->  
+    <div class="modal fade" id="confirmModel" tabindex="-1" role="dialog" aria-labelledby="confirmModelLabel" aria-hidden="true">
+        <div class="modal-dialog h4" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title ml-auto" id="exampleModalLabel">تأكيد طلب التحصيل</h4>
+                    <button type="button" class="close d-inline-block mr-auto" data-dismiss="modal" aria-label="Close">
+                    <span class="" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>المحصل</label>
+                        <select class="" id="collector">
+                    
+                        </select>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <label>تاريخ اصدار طلب التحصيل</label>
+                        <input type="datetime-local" class="" id="dateTimeCollectOrder">
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الدفتر الأولى</label>
+                        <input type="number" class="" id="firstRecordSerial">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الايصالات</label>
+                        <input type="number" class="" id="receiptsNum">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">اغلاق</button>
+                    <button type="button" class="btn btn-primary" id="confirmCollectOrder" onclick="confirmCollectOrder()">تأكيد وحفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <div class="row mt-2">
+        <div class="col-8 ">
+              <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                المناطق
+              </button>
+        </div>
+        <div class="col-3 mr-auto">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="search">البحث:</label>
+                    <input type="text" class="form-control" name="search" placeholder="ابحث ...">
+                </div>
+                <hr>
+                <div class="form-group" style=" position: relative; left: 49rem; /* display: flex; */ width: 62rem; ">
+                    <div class="form-check collapse" id="collapseExample">
+                        <label for="areas">الفلترة بالمناطق : </label><br>
+                        {% for area in areas %}
+                        <div class="form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="areas[]" value="{{ area.id }}" id="area{{ area.id }}">
+                            <label class="form-check-label" for="area{{ area.id }}">{{ area.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr>
+                <button type="submit" class="btn btn-primary">البحث</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="content-container p-2 mt-3" style="background-color:#F3F5F2">
+    <div class="row">
+        {{clientsCount}} عميل لم يتم التحصيل منه
+        <div class="editor_holder col-12">
+            <div class="row">
+                <div class="col-6 p-2 m-2 border">
+                    <label>تغيير كل المبالغ ب </label>
+                    <select id="changePayAmountsSelect">
+                        <option value="amount">قيمة معينة</option>
+                        <option value="percent">نسبة مئوية</option>
+                    </select>
+                    <input class="value" id="changePayAmountsValue">
+                    <button class="changePayAmounts" id="changePayAmounts">تطبيق</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            {% if isContracts %}
+            <table class="w-100 table text-center table-striped table-hover table-bordered text-center" id="tblData"
+            style="text-align:center;direction:rtl;height: 59vh;overflow-y: auto;">
+            <thead class="text-center">
+                <tr class="bg-secondary text-white text-center" style="font-size:1rem">
+                    <th class="hide-column"><button name="checkAll" class="btn btn-info" id="checkAll" onclick="toggleSelect()">الكل</button>
+                    <th>م</th>
+                    <th class="d-none">تاريخ التعاقد</th>
+                    <th>اسم العميل</th>
+                    <th>العنوان بالتفصيل</th>
+                    <th>المنطقة</th>
+                    <th class="d-none">تاريخ الدفع المفترض</th>
+                    <th class="d-none">المستحق</th>
+                    <th class="d-none">اخر دفع</th>
+                    <th class="d-none">الملاحظات</th>
+                    <th class="d-none">طلب مراجعة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts %}
+                <tr id="{{contract.id}}">
+                    <td class=""><input name="contractSelect" class="contractSelect {{contract.id}}" type="checkbox"></td>
+                    <td class="ml-2 mr-2">{{forloop.counter}}</td>
+                    <td class="date d-none">{{contract.created_prev_date|date:"d / m /Y" }}</td>
+                    <td>{{contract.client.name}}</td>
+                    <td class="">{{contract.client.streetName}} / {{contract.client.addressBuilding}} / {{contract.client.addressApartment}}</td>
+                    <td class="">{{contract.client.area.name}}</td>
+                    <td class="d-none">{{contract.ecd|date:"d / m /Y" }}</td>
+                    <td class="deserved d-none">
+                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.remainAmount}}"> جم
+                        <hr>
+                        <input class="text-center w-50 editPay" name="newPay" placeholder="تعديل السعر" value="{{contract.remainAmount}}"> جم
+                    </td>
+                    <td class="d-none">{{contract.lastPay|date:"d / m /Y" }}</td>
+                    <td class="d-none">
+                        {{contract.service.notes}}
+                        <br>
+                        <hr>
+                        <input  placeholder="ملاحظات">
+                    </td>
+                    <td class="d-none">
+                        {% if contract.needReview == true  %}
+                            <span class="p-2 m-2 bg-success text-white">تمت المراجعة</span>
+                        {% else %}
+                            <a class="btn btn-danger" href="/needReview/{{contract.id}}">طلب مراجعة</a>
+                        {% endif %}
+                        
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <h4 class="text-center text-white bg-danger">لايوجد تعاقدات متاحة للتحصيل</h4>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+// make default beahavour of check all exist inputs
+function defaultCheck(){
+    let allCheckInputs = document.querySelectorAll("input[type='checkbox']");
+    console.log(allCheckInputs)
+    allCheckInputs.forEach((checkbox)=>{
+        checkbox.checked = true;
+    })
+}
+
+defaultCheck()
+
+function  getCollectorsAjax(){
+    // get all collectors to the collector select
+    // ajax request to get subServices
+    $.ajax('/DataEntry/getCollectors/', {
+        type: 'GET',  // http method
+        data: { },  // data to submit
+        success: function (data, status, xhr) {
+            <!-- let data2 = JSON.stringify(data) -->
+            
+            console.log('status: ' + status + ', data: ' + data[0].id);
+            for(i=0; i<= (data.length - 1); i++){
+                console.log(`data = > collector id => ${data[i].id}`)
+                $('select#collector').append(`<option value="${data[i].id}">${data[i].name}</option>`)
+            }
+            setTimeout(function(){
+                $("select#collector").chosen()
+                $(".chosen-single").css({
+                    'font-size' : '2rem',
+                    'width' : '150%',
+                    'height' : '2.5rem'
+                 });
+                $(".chosen-container-single, .chosen-single span").css({
+                    'height':'2rem'
+                });
+            }, 2000)
+            
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+                $('p').append('Error' + errorMessage);
+        }
+    });
+}
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// print createNewCollectOrder
+
+//function NewCollectOrder() {}
+function NewCollectOrder() {
+    // Clone the table and remove unchecked rows and hidden columns
+    $('#tblData').css({
+        'height': 'auto',
+    })
+    var clonedTable = $('#tblData').clone();
+    clonedTable.find('tbody tr').each(function () {
+      if (!$(this).find('.contractSelect').is(':checked')) {
+        $(this).remove();
+      }
+    });
+    clonedTable.find('thead th, tbody td').each(function (index) {
+      if ($(this).hasClass('hide-column')) {
+        clonedTable.find('thead th:nth-child(' + (index + 1) + ')').remove();
+        clonedTable.find('tbody td:nth-child(' + (index + 1) + ')').remove();
+      }
+    });
+  
+    // Open a new window and print the table
+    
+    clonedTable.find('.deservedMoney').css({
+        'text-align': 'center',
+        'width'     : '3rem'
+    })
+    clonedTable.find('table').css({
+        'text-align':'center','direction':'rtl','display': 'block','height': 'auto','page-break-inside': 'avoid',
+    })
+    var newWin = window.open('', 'Print-Window');
+    newWin.document.write('<html><head><title>طباعة الطلب</title></head><body>');
+    newWin.document.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
+    newWin.document.write(clonedTable[0].outerHTML);
+    newWin.document.write('</body></html>');
+    newWin.document.close();
+    setTimeout(function(){
+        newWin.print();
+    },500)
+    
+    setTimeout(function(){
+        window.location.reload()
+    },2000)
+
+  }
+  
+  $(document).ready(function () {
+    // Toggle all checkboxes on header checkbox change
+    $('#check-all').on('change', function () {
+      $('.check-row').prop('checked', $(this).is(':checked'));
+    });
+});
+// -- 
+function confirmCollectOrder() {
+    let tr = $('tr :checkbox:checked').closest('tr');
+    let data = {};
+    let collector = $("select#collector").val();
+    let dateTimeCollectOrder     = $("input#dateTimeCollectOrder").val(),
+        firstRecordSerial        = $("#firstRecordSerial").val(),
+        receiptsNum              = $("#receiptsNum").val();
+
+    console.log("firstRecordSerial => ", firstRecordSerial , " // receiptsNum => ", receiptsNum)
+
+    // Add collector and dateTimeCollectOrder to the data object
+    data.collector               = collector;
+    data.dateTimeCollectOrder   = dateTimeCollectOrder;
+    data.firstRecordSerial      = firstRecordSerial
+    data.receiptsNum            = receiptsNum
+    data.csrfmiddlewaretoken    = getCookie('csrftoken');
+
+    tr.each(function() {
+        let requiredToPay = $(this).find('input.deservedMoney').val();
+        let clientId = $(this).attr('id');
+
+        if (requiredToPay !== undefined && clientId !== undefined) {
+            data[clientId] = requiredToPay;
+        }
+    });
+
+    console.log(data);
+    NewCollectOrder()
+
+    // Send the data to the Django backend via AJAX request
+    $.ajax({
+        url: '/DataEntry/createNewCollectOrder/',
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+
+
+function toggleSelect(){
+    $(':checkbox').each(function () { this.checked = !this.checked; });
+}
+
+$(document).ready(function() {
+    $('.editPay').on('keyup', function() {
+      // Code to be executed on key up
+      var inputValue = $(this).val();
+      console.log(inputValue); // Example: log the input value to the console
+      $(this).siblings(".deservedMoney").attr("value", inputValue)
+      // You can use $(this) to refer to the input that was changed
+      // and $(this).val() to get the current value of that input
+    });
+});
+
+
+
+$(document).ready(function() {
+    $("#changePayAmounts").click(function(){
+        let select                  = $("select#changePayAmountsSelect").val(),
+            value   = $("#changePayAmountsValue").val()  ;
+        if (select=="amount"){
+            console.log("asmount")
+            $(".deservedMoney").attr("value", value)
+            $(".editPay").attr("value",value)
+        }else if(select=="percent"){
+            console.log("pressascntage")
+        }else{
+
+        }
+    })
+});
+
+{% endblock %}
