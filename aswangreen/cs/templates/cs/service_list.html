@@ -1,0 +1,42 @@
+{% extends "cs/index.html" %}
+{% block title %}
+    <title>قائمة الخدمات</title>
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">.
+    <div class="row">
+        <div class="col-10 m-auto">
+            <h1>قائمة الخدمات</h1>
+            <table class="table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData" style="display:block; text-align:center;direction:rtl;height: 62vh;overflow-y: auto;">
+                <thead>
+                    <th>الخدمة</th>
+                    <th>السعر</th>
+                    <th>الملاحظات</th>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                        <tr>
+                            <td><a href="{% url 'cs:service_update' service.pk %}">{{ service.name }}</a></td>
+                            <td>{{ service.price }}</td>
+                            <td>{{ service.notes }}</td>
+                        </tr>
+                    {% empty %}
+                        <li>No services found.</li>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-primary" href="{% url 'cs:service_create' %}">اضافة خدمة</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

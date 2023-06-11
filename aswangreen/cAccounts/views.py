@@ -77,12 +77,12 @@ def profile(request):
     elif user.groups.filter(name="tahsealAdmin"):
         request.session['group'] = "tahsealAdmin"
         # print("admin here => ")
-        return redirect('/DataEntry/tahseal/TallContracts/')
+        return redirect('/DataEntry/TcurrentCollectOrder/')
     
-    elif user.groups.filter(name="ServiceManagerAdmin"):
-        request.session['group'] = "ServiceManagerAdmin"
+    elif user.groups.filter(name="customerService"):
+        request.session['group'] = "customerService"
         # print("admin here => ")
-        return redirect('/moreServicesManager/')
+        return redirect('/cs/')
         
     else:
         request.session['group'] = "else"

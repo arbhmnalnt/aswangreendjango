@@ -43,11 +43,13 @@ INSTALLED_APPS = [
     'simple_pagination',
     'bootstrap4',
     'crispy_forms',
+    'crispy_bootstrap4',
     'website',
     'account',
     'cAccounts',
     'api',
     'DataEntry',
+    'cs',
     'moreServicesManager',
     'import_export',
 ]
@@ -55,6 +57,9 @@ INSTALLED_APPS = [
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location':  BASE_DIR / '/backup/'}
 #
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

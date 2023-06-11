@@ -11,8 +11,8 @@ urlpatterns = [
     # -- temp pages
     path('', TCurrentContract, name="mainPage") ,
     path('TmainPage/', TmainPage, name="TmainPage") ,
-    path('TnewContract/', TnewContract, name="TnewContract"),
-    path('TnewContract2/', TnewContract2, name="TnewContract2"),
+    path('TnewContract2/', TnewContract, name="TnewContract2"),
+    # path('TnewContract/', TnewContract2, name="TnewContract"),
     path('TCurrentContract/', TCurrentContract, name="TCurrentContract"),
     path('TgetcollcetStatus/', TgetcollcetStatus, name="TgetcollcetStatus"),
     path('TnewCollectOrder/', TnewCollectOrder, name="TnewCollectOrder"),
@@ -24,7 +24,9 @@ urlpatterns = [
     path('getsubServices/' ,getsubServicesAll),
     path('getCollectors/' ,getCollectorsAll.as_view()),
     path('createNewCollectOrder/' ,createNewCollectOrder.as_view()),
-    path('tempStop/' ,tempStop),
+    path('payRecord/' ,payRecord.as_view()),
+
+    # path('tempStop/' ,tempStop),
     # contracts tahseal also
     path('TcurrentCollectOrder/' ,CollectOrderList.as_view(), name="TcurrentCollectOrder"),
     path('TcurrentCollectOrder/<int:pk>' ,CollectOrderDetail.as_view(), name="collect_order_detail"),
@@ -36,6 +38,8 @@ urlpatterns = [
     # apis without view for tahseal
     path('saveReceipt/' ,saveReceipt),
     path('confirmCollectOrder/' ,confirmCollectOrder),
+    path('addNewSerialToCollectOrder/' ,addNewSerialToCollectOrder),
+
 
 
 

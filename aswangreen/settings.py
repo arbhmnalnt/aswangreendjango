@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'cAccounts',
     'api',
     'DataEntry',
-    'moreServicesManager',  
+    'moreServicesManager',
     'import_export',
 ]
 # not working
@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_CREDENTIALS = False
 
 ROOT_URLCONF = 'aswangreen.urls'
@@ -97,18 +97,15 @@ WSGI_APPLICATION = 'aswangreen.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aswangreen',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
-        'port':"3306",
+        'NAME': 'aswangreen$data2',
+        'USER': 'aswangreen',
+        'PASSWORD': 'ahmed123!',
+        'HOST': 'aswangreen.mysql.pythonanywhere-services.com',
         'OPTIONS': {
             'sql_mode': 'traditional',
         }
     }
 }
-
-
 
 
 # Password validation
@@ -155,22 +152,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-
-onlinelocalPath   = "/home/aswangreen/aswangreen/"
-offlinelocalPath  =  "/aswanGreen/system/aswangreen/"
-# default static files settings for PythonAnywhere.
-# see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
-MEDIA_ROOT = offlinelocalPath +'/media/'
-MEDIA_URL = 'media/'
-STATIC_ROOT = offlinelocalPath+'/static/'
+MEDIA_ROOT = '/home/aswangreen/aswangreen/media'
+MEDIA_URL = '/media/'
+STATIC_ROOT = '/home/aswangreen/aswangreen/static'
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
-
-# LOGOUT_REDIRECT_URL = 'cAccounts/login'
-# LOGIN_REDIRECT_URL = '/cAccounts/profile/'
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 90000
 
 LOGIN_URL = '/cAccounts/login'

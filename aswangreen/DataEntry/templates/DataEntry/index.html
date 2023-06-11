@@ -55,7 +55,7 @@
                 <a href="/DataEntry/TmainPage?page=1" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">تأكيد الاكسيل</button>
                 </a>
-                <a href="/DataEntry/TnewContract" class="">
+                <a href="/DataEntry/TnewContract2" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">ادخال تعاقد جديد</button>
                 </a>
                 <a href="/DataEntry/TCurrentContract/" class="">
@@ -65,11 +65,11 @@
                   <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
                 </a>
                 {% elif user_group == "tahsealAdmin"%}
-                
+
                 <a href="/DataEntry/TcurrentCollectOrder" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">طلبات التحصيل الجارية</button>
                 </a>
-                
+
                 {% else %}
                 {% endif %}
                 {% endwith %}

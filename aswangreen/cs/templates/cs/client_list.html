@@ -1,0 +1,44 @@
+{% extends "cs/index.html" %}
+{% block title %}
+    <title>قائمة العملاء</title>
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">.
+    <div class="row">
+        <div class="col-12 m-auto">
+            <h1>قائمة العملاء</h1>
+            <table class="table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData" style="display:block; text-align:center;direction:rtl;height: 62vh;overflow-y: auto;">
+                <thead>
+                    <th>رقم العميل</th>
+                    <th>الاسم</th>
+                    <th>العنوان بالتفصيل</th>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td><a class="btn btn-primary text-white"
+                                href="{% url 'cs:client_update' client.pk %}">{{ client.id }}</a></td>
+
+                            <td>{{ client.name }}</td>
+                            <td>{{ client.addressDetails }}</td>
+                        </tr>
+                    {% empty %}
+                        <li>No client found.</li>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-primary" href="{% url 'cs:client_create' %}">اضافة عميل</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

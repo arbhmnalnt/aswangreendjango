@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'cAccounts',
     'api',
     'DataEntry',
-    'moreServicesManager',  
+    'cs',  
     'import_export',
 ]
 # not working
@@ -157,7 +157,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
 
 onlinelocalPath   = "/home/aswangreen/aswangreen/"
-offlinelocalPath  =  "/aswanGreen/system/aswangreen/"
+offlinelocalPath  =  "/aswanGreen/system/aswangreen/aswangreen"
 # default static files settings for PythonAnywhere.
 # see https://help.pythonanywhere.com/pages/DjangoStaticFiles for more info
 MEDIA_ROOT = offlinelocalPath +'/media/'

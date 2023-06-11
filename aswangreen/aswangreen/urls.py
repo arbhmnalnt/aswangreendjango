@@ -24,6 +24,7 @@ urlpatterns = [
     path('cAccounts/', include('cAccounts.urls')),
     path('account/', include('account.urls')),
     path('DataEntry/', include('DataEntry.urls')),
+    path('cs/', include('cs.urls')),
     path('moreServicesManager/', include('moreServicesManager.urls')),
     path('collection/', include('collection.urls')),
     path('api/', include('api.urls')),

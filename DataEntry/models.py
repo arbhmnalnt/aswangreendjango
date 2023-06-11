@@ -105,7 +105,7 @@ class SubService(TimeStampMixin,models.Model):
     name                     = models.CharField(max_length=50,null=True, blank=True)
     typee             =  models.ForeignKey('Typee', on_delete=models.CASCADE,null=True, blank=True)
     price                    = models.IntegerField(null=True, blank=True, default=10)
-    
+
 
 class Area(TimeStampMixin,models.Model):
     name = models.CharField(max_length=100,null=True, blank=True)
@@ -126,7 +126,8 @@ class Client(TimeStampMixin,models.Model):
     addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     customFilter    = models.CharField(max_length=250, null=True, blank=True, help_text="فلتر مخصص")
     created_prev_date = models.DateField(null=True, blank=True)
-    needReview      = models.BooleanField(default=False)
+    needReview      = models.BooleanField(default=False, null=True, blank=True)
+    activation_request = models.BooleanField(default=False)
     outsource       = models.BooleanField(default=False)
     created_by      = models.ForeignKey('Employee', related_name='client_created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', related_name='client_modified_by_employee', on_delete=models.CASCADE,null=True, blank=True)
@@ -161,7 +162,7 @@ class Contract(TimeStampMixin,models.Model):
     created_by      = models.ForeignKey('Employee', related_name='created_by_employee', on_delete=models.CASCADE,null=True, blank=True)
     modified_by     = models.ForeignKey('Employee', on_delete=models.CASCADE,null=True, blank=True)
     notes           = models.TextField(max_length=250,null=True, blank=True)
-    needReview      = models.BooleanField(default=False)
+    needReview      = models.BooleanField(default=False, null=True, blank=True)
     is_test         = models.BooleanField(default=True)
 
 class FollowContractServices(TimeStampMixin,models.Model):
@@ -170,7 +171,7 @@ class FollowContractServices(TimeStampMixin,models.Model):
         ('pr', 'مطلوب الدفع'),                 # Payment required
         ('pip', 'جارى الدفع'),                 # Payment in progress
         ('pd', 'تم الدفع'),                    # payment done
-        ('lp', 'متأخر الدفع')                  # late payment 
+        ('lp', 'متأخر الدفع')                  # late payment
     )
     client               = models.ForeignKey('Client', related_name='client', on_delete=models.CASCADE,null=True, blank=True)
     service              = models.ForeignKey('Service', related_name='service', on_delete=models.CASCADE,null=True, blank=True)
@@ -212,12 +213,12 @@ class CollectRecord(TimeStampMixin,models.Model):   # التحصيل دفتر
 
     def __str__(self):
         return str(self.pk)
-    
+
 # def class for collect
 class collectionRecord(TimeStampMixin,models.Model):   # التحصيل دفتر
     serial              = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
     receiptNum          = models.PositiveIntegerField(default=50, null=True, blank=True, verbose_name="عدد الايصالات")
-    
+
     def __str__(self):
         return str(self.serial)
 
@@ -227,10 +228,11 @@ class PayHistory(TimeStampMixin,models.Model):
     client          = models.ForeignKey('Client', related_name='client_pay_history', on_delete=models.CASCADE,null=True, blank=True, db_index=True)
     ecd             = models.DateField(blank=True, null=True)
     month           = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name="الشهر")  # for month from range of 01 to 12
-    CollectOrder    = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True) 
+    CollectOrder    = models.ForeignKey('CollectOrder', on_delete=models.CASCADE, null=True, blank=True)
     serial          = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الدفتر")
     receiptNum      = models.PositiveIntegerField(null=True, blank=True, verbose_name="رقم الايصال")
-    
+    # collectedAmount = models.PositiveIntegerField(null=True, blank=True, verbose_name="المبلغ المدفوع")
+
 
 class SimpleService(TimeStampMixin,models.Model):
     name = models.CharField(max_length=100,null=True, blank=True)

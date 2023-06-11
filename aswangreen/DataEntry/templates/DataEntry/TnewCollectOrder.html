@@ -25,16 +25,16 @@ table {
     width: 100%;
     border-collapse: collapse;
   }
-  
+
   th {
     padding: 8px;
     cursor: pointer;
   }
-  
+
   th:hover {
     background-color: #aaa;
   }
-  
+
   td {
     padding: 8px;
   }
@@ -45,12 +45,12 @@ table {
     <div class="row">
         <div class="col-6 text-right">
             <h5>إنشاء طلب تحصيل</h5>
-        </div>  
+        </div>
         <div class="col-3 mr-auto">
             <button class="btn btn-primary" id="confirmAndPrint" data-toggle="modal" data-target="#confirmModel" onclick="getCollectorsAjax()">طباعة الطلب</button>
         </div>
     </div>
-    <!-- Modal -->  
+    <!-- Modal -->
     <div class="modal fade" id="confirmModel" tabindex="-1" role="dialog" aria-labelledby="confirmModelLabel" aria-hidden="true">
         <div class="modal-dialog h4" role="document">
             <div class="modal-content">
@@ -64,7 +64,7 @@ table {
                     <div class="form-group">
                         <label>المحصل</label>
                         <select class="" id="collector">
-                    
+
                         </select>
                     </div>
                     <br>
@@ -150,8 +150,8 @@ table {
                     <th>اسم العميل</th>
                     <th>العنوان بالتفصيل</th>
                     <th>المنطقة</th>
-                    <th class="d-none">تاريخ الدفع المفترض</th>
-                    <th class="d-none">المستحق</th>
+                    <th class="hide-column">تاريخ الدفع المفترض</th>
+                    <th class="">المستحق</th>
                     <th class="d-none">اخر دفع</th>
                     <th class="d-none">الملاحظات</th>
                     <th class="d-none">طلب مراجعة</th>
@@ -166,9 +166,9 @@ table {
                     <td>{{contract.client.name}}</td>
                     <td class="">{{contract.client.streetName}} / {{contract.client.addressBuilding}} / {{contract.client.addressApartment}}</td>
                     <td class="">{{contract.client.area.name}}</td>
-                    <td class="d-none">{{contract.ecd|date:"d / m /Y" }}</td>
-                    <td class="deserved d-none">
-                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.remainAmount}}"> جم
+                    <td class="">{{contract.ecd|date:"d / m /Y" }}</td>
+                    <td class="deserved">
+                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.services.0.price}}"> جم
                         <hr>
                         <input class="text-center w-50 editPay" name="newPay" placeholder="تعديل السعر" value="{{contract.remainAmount}}"> جم
                     </td>
@@ -185,9 +185,9 @@ table {
                         {% else %}
                             <a class="btn btn-danger" href="/needReview/{{contract.id}}">طلب مراجعة</a>
                         {% endif %}
-                        
+
                     </td>
-                    
+
                 </tr>
                 {% endfor %}
             </tbody>
@@ -219,7 +219,7 @@ function  getCollectorsAjax(){
         data: { },  // data to submit
         success: function (data, status, xhr) {
             <!-- let data2 = JSON.stringify(data) -->
-            
+
             console.log('status: ' + status + ', data: ' + data[0].id);
             for(i=0; i<= (data.length - 1); i++){
                 console.log(`data = > collector id => ${data[i].id}`)
@@ -236,7 +236,7 @@ function  getCollectorsAjax(){
                     'height':'2rem'
                 });
             }, 2000)
-            
+
         },
         error: function (jqXhr, textStatus, errorMessage) {
                 $('p').append('Error' + errorMessage);
@@ -280,9 +280,9 @@ function NewCollectOrder() {
         clonedTable.find('tbody td:nth-child(' + (index + 1) + ')').remove();
       }
     });
-  
+
     // Open a new window and print the table
-    
+
     clonedTable.find('.deservedMoney').css({
         'text-align': 'center',
         'width'     : '3rem'
@@ -299,20 +299,20 @@ function NewCollectOrder() {
     setTimeout(function(){
         newWin.print();
     },500)
-    
+
     setTimeout(function(){
         window.location.reload()
     },2000)
 
   }
-  
+
   $(document).ready(function () {
     // Toggle all checkboxes on header checkbox change
     $('#check-all').on('change', function () {
       $('.check-row').prop('checked', $(this).is(':checked'));
     });
 });
-// -- 
+// --
 function confirmCollectOrder() {
     let tr = $('tr :checkbox:checked').closest('tr');
     let data = {};
