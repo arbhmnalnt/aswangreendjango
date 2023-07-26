@@ -9,7 +9,17 @@
 
 
 {% block content %}
-<div class="container-fluid">.
+<div class="container-fluid">
+    <div class="row mt-5 mb-3">
+        <div class="col-10 m-auto border border-danger p-3 text-center">
+            <form class="form" action="#" method="GET">
+                <div class="">
+                    <input name="q" class="form-control m-2" placeholder="ابحث باسم العميل">
+                    <input type="submit" class="form-control btn btn-info" value="ابحث">
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12 m-auto">
             <h1>قائمة العملاء</h1>
@@ -18,6 +28,7 @@
                     <th>رقم العميل</th>
                     <th>الاسم</th>
                     <th>العنوان بالتفصيل</th>
+                    <th>أجراءات</th>
                 </thead>
                 <tbody>
                     {% for client in clients %}
@@ -27,7 +38,11 @@
 
                             <td>{{ client.name }}</td>
                             <td>{{ client.addressDetails }}</td>
+                            <td>
+                                <a class="btn btn-danger" href="{% url 'cs:client_delete' pk=client.id%}">حذف العميل</a>
+                            </td>
                         </tr>
+
                     {% empty %}
                         <li>No client found.</li>
                     {% endfor %}

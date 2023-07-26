@@ -17,6 +17,8 @@
                 <thead>
                     <th>رقم العميل</th>
                     <th>الاسم</th>
+                    <th>رقم التليفون</th>
+                    <th>العنوان بالتفصيل</th>
                     <th>نوع الطلب</th>
                     <th>التفاصيل</th>
                 </thead>
@@ -26,6 +28,9 @@
                             <td><a class="btn btn-primary text-white"
                                 href="{% url 'cs:request_update' request.pk %}">{{ request.client.id }}</a></td>
                             <td>{{ request.client.name }}</td>
+                            <td>{{request.client.phone}}</td>
+                            <td>{{request.client.addressDetails}}</td>
+                            <td>{{request.get_kind_display }}</td>
                             <td>{{ request.body }}</td>
                         </tr>
                     {% empty %}

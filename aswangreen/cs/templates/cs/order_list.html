@@ -9,28 +9,50 @@
 
 
 {% block content %}
-<div class="container-fluid">.
+<div class="container-fluid">
+    <h1>قائمة الطلبات</h1>
+    <div class="row mt-5 mb-3">
+        <div class="col-10 m-auto border border-danger p-3 text-center">
+            <form class="form" action="#" method="GET">
+                <div class="">
+                    <input name="q" class="form-control m-2" placeholder="ابحث باسم العميل">
+                    <input type="submit" class="form-control btn btn-info" value="ابحث">
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12 m-auto">
-            <h1>قائمة الطلبات</h1>
+
             <table class="table text-center table-striped w-100 table-hover table-bordered text-center" id="tblData" style="display:block; text-align:center;direction:rtl;height: 62vh;overflow-y: auto;">
                 <thead>
                     <th>رقم الطلب</th>
                     <th>العميل</th>
+                    <th>رقم التليفون</th>
+                    <th>العنوان بالتفصيل</th>
+                    <th>الخدمة</th>
                     <th>تاريخ اداء الخدمة</th>
                     <th>حالة الطلب</th>
+                    <th>الأمر</th>
                 </thead>
                 <tbody>
                     {% for order in orders %}
                         <tr>
                             <td><a class="btn btn-primary" href="{% url 'cs:order_update' order.pk %}">{{ order.id }}</a></td>
                             <td>{{ order.client.name }}</td>
+                            <td>{{order.client.phone}}</td>
+                            <td>{{order.client.addressDetails}}</td>
+                            <td>{{ order.service.name }}</td>
                             <td>{{ order.DueDate }}</td>
                             <td>{{ order.get_Status_display  }}</td>
+                            <td>
+                                <a href="{% url  'cs:order_delete' pk=order.id %}" class="btn btn-danger text-white">حذف الطلب</a>
+                            </td>
                         </tr>
                     {% empty %}
                         <li>No order found.</li>
                     {% endfor %}
+
                 </tbody>
             </table>
             <a class="btn btn-primary" href="{% url 'cs:order_create' %}">اضافة طلب</a>

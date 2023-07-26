@@ -1,0 +1,24 @@
+{% extends "cs/index.html" %}
+{% block title %}
+    <title>تأكيد حذف الطلب </title>
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+
+{% block content %}
+<h1>حذف الطلب</h1>
+<p>هل انت متأكد من حذف الطلب - {{object.id}} ؟</p>
+
+<form method="post">
+{% csrf_token %}
+<button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+<a href="{% url 'cs:request_list' %}" class="btn btn-info">الغاء</a>
+</form>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

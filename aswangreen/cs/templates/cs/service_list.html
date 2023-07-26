@@ -18,6 +18,7 @@
                     <th>الخدمة</th>
                     <th>السعر</th>
                     <th>الملاحظات</th>
+                    <th>الأمر</th>
                 </thead>
                 <tbody>
                     {% for service in services %}
@@ -25,6 +26,7 @@
                             <td><a href="{% url 'cs:service_update' service.pk %}">{{ service.name }}</a></td>
                             <td>{{ service.price }}</td>
                             <td>{{ service.notes }}</td>
+                            <td><a id="deleteServiceBtn" class="btn btn-danger" href="/cs/delete/{{service.id}}">حذف الخدمة</a></td>
                         </tr>
                     {% empty %}
                         <li>No services found.</li>

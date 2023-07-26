@@ -568,7 +568,7 @@ def TnewCollectOrder(request):
 
     if request.method == 'POST':
         search_query = request.POST.get('search', '')
-        search_areas = request.POST.getlist('areas[]')
+        # search_areas = request.POST.getlist('areas[]')
         words = search_query.split()
         start_word = words[0] if words else ''
         # print(f"search_query => {search_query}")
@@ -586,10 +586,10 @@ def TnewCollectOrder(request):
                 (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__area__name__icontains=search_query, is_deleted=False) |
                 (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__serialNum__icontains=search_query, is_deleted=False)
             ).order_by('-created_at')
-        elif len(search_areas) >= 0:
+        elif len(search_query) >= 2:
             follows = FollowContractServices.objects.filter(
                 (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(collcetStatus="pr", is_deleted=False),
-                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__area__in=search_areas, is_deleted=False)   ,
+                (Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), Q(client__area__name__icontains=search_query, is_deleted=False)   ,
             ).order_by('-created_at')
         else:
             follows = FollowContractServices.objects.filter((Q(collcetStatus='wecd') | Q(collcetStatus ='pr')), is_deleted=False).order_by('-created_at')
