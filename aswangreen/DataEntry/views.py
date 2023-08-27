@@ -561,7 +561,7 @@ def TnewCollectOrder(request):
         pass
     else:
         return HttpResponse("erorr here")
-    collectManager()
+    # collectManager()
     areas = Area.objects.all()
     isContracts = True
     contract_list = []
@@ -710,7 +710,7 @@ def TgetcollcetStatus(request):
 def TCurrentContract(request):
     listcount = 15
     # contracts_list = Contract.objects.filter(is_deleted=False, is_test=False)
-    contracts_list = Contract.objects.filter(is_deleted=False)
+    contracts_list = Contract.objects.filter(is_deleted=False).order_by('-created_at')
     query       = request.GET.get('q')
     queryDate   = request.GET.get('qd')
     queryStatue = request.GET.get('qs')
@@ -721,9 +721,9 @@ def TCurrentContract(request):
             Q(belong_to__name__icontains=query)& Q(is_deleted=False) |Q(client__customFilter__icontains=query)& Q(is_deleted=False)|
             Q(notes__icontains=query)& Q(is_deleted=False) |Q(created_by__name__icontains=query)& Q(is_deleted=False)|
             Q(services__name__icontains=query)& Q(is_deleted=False)
-        ).distinct()
+        ).distinct().order_by('-created_at')
     if queryDate:
-        contracts_list = Contract.objects.filter(created_prev_date=queryDate,is_deleted=False).distinct()
+        contracts_list = Contract.objects.filter(created_prev_date=queryDate,is_deleted=False).distinct().order_by('-created_at')
 
     paginator = Paginator(contracts_list, listcount) # 6 posts per page
     page = request.GET.get('page')
@@ -1032,6 +1032,11 @@ def getPageNums(total, listcount):
     pages = math.ceil(total/listcount)
     return pages
 
+def OSTT(request):
+    autoServiceAdd()
+    collectManager()
+    return redirect('/DataEntry/TmainPage/?page=1')
+
 @login_required
 def TmainPage(request):
     print(f"request.session['group'] => {request.session.keys()}")
@@ -1045,7 +1050,8 @@ def TmainPage(request):
         pass
     else:
         return HttpResponse("erorr here")
-    autoServiceAdd()
+    # to be used one time only
+    # autoServiceAdd()
     listcount = 7
     # stats part
     remainingCollections = len(peopleTocollectFrom())
@@ -1533,16 +1539,22 @@ def collectManager():
         followEcd = follow.ecd
         if followEcd == None:
             from datetime import datetime, date
-            date_string = '2023-04-25'
+            date_string = '2023-08-25'
             datetime_object = datetime.strptime(date_string, '%Y-%m-%d')
             followEcd = datetime_object.date()
         else:
             pass
         # print(f"follow.id => {follow.id}  //  followEcd => {followEcd}")
-        follow.ecd = followEcd.replace(month=5)
+        import datetime
+        # Get the current date
+        current_date = datetime.datetime.now()
+        # Extract the current month and year
+        current_month = current_date.month
+        current_year = current_date.year
+        follow.ecd = followEcd.replace(month=current_month)
         follow.save()
         followEcd = follow.ecd
-        follow.ecd = followEcd.replace(year=2023)
+        follow.ecd = followEcd.replace(year=current_year)
         follow.save()
         followEcd = follow.ecd
         # print(f"follow.id => {follow.id}  //  followEcd => {followEcd}")
@@ -1802,7 +1814,7 @@ def updateFollowContractServices(data2,contractId):
     clientId                =   contract.client.id
     contractDate            =   contract.created_prev_date
     service_objects_list    =   data2["services"]
-    services_id = int(service_objects_list)
+    services_id = int(service_objects_list[0])
     current_services_list   =   contract.sevices
 
     service_self = Service.objects.get(pk=services_id)
@@ -1927,7 +1939,7 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
     client                  =   Client.objects.get(pk=newClientId)
     contract                =   Contract.objects.get(pk=newContractId)
     service_objects_list    =   data2["services"]
-    services_id = int(service_objects_list)
+    services_id = int(service_objects_list[0])
     service_self = Service.objects.get(pk=services_id)
     follow_contract_services = FollowContractServices.objects.update_or_create(
         client=client,service=service_self,
@@ -1940,7 +1952,7 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
 
 def create_new_contract(data, newClientId):
     services_list = data["services"]
-    services_id = int(services_list)
+    services_id = int(services_list[0])
     services_set = set()
     serv = Service.objects.get(pk=services_id)
     services_set.add(serv)

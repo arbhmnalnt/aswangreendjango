@@ -16,6 +16,8 @@ urlpatterns = [
     path('TCurrentContract/', TCurrentContract, name="TCurrentContract"),
     path('TgetcollcetStatus/', TgetcollcetStatus, name="TgetcollcetStatus"),
     path('TnewCollectOrder/', TnewCollectOrder, name="TnewCollectOrder"),
+    # OSTT - operations takes time
+    path('OSTT/', OSTT, name="OSTT"),
     # -- temp pages for tahseal view
     path('tahseal/TallContracts/', TallContracts, name="TallContracts"),
     path('checkClientSerial/', checkClientSerial, name="checkClientSerial"),

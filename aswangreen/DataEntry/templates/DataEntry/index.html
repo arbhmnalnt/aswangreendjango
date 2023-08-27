@@ -16,8 +16,8 @@
 
   <style>
     .btn-custom{
-      background-color:#6c757d00 !important;
-      border:none;
+      /*background-color:#6c757d00 !important;*/
+      /*border:none;*/
     }
   {% block style %}
   {% endblock %}
@@ -53,16 +53,24 @@
                 {% with user_group=request.session.group %}
                 {% if  user_group == "dataEntryAdmin"%}
                 <a href="/DataEntry/TmainPage?page=1" class="">
-                    <button class="btn btn-secondary w-100 m-2 text-right btn-custom">تأكيد الاكسيل</button>
+                    <button class="btn btn-secondary w-100 m-2  btn-custom">الصفحة الرئيسية</button>
                 </a>
                 <a href="/DataEntry/TnewContract2" class="">
-                    <button class="btn btn-secondary w-100 m-2 text-right btn-custom">ادخال تعاقد جديد</button>
+                    <button class="btn btn-secondary w-100 m-2  btn-custom">ادخال تعاقد جديد</button>
                 </a>
                 <a href="/DataEntry/TCurrentContract/" class="">
-                    <button class="btn btn-secondary w-100 m-2 text-right btn-custom">التعاقدات الحالية</button>
+                    <button class="btn btn-secondary w-100 m-2  btn-custom">التعاقدات الحالية</button>
                 </a>
                 <a href="/DataEntry/TnewCollectOrder" class="">
-                  <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
+                  <button class="btn btn-secondary w-100 m-2  btn-custom">انشاء طلب تحصيل</button>
+                </a>
+                <a href="/DataEntry/OSTT" class="">
+                    <button class="btn btn-secondary w-100 m-2 btn-custom">
+                        تأكيد وحساب طلبات التحصيل
+                        <hr>
+                        <p class="h6 text-white p-2 m-2 border border-danger">اجراء يتطلب الانتظار بعض الوقت</p>
+
+                    </button>
                 </a>
                 {% elif user_group == "tahsealAdmin"%}
 
