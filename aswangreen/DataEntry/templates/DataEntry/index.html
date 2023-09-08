@@ -13,7 +13,8 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" integrity="sha512-0nkKORjFgcyxv3HbE4rzFUlENUMNqic/EzDIeYCgsKa/nwqr2B91Vu/tNAu4Q0cBuG4Xe/D1f/freEci/7GDRA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.all.js"></script>
+  <link rel="stylesheet" href="<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.7.27/sweetalert2.css" integrity="sha512-eRBMRR/qeSlGYAb6a7UVwNFgXHRXa62u20w4veTi9suM2AkgkJpjcU5J8UVcoRCw0MS096e3n716Qe9Bf14EyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />">
   <style>
     .btn-custom{
       /*background-color:#6c757d00 !important;*/
@@ -64,13 +65,9 @@
                 <a href="/DataEntry/TnewCollectOrder" class="">
                   <button class="btn btn-secondary w-100 m-2  btn-custom">انشاء طلب تحصيل</button>
                 </a>
-                <a href="/DataEntry/OSTT" class="">
-                    <button class="btn btn-secondary w-100 m-2 btn-custom">
-                        تأكيد وحساب طلبات التحصيل
-                        <hr>
-                        <p class="h6 text-white p-2 m-2 border border-danger">اجراء يتطلب الانتظار بعض الوقت</p>
-
-                    </button>
+                <a href="" class="OSTT" >
+                    <!--  /DataEntry/OSTT  -->
+                    <button class="btn btn-secondary w-100 m-2 btn-custom">تأكيد وحساب طلبات التحصيل      </button>
                 </a>
                 {% elif user_group == "tahsealAdmin"%}
 
@@ -104,6 +101,10 @@
     <script src="{% static 'js/TnewContractPageScript.js' %}"></script>
     <script>{% block script %}{% endblock %}</script>
     <script>
+    $("a.OSTT").click(function(){
+        location.href = "/DataEntry/OSTT/"
+        Swal.fire('جارى التأكيد, برجاء الانتظار ...')
+    })
 var currentTab = 0; // Current tab is set to be the first tab (0)
 showTab(currentTab); // Display the current tab
 

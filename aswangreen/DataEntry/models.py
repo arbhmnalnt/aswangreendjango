@@ -5,7 +5,7 @@ from django.db import models
 
 # Create your models here.
 class TimeStampMixin(models.Model):
-    is_deleted      = models.BooleanField (default=False)
+    is_deleted      = models.BooleanField (default=False, db_index=True)
     created_at      = models.DateTimeField(auto_now_add=True,null=True)
     created_at_date = models.DateField(auto_now_add=True,null=True)
     updated_at      = models.DateTimeField(auto_now=True,null=True)
@@ -143,7 +143,7 @@ class Client(TimeStampMixin,models.Model):
     notes           = models.TextField(max_length=250,null=True, blank=True)
     deserved        = models.IntegerField(default=0, help_text="إجمالى المستحق على العميل")
     # for dateentry needs
-    serviceId       = models.PositiveSmallIntegerField(null=True, blank=True)
+    serviceId       = models.PositiveSmallIntegerField(null=True, blank=True, db_index=True)
     lastReceiptSerial    = models.PositiveIntegerField(null=True, blank=True, verbose_name="اخر سريال دفع")
 
 
@@ -173,10 +173,10 @@ class FollowContractServices(TimeStampMixin,models.Model):
         ('pd', 'تم الدفع'),                    # payment done
         ('lp', 'متأخر الدفع')                  # late payment
     )
-    client               = models.ForeignKey('Client', related_name='client', on_delete=models.CASCADE,null=True, blank=True)
-    service              = models.ForeignKey('Service', related_name='service', on_delete=models.CASCADE,null=True, blank=True)
+    client               = models.ForeignKey('Client', related_name='client', on_delete=models.CASCADE,null=True, blank=True, db_index=True)
+    service              = models.ForeignKey('Service', related_name='service', db_index=True,on_delete=models.CASCADE,null=True, blank=True)
     ecd                  = models.DateField(null=True, blank=True, verbose_name="تاريخ  التحصيل المفترض")        # Estimated collection date
-    collcetStatus        = models.CharField(max_length=5,null=True, blank=True, choices=COLLECT_STATUS, default = 'wecd')
+    collcetStatus        = models.CharField(max_length=5,null=True, blank=True, db_index=True, choices=COLLECT_STATUS, default = 'wecd')
     deservedAmount       = models.IntegerField(null=True, blank=True, verbose_name="المبلغ المطلوب تحصيله")
     collectedAmount      = models.IntegerField(null=True, blank=True, verbose_name="المبلغ الذى تم تحصيله")
     collectedDate        = models.DateField(null=True, blank=True, verbose_name="تاريخ التحصيل الفعلى")

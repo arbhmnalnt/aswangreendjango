@@ -1455,64 +1455,64 @@ def saveReceiptToFollow(followId, collectedAmount, CollectRecordSerial, receiptS
         )
         print("all Done")
 
+import logging
 
 def autoServiceAdd():
-    print(f"autoServiceAdd => started")
+    # print(f"autoServiceAdd => started")
     status = {'msg':'-'}
-    clients = Client.objects.filter(is_deleted=False)
-    for client in clients :
-        clientId = client.id
-        # print(f"client.serviceId => {client.serviceId}")
-        if client.serviceId != None:
-            # print(f"client has serviceId id => {clientId}")
-            serviceId = client.serviceId
-            date_obj = client.created_prev_date
-            if date_obj == None:
-                pass
-            else:
-                date_str = date_obj.strftime('%Y-%m-%d')
-            #data2
-            data2 = {"Serial":client.serialNum, "referer":"3",
-                     "date": date_str, "userId": "1",
-                     "services":f"{serviceId}"
-                     }   # 1 => data entry    shimaa
+    clients = Client.objects.filter(is_deleted=False, serviceId__isnull=False)
+    logging.info(f"clients => {clients}")
 
-            newContractId = create_new_contract(data2, clientId)
-            # follow Services
-            make_new_contract_service_followers(data2, newContractId, clientId)
-        else:
+    for client in clients:
+        clientId = client.id
+        serviceId = client.serviceId
+        date_obj = client.created_prev_date
+        if date_obj == None:
             pass
-            # print(f"client hasnot serviceId id => {clientId}")
+        else:
+            date_str = date_obj.strftime('%Y-%m-%d')
+        #data2
+        data2 = {"Serial":client.serialNum, "referer":"3",
+                 "date": date_str, "userId": "1",
+                 "services":f"{serviceId}"
+                 }   # 1 => data entry    shimaa
+
+        newContractId = create_new_contract(data2, clientId)
+        logging.info(f"newContractId => {newContractId}")
+        make_new_contract_service_followers(data2, newContractId, clientId)
+        logging.info(f"newContractId => {newContractId}")
+
+logging.basicConfig(level=logging.INFO)
+
+
+import logging
 
 def correctCollectMonth():
+    current_date = datetime.now()
+    year = current_date.year
+    month = current_date.month
     follows = FollowContractServices.objects.filter(is_deleted=False)
-    for follow in follows :
-
+    for follow in follows:
         if follow.collectedDate == None:
             contractDate = Contract.objects.filter(client=follow.client, is_deleted=False)[0].created_prev_date
-            lastPayDate = contractDate
-        else:
-            lastPayDate = follow.collectedDate
-        thirtyDaysAfter = lastPayDate+ timezone.timedelta(days=30)
-        current = timezone.now()
-        current_date = current.date()
-        # print(f"type of thirtyDaysAfter is {type(thirtyDaysAfter)}")
-        if thirtyDaysAfter < current_date:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} YES")
-            if follow.collcetStatus == "pip":
-                follow.collectedDate = current_date
-            else:
-                follow.collcetStatus="pr"
-            # print(f"follow client {follow.client.name} / serialNum => {follow.client.serialNum}  thirtyDaysAfter.month => {thirtyDaysAfter.month}")
-            follow.ecd          = thirtyDaysAfter
+            contractDate = datetime.combine(contractDate, datetime.min.time())
 
-            follow.collectMonth = thirtyDaysAfter.month
-            follow.year         = thirtyDaysAfter.year
+        else:
+            contractDate = follow.collectedDate
+        day = int(contractDate.day)
+        day = 30 if day == 31 else 30
+        corrected_date = datetime(year, month, day)
+        collect_date = corrected_date.strftime('%Y-%m-%d')
+
+        if corrected_date < current_date:
+            follow.ecd = collect_date
+            follow.collectMonth = collect_date.month
+            follow.year = collect_date.year
             follow.save()
         else:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} NO")
-            follow.collcetStatus="wecd"
+            follow.collcetStatus = "wecd"
             follow.save()
+    logging.basicConfig(level=logging.INFO)
 
 def resetAllTablesToTestTheSystem():
     follows = FollowContractServices.objects.filter(is_deleted=False).update(collectedDate=None, collcetStatus='wecd')
@@ -1535,73 +1535,47 @@ def collectManager():
     statue = {'msg':'start'}   # for debugging
     updatedCount = 0
     follows = FollowContractServices.objects.filter(is_deleted=False)
-    for follow in follows :
-        followEcd = follow.ecd
-        if followEcd == None:
-            from datetime import datetime, date
-            date_string = '2023-08-25'
-            datetime_object = datetime.strptime(date_string, '%Y-%m-%d')
-            followEcd = datetime_object.date()
-        else:
-            pass
-        # print(f"follow.id => {follow.id}  //  followEcd => {followEcd}")
-        import datetime
-        # Get the current date
-        current_date = datetime.datetime.now()
-        # Extract the current month and year
-        current_month = current_date.month
-        current_year = current_date.year
-        follow.ecd = followEcd.replace(month=current_month)
-        follow.save()
-        followEcd = follow.ecd
-        follow.ecd = followEcd.replace(year=current_year)
-        follow.save()
-        followEcd = follow.ecd
-        # print(f"follow.id => {follow.id}  //  followEcd => {followEcd}")
-        # print(f"follow id => {follow.id}")
-        ecd_ecd = follow.ecd
-        contract = Contract.objects.filter(client=follow.client).update(ecd=ecd_ecd)
-        contract = Contract.objects.filter(client=follow.client).update(remainAmount=follow.remainAmount)
-        contract = Contract.objects.get(client=follow.client)
-        # FollowContractServices.objects.filter(pk=follow.id).update(area=follow.client.area.name)
-        Client.objects.filter(pk=contract.client.id).update(deserved=follow.remainAmount)
-        # print("client id => {contract.client.id} follow")
+    update_ecd(follows)
+    # --
 
-        if follow.collectedDate == None:
-            contractDate = Contract.objects.filter(client=follow.client, is_deleted=False)[0].created_prev_date
-            lastPayDate = contractDate
+def update_ecd(follows):
+    for follow in follows:
+        followEcd = follow.ecd
+        if followEcd is None:
+            import datetime
+            now = datetime.datetime.now()
+            follow.ecd = now
+            follow.ecd = follow.ecd.replace(year=now.year, month=now.month)
+            followEcd = follow.ecd
+            print(f'follow id => {follow.id} / ecd => {follow.ecd} / because followEcd => {followEcd}')
+        follow.save()
+
+        contract = Contract.objects.get(client=follow.client)
+        contract.ecd = follow.ecd
+        contract.save()
+
+        if follow.collectedDate is None:
+            lastPayDate = Contract.objects.filter(client=follow.client, is_deleted=False)[0].created_prev_date
         else:
             lastPayDate = follow.collectedDate
-
-        # from django.utils import timezone
-        # from datetime import datetime, timedelta
-
-        # # Convert the date string into a datetime object
-        # date_string = '24/04/2023'
-        # date_object = datetime.strptime(date_string, '%d/%m/%Y')
-
-        # # Add 30 days to the datetime object
-        # thirtyDaysAfter = date_object.date() + timedelta(days=30)
-
         current = timezone.now()
         current_date = current.date()
-        # # print(f"type of thirtyDaysAfter is {type(thirtyDaysAfter)}")
-
-        if ecd_ecd < current_date:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} YES")
+        if followEcd < current_date.date():
             if follow.collcetStatus == "pip":
-                follow.collectedDate = current_date
+                pass
+                #follow.collectedDate = current_date
             else:
-                follow.collcetStatus="pr"
+                follow.collcetStatus = "pr"
             follow.save()
         else:
-            # print(f"thirtyDaysAfter > lastPayDate {thirtyDaysAfter} => {lastPayDate} NO")
-            follow.collcetStatus="wecd"
+            follow.collcetStatus = "wecd"
             follow.save()
+    # --
     follows = FollowContractServices.objects.filter(collcetStatus="wecd", is_deleted=False)
     followsCount = follows.count()
     statue['count'] = followsCount
     clients = Client.objects.filter(is_deleted=False)
+    updatedCount = 0
     for client in clients:
         clientFollows = FollowContractServices.objects.filter(
                 client=client,
@@ -1612,47 +1586,8 @@ def collectManager():
 
         client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
         client.save()
-        statue['updatedCount'] = updatedCount
-    return statue
-# def collectManager():
-#     statue = {'msg':'start'}   # for debugging
-#     ####  how to it
-#     ##  i want to get all follows that has the
-#     ##
-#     ##
-#     ##
-#     tahselaStart = 25
-#     tahsealEnd = 5
-#     today = datetime.now()
-#     todaynum = today.day
-#     currentMonth = today.month
-#     if tahselaStart <= todaynum <= tahsealEnd:
-#         follows = FollowContractServices.objects.filter(collected_month=currentMonth,  collcetStatusNums="فى انتظار ميعاد التحصيل", is_deleted=False)
-#         followsCount = follows.count()
-#         statue['count'] = followsCount
-#         # need to calculate payment of all clients and add everyone payement to it's desireved
-#         updatedCount = follows.update(collcetStatusNums="مطلوب الدفع", is_deleted=False)
-#         clients = Client.objects.filter(is_deleted=False)
-#         for client in clients:
-#             clientFollows = FollowContractServices.objects.filter(
-#                     client=client,
-#                     collcetStatusNums="مطلوب الدفع",
-#                     service__priceType="month",
-#                     is_deleted=False
-#                 ).values('client').annotate(total_pay=Sum('deservedAmount'))
-
-#             client.deserved = clientFollows[0]['total_pay'] if clientFollows else 0
-#             client.save()
-
-#             # print(f"client {client.id} client total deserved => {client.deserved}")
-
-
-#         statue['updatedCount'] = updatedCount
-#     else:
-
-#         statue.msg = 'today not any of tahseal days'
-
-#     return statue
+        updatedCount += 1
+    print(f'updatedCount => {updatedCount}')
 
 def getServiceId(service, servicePrice, servicePriceType) :
     serviceExist = Service.objects.get(name=service, price=servicePrice, priceType=servicePriceType)
