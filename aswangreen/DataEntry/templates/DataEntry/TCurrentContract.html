@@ -162,11 +162,7 @@
 {% block script %}
 
 function printDoc(){
-    $('.print-none').hide();
-    $('#tblData').printThis();
-    setTimeout(function(){
-        $('.print-none').show();
-    },500)
+    window.print();
 }
 // search
 document.getElementById("input_search").addEventListener("keyup", function(event){
