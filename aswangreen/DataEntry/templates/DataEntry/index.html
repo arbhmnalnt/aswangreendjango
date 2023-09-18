@@ -65,7 +65,7 @@
                 <a href="/DataEntry/TnewCollectOrder" class="">
                   <button class="btn btn-secondary w-100 m-2  btn-custom">انشاء طلب تحصيل</button>
                 </a>
-                <a href="" class="OSTT" >
+                <a href="/DataEntry/OSTT/" class="OSTT" >
                     <!--  /DataEntry/OSTT  -->
                     <button class="btn btn-secondary w-100 m-2 btn-custom">تأكيد وحساب طلبات التحصيل      </button>
                 </a>
@@ -102,8 +102,29 @@
     <script>{% block script %}{% endblock %}</script>
     <script>
     $("a.OSTT").click(function(){
-        location.href = "/DataEntry/OSTT/"
-        Swal.fire('جارى التأكيد, برجاء الانتظار ...')
+        // Swal.fire('جارى التأكيد, برجاء الانتظار ...')
+		let timerInterval
+		Swal.fire({
+			title: 'جارى التحميل ...',
+			html: 'جارى تحميل البيانات خلال <b></b>',
+			timer: 14020,
+			timerProgressBar: true,
+			didOpen: () => {
+				Swal.showLoading()
+				const b = Swal.getHtmlContainer().querySelector('b')
+				timerInterval = setInterval(() => {
+				b.textContent = Math.ceil(Swal.getTimerLeft()/1000)
+				}, 1000)
+			},
+			willClose: () => {
+				clearInterval(timerInterval)
+			}
+		}).then((result) => {
+			/* Read more about handling dismissals below */
+			if (result.dismiss === Swal.DismissReason.timer) {
+				console.log('I was closed by the timer')
+			}
+		})
     })
 var currentTab = 0; // Current tab is set to be the first tab (0)
 showTab(currentTab); // Display the current tab

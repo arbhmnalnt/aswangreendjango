@@ -90,7 +90,13 @@
                                 <td style="font-weight:600">{{contract.client.name}}</td>
                                 <td style="font-weight:600">{{contract.client.phone}}</td>
                                 <td style="font-weight:600">{{contract.client.area}}</td>
-                                <td style="font-weight:600">({% for c in  contract.services.all%} <span class="serviceName">{{c.name}} &</span> {% endfor %})</td>
+                                <td style="font-weight:600">
+                                    {% if contract.services.exists %}
+                                        ({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})
+                                    {% else %}
+                                        ({{contract.service.name}})
+                                    {% endif %}
+                                </td>
                                 <td style="font-weight:600">{{contract.created_prev_date|date:"d-m-Y"}}</td>
                             </tr>
                             {%endfor%}

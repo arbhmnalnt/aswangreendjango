@@ -78,14 +78,8 @@ class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
 
 class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ['client__name', 'client__serialNum']
-    list_display = ('id','client','get_services','serialNum','created_at')
-    # optimizing the query for each service
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.prefetch_related('services')
+    list_display = ('id','client','service','serialNum','created_at')
 
-    def get_services(self, obj):
-        return " - ".join([service.name for service in obj.services.all()])
 
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):

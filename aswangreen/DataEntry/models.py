@@ -126,6 +126,7 @@ class Client(TimeStampMixin,models.Model):
     addressDetails  = models.TextField(max_length=250,null=True, blank=True, help_text="اى تفاصيل إخرى للعنوان")
     customFilter    = models.CharField(max_length=250, null=True, blank=True, help_text="فلتر مخصص")
     created_prev_date = models.DateField(null=True, blank=True)
+    collectDate       = models.DateField(null=True, blank=True)
     needReview      = models.BooleanField(default=False, null=True, blank=True)
     activation_request = models.BooleanField(default=False)
     outsource       = models.BooleanField(default=False)
@@ -151,7 +152,8 @@ class Client(TimeStampMixin,models.Model):
 class Contract(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(help_text="رقم سريال متفرد لكل تعاقد",unique=True,null=True, blank=True,db_index=True)
     client          = models.OneToOneField('Client', related_name='contract_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
-    services        = models.ManyToManyField('Service',related_name='services')
+    services         = models.ManyToManyField('Service',related_name='services')
+    service         = models.ForeignKey('Service',related_name='service_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
     # subServices     = models.ManyToManyField('SubService',related_name='services')
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)

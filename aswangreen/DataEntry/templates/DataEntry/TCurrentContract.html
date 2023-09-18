@@ -111,7 +111,13 @@
                     <td>{{contract.client.area.name}}</td>
                     <td>{{contract.client.addressDetails}}</td>
                     <td>{{contract.client.customFilter}}</td>
-                    <td class="services">({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})</td>
+                    <td class="services">
+                        {% if contract.services.exists %}
+                            ({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})
+                        {% else %}
+                            ({{contract.service.name}})
+                        {% endif %}
+                    </td>
                     </td>
                     <td>
                         {% if contract.lastReceiptSerial %}
@@ -162,7 +168,11 @@
 {% block script %}
 
 function printDoc(){
-    window.print();
+    $('.print-none').hide();
+    $('#tblData').printThis();
+    setTimeout(function(){
+        $('.print-none').show();
+    },500)
 }
 // search
 document.getElementById("input_search").addEventListener("keyup", function(event){

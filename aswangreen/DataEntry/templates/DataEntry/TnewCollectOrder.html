@@ -140,7 +140,7 @@ table {
         </div>
         <div class="col-12">
             {% if isContracts %}
-            <table class="w-100 table text-center table-striped table-hover table-bordered text-center" id="tblData"
+            <table class="table table-sm text-center table-striped table-hover table-bordered" id="tblData"
             style="text-align:center;direction:rtl;height: 59vh;overflow-y: auto;">
             <thead class="text-center">
                 <tr class="bg-secondary text-white text-center" style="font-size:1rem">
@@ -168,9 +168,9 @@ table {
                     <td class="">{{contract.client.area.name}}</td>
                     <td class="">{{contract.ecd|date:"d / m /Y" }}</td>
                     <td class="deserved">
-                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.services.0.price}}"> جم
+                        <input class="text-center w-50 deservedMoney" disabled value="{{contract.service.price}}"> جم
                         <hr>
-                        <input class="text-center w-50 editPay" name="newPay" placeholder="تعديل السعر" value="{{contract.remainAmount}}"> جم
+                        <input class="text-center w-50 editPay" name="newPay" placeholder="تعديل السعر" value="{{contract.service.price}}"> جم
                     </td>
                     <td class="d-none">{{contract.lastPay|date:"d / m /Y" }}</td>
                     <td class="d-none">
