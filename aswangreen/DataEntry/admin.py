@@ -78,9 +78,12 @@ class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
 
 class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ['client__name', 'client__serialNum']
-    list_display = ('id','client','service','serialNum','created_at')
+    list_display = ('id','client','serialNum','created_at')
 
-
+    def getService(self, obj):
+        serviceId = object.service
+        service = Service.objects.get(pk=serviceId)
+        return str(service.name)
 
 class FollowContractServicesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ['pk','client__name', 'client__area__name']
