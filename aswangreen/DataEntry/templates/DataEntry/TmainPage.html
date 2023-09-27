@@ -66,7 +66,7 @@
             <div class="row">
                 <div class="col-12 m-auto">
                     <h5 class=" text-center">أحدث التعاقدات <span><a href="#" class="text-left" style="position:relative; right:37%">المزيد</a></span></h6>
-                    <span class="h6">{{contractsLen}} تعاقدات</span> 
+                    <span class="h6">{{contractsLen}} تعاقدات</span>
                     <span class="h6 d-inline-block" style="margin-right:22rem!important">الصفحة رقم <span id="currentPageNumShow" class="text-info"></span></span>
                     <hr>
                     {% load paginate %}
@@ -164,7 +164,7 @@
     $("#currentPageNumShow").html(`${parseInt(pageNum)}`)
 
     $("#next").click(function(e){
-        
+
         e.preventDefault();
         var pageNum = getUrlParameter('page');
         $("#currentPageNumShow").html(`${parseInt(pageNum)}`)

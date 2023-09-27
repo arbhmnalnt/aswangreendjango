@@ -153,7 +153,8 @@ class Client(TimeStampMixin,models.Model):
 class Contract(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(help_text="رقم سريال متفرد لكل تعاقد",unique=True,null=True, blank=True,db_index=True)
     client          = models.OneToOneField('Client', related_name='contract_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
-    service         = models.CharField(max_length=5,null=True, blank=True)
+    service         = models.CharField(max_length=7,null=True, blank=True)
+    # relatedService  = models.ForeignKey('Service', related_name='serviceContract', db_index=True,on_delete=models.CASCADE,null=True, blank=True)
     # subServices     = models.ManyToManyField('SubService',related_name='services')
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)

@@ -9,7 +9,7 @@ app_name="DataEntry"
 
 urlpatterns = [
     # -- temp pages
-    path('', TCurrentContract, name="mainPage") ,
+    path('', TmainPage, name="mainPage") ,
     path('TmainPage/', TmainPage, name="TmainPage") ,
     path('TnewContract2/', TnewContract, name="TnewContract2"),
     # path('TnewContract/', TnewContract2, name="TnewContract"),

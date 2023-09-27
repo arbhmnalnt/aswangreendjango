@@ -69,7 +69,7 @@
             <span class="btn btn-primary text-white p-2 d-inline-block">إجمالى التعاقدات
             </span>
             <span class="bg-dark text-white p-3">
-            {{contracts_list.count}}
+            {{counter}}
             </span>
         </div>
         <div class="col-4 m-auto">
@@ -165,7 +165,7 @@
 
 function printDoc(){
     $('.print-none').hide();
-    $('#tblData').printThis();
+    window.print();
     setTimeout(function(){
         $('.print-none').show();
     },500)

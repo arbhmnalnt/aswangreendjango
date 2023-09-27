@@ -720,8 +720,7 @@ def TCurrentContract(request):
             Q(client__serialNum__icontains=query)& Q(is_deleted=False) |
             Q(client__name__icontains=query)& Q(is_deleted=False) |  Q(client__area__name__icontains=query)& Q(is_deleted=False)|
             Q(belong_to__name__icontains=query)& Q(is_deleted=False) |Q(client__customFilter__icontains=query)& Q(is_deleted=False)|
-            Q(notes__icontains=query)& Q(is_deleted=False) |Q(created_by__name__icontains=query)& Q(is_deleted=False)|
-            Q(services__name__icontains=query)& Q(is_deleted=False)
+            Q(notes__icontains=query)& Q(is_deleted=False) |Q(created_by__name__icontains=query)& Q(is_deleted=False)
         ).distinct().order_by('-created_at')
     if queryDate:
         contracts_list = Contract.objects.filter(created_prev_date=queryDate,is_deleted=False).distinct().order_by('-created_at')
@@ -734,7 +733,6 @@ def TCurrentContract(request):
         contracts = paginator.page(1)
     except EmptyPage:
         contracts = paginator.page(paginator.num_pages)
-
     contract_service_mapping = {}
     for contract in contracts_list:
         service_id = contract.service
@@ -743,8 +741,8 @@ def TCurrentContract(request):
         else:
             service = Service.objects.get(pk=service_id)
         contract_service_mapping[contract] = service
-
-    ctx = {'contract_service_mapping':contract_service_mapping, 'contracts':contracts}
+    counter = contracts_list.count()
+    ctx = {'contract_service_mapping':contract_service_mapping, 'contracts':contracts, 'counter':counter}
     return render(request, 'DataEntry/TCurrentContract.html', ctx)
 
 @api_view(['GET'])
@@ -900,10 +898,15 @@ def TnewContract(request):
 
     isClient       = False
     if request.method == 'POST':
-        date            = request.POST['date']    # todayUser
+        date            = request.POST['date']       # todayUser
         clientId        = request.POST['clientId']
         if 'clientId' in request.POST:
-            isClient = True
+            serial = request.POST['serial']
+            isC = Contract.objects.filter(serialNum=serial).exists()
+            if isC:
+                isClient = True
+            else:
+                isClient = False
         else:
             isClient = False
         if clientId == 0:
@@ -952,6 +955,7 @@ def TnewContract(request):
             "nationalId": "",
             "Serial": serial,
             "area": area,
+            "clientId": clientId,
             "streetName": addressDetails,
             "addressBuilding": apartment,
             "addressApartment": flat,
@@ -963,6 +967,7 @@ def TnewContract(request):
             "contractDate":contractDate,
             "notes": f"{serviceNotes}"
         }
+        print(f' is client => {isClient}')
 
         if isClient:
             clientId = update_client_data(data2)
@@ -988,7 +993,7 @@ def TnewContract(request):
             employees = Employee.objects.all()
             ctx={'employees':employees, 'areas':areas,'today':todayDate,
             'todayUser':todayUser, 'clientRecord':clientRecord,
-            'clientContract':clientContract,'service':service,'isClient':isClient}
+            'clientContract':clientContract,'service':service,'isClient':isClient,'clientId':clientId}
             return render(request, 'DataEntry/TnewContract.html', ctx)
     areas     = Area.objects.all()
     employees = Employee.objects.all()
@@ -1003,20 +1008,23 @@ def getPageNums(total, listcount):
 
 import time
 
+
 def OSTT(request):
-    startTime = time.time()
-    print(f' start => ')
+    # startTime = time.time()
+    # print(f' start => ')
     autoServiceAdd()
 
     collectManager()
-    print(f'end =>')
-    endTime = time.time()
-    total_time_taken = endTime - startTime
-    print(f'Total time taken: {total_time_taken}')
+    # print(f'end =>')
+    # endTime = time.time()
+    # total_time_taken = endTime - startTime
+    # print(f'Total time taken: {total_time_taken}')
     return redirect('/DataEntry/TmainPage/?page=1')
 
 @login_required
 def TmainPage(request):
+    # startTime = time.time()
+    # print(f' start => ')
     print(f"request.session['group'] => {request.session.keys()}")
     if 'group' not in request.session :
         return redirect('/cAccounts/login/')
@@ -1028,33 +1036,43 @@ def TmainPage(request):
         pass
     else:
         return HttpResponse("erorr here")
-    # to be used one time only
-    # autoServiceAdd()
+
     listcount = 7
+    page = int(request.GET.get('page' , 1))
+    nextPage = page+1
+    previousPage = page-1
+    pageS = page - 1
+    start = pageS*listcount
+    end = page*listcount
+
     # stats part
     remainingCollections = len(peopleTocollectFrom())
     collected            = len(peopleCollectedFrom())
     currentClients       = Contract.objects.all().count()
     collectorsNum        = Employee.objects.filter(jobTitle="محصل").count()
     # latest contracts
-    contracts            = Contract.objects.all().order_by('-id')
+    contracts            = Contract.objects.all().order_by('-id')[start:end]
     contract_service_mapping = {}
     for contract in contracts:
         service_id = contract.service
-        service = Service.objects.get(pk=service_id)
+        if service_id == None :
+            service = Service.objects.get(pk=2929)
+        else:
+            service = Service.objects.get(pk=service_id)
         contract_service_mapping[contract] = service
 
     pages = getPageNums(Contract.objects.all().count(), listcount)
+
     # current collecr orders
     orders               = CollectOrder.objects.filter(confirmed=False)
     ctx= {'remainingCollections':remainingCollections, "collected":collected, "currentClients":currentClients, "collectorsNum":collectorsNum,
         'items':contracts,'contract_service_mapping':contract_service_mapping, 'contractsLen':contracts.count(), 'orders':orders, 'ordersLen':orders.count(),
-        'pages':pages, 'listcount':listcount}
+        'pages':pages, 'listcount':listcount, 'nextPage':nextPage, 'previousPage':previousPage}
 
-    # check if clients has a service id in the client record
-    # make a contract with this service to the client
-    # make a follow service for the client with it's contract and service
-
+    # print(f'end =>')
+    # endTime = time.time()
+    # total_time_taken = endTime - startTime
+    # print(f'Total time taken: {total_time_taken}')
 
     return render(request, 'DataEntry/TmainPage.html', ctx)
 
@@ -1489,8 +1507,13 @@ def update_ecd(follows):
             followEcd = follow.ecd
             if followEcd is None:
                 client = follow.client
-                followEcd = client.created_prev_date
-                follow.ecd = followEcd
+                if client == None:
+                    ss = follow.id
+                    print(f'follow => {ss} follow client => {follow.client}')
+                    continue
+                else:
+                    followEcd = client.created_prev_date
+                    follow.ecd = followEcd
             else:
                 if followEcd < current_date:
                     if follow.collcetStatus == "pip":
@@ -1796,6 +1819,7 @@ import datetime
 def get_Month(date):
     if type(date) == str:
         date = datetime.datetime.strptime(date, "%Y-%m-%d")
+        month = date.month
     else:
         month = date.month
     return month
@@ -1834,9 +1858,9 @@ def create_new_contract(data, clientId):
     if not Contract.objects.filter(client_id=clientId).exists():
         employee = Employee.objects.get(pk=data['userId'])
         if "belongsTo"  in  data:
-            belongsTo = Employee.objects.get(pk=data['belongsTo'])
+            belongsTo = getEmployee(data['belongsTo'])
         else:
-            belongsTo = Employee.objects.get(pk=data['referer'])
+            belongsTo = getEmployee(data['referer'])
         contract = Contract.objects.create(
                 serialNum=data["Serial"],
                 client=client,
