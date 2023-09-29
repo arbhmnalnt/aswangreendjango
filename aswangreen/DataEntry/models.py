@@ -41,6 +41,10 @@ class TimeStampMixin(models.Model):
             return str("object_")
 
 
+class Track(TimeStampMixin, models.Model):
+    # user    =     n
+    details = models.TextField(max_length=350,null=True, blank=True)
+
 class Departement(TimeStampMixin,models.Model):
     name  = models.CharField(max_length=50)
     notes = models.TextField(max_length=50,null=True, blank=True)

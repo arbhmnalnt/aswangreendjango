@@ -555,7 +555,7 @@ def TnewCollectOrder(request):
     if 'group' not in request.session:
         return redirect('/cAccounts/login/')
 
-    if request.session['group'] == "tahsealAdmin":
+    if request.session['group'] == "tahsealAdmin" or request.session['group'] == "allAdmin":
         pass
 
     elif request.session['group'] == "dataEntryAdmin":
@@ -779,117 +779,117 @@ def checkClientSerial(request):
     data = {'responseText':res, 'itesms':a}
     return Response(data)
 
-@login_required
-def TnewContract2(request):
-    if 'group' not in request.session :
-        return redirect('/cAccounts/login/')
-    else :
-        pass
-    if request.session['group'] == "dataEntryAdmin":
-        pass
-    elif request.session['group'] == "tahsealAdmin":
-        return redirect('/DataEntry/TnewCollectOrder')
-    else:
-        return HttpResponse("erorr here")
-    isServiceManagerAdmin = False
-    # print(f"request.GET.get('userRole') => {request.GET.get('userRole')}")
-    if request.GET.get('userRole'):
-        isServiceManagerAdmin = True
-    services  = Service.objects.all()
-    servicesList = ["service-"+str(service.id) for service in services]
-    isClient       = False
-    if request.method == 'POST':
-        date            = request.POST['date']    # todayUser
-        clientId        = request.POST['clientId']
-        Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False)
-        Client.objects.filter(pk=clientId, is_deleted=False).update(notes='')
-        userId          = request.POST['userId']
-        serial          = request.POST['seriala']
-        clientName      = request.POST['name']
-        phone           = request.POST['phone']
-        contractDate    = request.POST['contractDate']
-        lastPay = request.POST['lastPay'] if 'lastPay' in request.POST else ''
-        area            = Area.objects.get(pk=request.POST['area'])
-        addressDetails  = request.POST['addressDetails']
-        apartment       = isEmptyStr(request.POST['apartment'])
-        flat            = isEmptyStr(request.POST['float'])
-        serviceName         = request.POST.getlist('service[]')[0]
-        servicePrice        = request.POST.getlist('servicePrice[]')[0]
-        serviceType         = request.POST.getlist('serviceTypes[]')[0]
-        servicePriceType    = request.POST.getlist('servicePriceType[]')[0]
-        serviceNote         = servcesNotes = request.POST.getlist('notes[]')[0]
-        #
-        service = Service.objects.get_or_create(
-            name=serviceName, typee=serviceType, price=servicePrice,priceType=servicePriceType, notes=serviceNote
-        )
-        serviceId = service.id
-        referer         = 0 if request.POST['referer'] == '0' else request.POST['referer']
-        ##########
+# @login_required
+# def TnewContract2(request):
+#     if 'group' not in request.session :
+#         return redirect('/cAccounts/login/')
+#     else :
+#         pass
+#     if request.session['group'] == "dataEntryAdmin":
+#         pass
+#     elif request.session['group'] == "tahsealAdmin":
+#         return redirect('/DataEntry/TnewCollectOrder')
+#     else:
+#         return HttpResponse("erorr here")
+#     isServiceManagerAdmin = False
+#     # print(f"request.GET.get('userRole') => {request.GET.get('userRole')}")
+#     if request.GET.get('userRole'):
+#         isServiceManagerAdmin = True
+#     services  = Service.objects.all()
+#     servicesList = ["service-"+str(service.id) for service in services]
+#     isClient       = False
+#     if request.method == 'POST':
+#         date            = request.POST['date']    # todayUser
+#         clientId        = request.POST['clientId']
+#         Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False)
+#         Client.objects.filter(pk=clientId, is_deleted=False).update(notes='')
+#         userId          = request.POST['userId']
+#         serial          = request.POST['seriala']
+#         clientName      = request.POST['name']
+#         phone           = request.POST['phone']
+#         contractDate    = request.POST['contractDate']
+#         lastPay = request.POST['lastPay'] if 'lastPay' in request.POST else ''
+#         area            = Area.objects.get(pk=request.POST['area'])
+#         addressDetails  = request.POST['addressDetails']
+#         apartment       = isEmptyStr(request.POST['apartment'])
+#         flat            = isEmptyStr(request.POST['float'])
+#         serviceName         = request.POST.getlist('service[]')[0]
+#         servicePrice        = request.POST.getlist('servicePrice[]')[0]
+#         serviceType         = request.POST.getlist('serviceTypes[]')[0]
+#         servicePriceType    = request.POST.getlist('servicePriceType[]')[0]
+#         serviceNote         = servcesNotes = request.POST.getlist('notes[]')[0]
+#         #
+#         service = Service.objects.get_or_create(
+#             name=serviceName, typee=serviceType, price=servicePrice,priceType=servicePriceType, notes=serviceNote
+#         )
+#         serviceId = service.id
+#         referer         = 0 if request.POST['referer'] == '0' else request.POST['referer']
+#         ##########
 
-        # to be done
-        if clientId != "" or clientId != None :
-            client = Client.objects.get(pk=clientId)
-            previous_notes = client.notes
-        else:
-            previous_notes = ''
-        data2 = {
-            "name": clientName,
-            "clientId": clientId,
-            "phone": phone,
-            "nationalId": "",
-            "Serial": serial,
-            "area": area,
-            "streetName": addressDetails,
-            "addressBuilding": apartment,
-            "addressApartment": flat,
-            "addressDetails": f"{addressDetails} - {apartment} - {flat}",
-            "service": serviceId,
-            "referer": referer,
-            "date": date,
-            "userId": userId,
-            "contractDate":contractDate,
-            "lastPay":lastPay,
-            "notes": f"{servcesNotes}"
-        }
+#         # to be done
+#         if clientId != "" or clientId != None :
+#             client = Client.objects.get(pk=clientId)
+#             previous_notes = client.notes
+#         else:
+#             previous_notes = ''
+#         data2 = {
+#             "name": clientName,
+#             "clientId": clientId,
+#             "phone": phone,
+#             "nationalId": "",
+#             "Serial": serial,
+#             "area": area,
+#             "streetName": addressDetails,
+#             "addressBuilding": apartment,
+#             "addressApartment": flat,
+#             "addressDetails": f"{addressDetails} - {apartment} - {flat}",
+#             "service": serviceId,
+#             "referer": referer,
+#             "date": date,
+#             "userId": userId,
+#             "contractDate":contractDate,
+#             "lastPay":lastPay,
+#             "notes": f"{servcesNotes}"
+#         }
 
 
-        newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
-        # client contract data
-        newContractId = create_new_contract(data2, newClientId)
-        # follow Services
-        make_new_contract_service_followers(data2, newContractId, newClientId)
-        return redirect('/DataEntry/TnewContract/')
-    else:
-        print("isServiceManagerAdmin =>" , isServiceManagerAdmin)
-        # print(f"isClient => {isClient}")
-        if request.GET.get('clientId'):
-            isClient       = True
-            clientId       = request.GET.get('clientId')
-            Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False)
-            Client.objects.filter(pk=clientId, is_deleted=False).update(notes='')
-            clientRecord   = Client.objects.get(pk=clientId)
-            isContract     = Contract.objects.filter(client=clientRecord)
-            clientContract = isContract[0] if isContract.count()>0 else False
-            servicesList   = [serv.name for serv in clientContract.services.all()] if isContract.count()>0 else []
-            areas     = Area.objects.all()
-            employees = Employee.objects.all()
-            ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
-            'todayUser':todayUser, 'clientRecord':clientRecord,'clientId':clientId,
-            'clientContract':clientContract,'servicesList':servicesList,'isClient':isClient, 'isServiceManagerAdmin':isServiceManagerAdmin}
-            return render(request, 'DataEntry/TnewContract.html', ctx)
-    areas     = Area.objects.all()
-    employees = Employee.objects.all()
+#         newClientId  =  create_new_client(data2) # wikk be returened after inserting the new client
+#         # client contract data
+#         newContractId = create_new_contract(data2, newClientId)
+#         # follow Services
+#         make_new_contract_service_followers(data2, newContractId, newClientId)
+#         return redirect('/DataEntry/TnewContract/')
+#     else:
+#         print("isServiceManagerAdmin =>" , isServiceManagerAdmin)
+#         # print(f"isClient => {isClient}")
+#         if request.GET.get('clientId'):
+#             isClient       = True
+#             clientId       = request.GET.get('clientId')
+#             Client.objects.filter(pk=clientId, is_deleted=False).update(missing_info=False)
+#             Client.objects.filter(pk=clientId, is_deleted=False).update(notes='')
+#             clientRecord   = Client.objects.get(pk=clientId)
+#             isContract     = Contract.objects.filter(client=clientRecord)
+#             clientContract = isContract[0] if isContract.count()>0 else False
+#             servicesList   = [serv.name for serv in clientContract.services.all()] if isContract.count()>0 else []
+#             areas     = Area.objects.all()
+#             employees = Employee.objects.all()
+#             ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
+#             'todayUser':todayUser, 'clientRecord':clientRecord,'clientId':clientId,
+#             'clientContract':clientContract,'servicesList':servicesList,'isClient':isClient, 'isServiceManagerAdmin':isServiceManagerAdmin}
+#             return render(request, 'DataEntry/TnewContract.html', ctx)
+#     areas     = Area.objects.all()
+#     employees = Employee.objects.all()
 
-    ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
-    'todayUser':todayUser, 'isClient':isClient, 'isServiceManagerAdmin':isServiceManagerAdmin}
-    return render(request, 'DataEntry/TnewContract2.html', ctx)
+#     ctx={'services':services, 'employees':employees, 'areas':areas,'today':todayDate,
+#     'todayUser':todayUser, 'isClient':isClient, 'isServiceManagerAdmin':isServiceManagerAdmin}
+#     return render(request, 'DataEntry/TnewContract2.html', ctx)
 
 def TnewContract(request):
     if 'group' not in request.session :
         return redirect('/cAccounts/login/')
     else :
         pass
-    if request.session['group'] == "dataEntryAdmin":
+    if request.session['group'] == "dataEntryAdmin" or request.session['group'] == "allAdmin" :
         pass
     elif request.session['group'] == "tahsealAdmin":
         return redirect('/DataEntry/TnewCollectOrder')
@@ -1025,7 +1025,7 @@ def OSTT(request):
 def TmainPage(request):
     # startTime = time.time()
     # print(f' start => ')
-    print(f"request.session['group'] => {request.session.keys()}")
+    print(f"request.session['group'] aa => {request.session['group']}")
     if 'group' not in request.session :
         return redirect('/cAccounts/login/')
     else :
@@ -1033,6 +1033,8 @@ def TmainPage(request):
     if request.session['group'] == "dataEntryAdmin":
         pass
     elif request.session['group'] == "tahsealAdmin":
+        pass
+    elif request.session['group'] == "allAdmin":
         pass
     else:
         return HttpResponse("erorr here")
@@ -1839,7 +1841,7 @@ def make_new_contract_service_followers(data2, newContractId, newClientId):
         else:
             serviceId = data2["service"]
         service                 = Service.objects.get(pk=serviceId)
-        employee                  = Employee.objects.get(pk=data2['userId'])
+        employee                  = getEmployee(data2['userId'])
         follow_contract_services = FollowContractServices.objects.create(
             client=client, service=service, deservedAmount=service.price, remainAmount=service.price,
             collectMonth=get_Month(data2['date']),created_by=employee, is_test=False
@@ -1856,7 +1858,7 @@ def create_new_contract(data, clientId):
     client = Client.objects.get(pk=clientId)
     #
     if not Contract.objects.filter(client_id=clientId).exists():
-        employee = Employee.objects.get(pk=data['userId'])
+        employee = getEmployee(data['userId'])
         if "belongsTo"  in  data:
             belongsTo = getEmployee(data['belongsTo'])
         else:
@@ -1900,7 +1902,7 @@ def getEmployee(userId):
 
 def create_new_client(dictt):
     area_obj = Area.objects.get(name=dictt["area"])
-    employee_obj = Employee.objects.get(pk=dictt['userId'])
+    employee_obj = getEmployee(dictt['userId'])
 
     client = Client.objects.create(
         serialNum=dictt["Serial"],name=dictt["name"],phone=dictt["phone"],area=area_obj,streetName=dictt["streetName"],
