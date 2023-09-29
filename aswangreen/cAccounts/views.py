@@ -32,7 +32,7 @@ def login(request):
         data2 = request.POST
         # print(data2)
         #data2 = json.loads(json.dumps(request.bo))
-        
+
         username = data2.get('username')
         # print(f"username => {username}")
         password = data2.get('password')
@@ -74,16 +74,20 @@ def profile(request):
         request.session['group'] = "dataEntryAdmin"
         return redirect('/DataEntry/')
 
+    elif user.groups.filter(name="allAdmin"):
+        request.session['group'] = "allAdmin"
+        return redirect('/DataEntry/')
+
     elif user.groups.filter(name="tahsealAdmin"):
         request.session['group'] = "tahsealAdmin"
         # print("admin here => ")
         return redirect('/DataEntry/TcurrentCollectOrder/')
-    
+
     elif user.groups.filter(name="customerService"):
         request.session['group'] = "customerService"
         # print("admin here => ")
         return redirect('/cs/')
-        
+
     else:
         request.session['group'] = "else"
         msg="user has no group"

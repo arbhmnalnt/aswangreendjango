@@ -51,7 +51,11 @@
     	<div class="row" style="height:89vh">
     	    <div class="col-2 pt-5 text-white" style="background-color:#30393D">
                 {% with user_group=request.session.group %}
-                {% if  user_group == "dataEntryAdmin"%}
+                {% if user_group == "allAdmin" %}
+                <a href = "/DataEntry/track/">
+                    <button class="btn btn-danger w-100 m-2 text-right btn-custom">سجل التتبع</button>
+                </a>
+                {% elif  user_group == "dataEntryAdmin"%}
                 <a href="/DataEntry/TmainPage?page=1" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">تأكيد الاكسيل</button>
                 </a>
@@ -64,12 +68,13 @@
                 <a href="/DataEntry/TnewCollectOrder" class="">
                   <button class="btn btn-secondary w-100 m-2 text-right btn-custom">انشاء طلب تحصيل</button>
                 </a>
+
                 {% elif user_group == "tahsealAdmin"%}
-                
+
                 <a href="/DataEntry/TcurrentCollectOrder" class="">
                     <button class="btn btn-secondary w-100 m-2 text-right btn-custom">طلبات التحصيل الجارية</button>
                 </a>
-                
+
                 {% else %}
                 {% endif %}
                 {% endwith %}

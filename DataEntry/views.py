@@ -1020,7 +1020,7 @@ def getPageNums(total, listcount):
 
 @login_required
 def TmainPage(request):
-    print(f"request.session['group'] => {request.session.keys()}")
+    print(f"request.session['group'] aa => {request.session['group']}")
     if 'group' not in request.session :
         return redirect('/cAccounts/login/')
     else :
