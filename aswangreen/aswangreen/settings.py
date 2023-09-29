@@ -102,10 +102,11 @@ WSGI_APPLICATION = 'aswangreen.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aswangreen$data2',
-        'USER': 'aswangreen',
-        'PASSWORD': 'ahmed123!',
-        'HOST': 'aswangreen.mysql.pythonanywhere-services.com',
+        'NAME': 'aswangreen',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'port':"3306",
         'OPTIONS': {
             'sql_mode': 'traditional',
         }

@@ -102,7 +102,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for contract in contracts_list %}
+                {% for contract, service in contract_service_mapping.items %}
                 <tr id="{{contract.serialNum}}">
                     <td>{{forloop.counter}}</td>
                     <td class="serial">{{contract.serialNum}}</td>
@@ -112,11 +112,7 @@
                     <td>{{contract.client.addressDetails}}</td>
                     <td>{{contract.client.customFilter}}</td>
                     <td class="services">
-                        {% if contract.services.exists %}
-                            ({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})
-                        {% else %}
-                            ({{contract.service.name}})
-                        {% endif %}
+                        {{service}}
                     </td>
                     </td>
                     <td>

@@ -193,11 +193,10 @@
                   </p>
                 </div>
                 <div class="tab {%if isServiceManagerAdmin%}d-block{%else%}{%endif%}">الخدمات:
-                    <p class="border p-2 text-danger">{%for serv in clientContract.services.all%}{{serv.name}} {{serv.price}}
-                        {%if serv.typee == "once"%} مرة واحدة
-                        {%elif serv.typee == "month"%} شهرى
+                    <p class="border p-2 text-danger">{{service.name}} {{service.price}} / {{service.typee}} / {{service.notes}}
+                        {%if service.typee == "once"%} مرة واحدة
+                        {%elif service.typee == "month"%} شهرى
                         {% endif %}
-                        & {% endfor %}</p>
                     <div class="d-flex">
                         <p>الخدمة</p>
                         <p>السعر</p>
@@ -210,23 +209,21 @@
                             <div class="service-holer border d-flex">
                                 <div class="service-number mt-3">1.</div>
                                 <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة"
-                                 name="service[]" value="">
-                                <input type="number" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice[]">
-                                <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType[]">
+                                 name="service" value="">
+                                <input type="number" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice">
+                                <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType">
                                     <option selected disabled class="notValidChoose">اختر</option>
                                     <!-- <option value="once">خدمة لمرة واحدة</option> -->
                                     <option value="continuous" selected>شهرى</option>
                                 </select>
-                                <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType[]">
+                                <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType">
                                     <option selected disabled class="notValidChoose">اختر</option>
                                     <!-- <option value="once">مرة واحدة</option>
                                     <option value="weekly">اسبوعيا</option> -->
                                     <option value="month" selected>شهرى</option>
                                 </select>
-                                <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes[]">
-                                <div class="service-actions">
-                                    <button class="delete-service btn btn-danger">حذف الخدمة</button>
-                                </div>
+                                <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes">
+
                                 <hr>
                             </div>
                         </div>
@@ -440,33 +437,6 @@ function checkAllInputsNotEmpty(){
     return isValid;
 }
 
-function addNewServiceInputs(newNumber){
-    // Select the element after which the new element will be added
-    const $existingElement = $('div.service-holer:last');
-
-    // Create a new element and append it after the existing element
-    $(`<div class="service-holer border d-flex">
-        <div class="service-number mt-3">${newNumber}.</div>
-        <input type="text" class="service-name form-control ml-2 mt-2" placeholder="الخدمة" name="service[]">
-        <input type="text" class="service-price form-control ml-2 mt-2" placeholder="سعر الخدمة" name="servicePrice[]">
-        <select class="service-type form-control ml-2 mt-2" placeholder="نوع الخدمة" name="serviceType[]">
-            <option selected disabled class="notValidChoose">اختر</option>
-            <option value="once">خدمة لمرة واحدة</option>
-            <option value="continuous">خدمة مستمرة</option>
-        </select>
-        <select class="price-type form-control ml-2 mt-2" placeholder="السعر لكل"name="servicePriceType[]">
-            <option selected disabled class="notValidChoose">اختر</option>
-            <option value="once">مرة واحدة</option>
-            <option value="weekly">اسبوعيا</option>
-            <option value="month">شهر</option>
-        </select>
-        <input type="text" class="service-notes form-control ml-2 mt-2" placeholder="ملاحظات" name="notes[]">
-        <div class="service-actions">
-            <button class="delete-service btn btn-danger">حذف الخدمة</button>
-        </div>
-        <hr>
-    </div>`).insertAfter($existingElement);
-}
 
 {% endif %}
 {% endblock %}

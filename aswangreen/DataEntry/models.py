@@ -148,12 +148,12 @@ class Client(TimeStampMixin,models.Model):
     lastReceiptSerial    = models.PositiveIntegerField(null=True, blank=True, verbose_name="اخر سريال دفع")
 
 
+    # services         = models.ManyToManyField('Service',related_name='services')
 
 class Contract(TimeStampMixin,models.Model):
     serialNum       = models.IntegerField(help_text="رقم سريال متفرد لكل تعاقد",unique=True,null=True, blank=True,db_index=True)
     client          = models.OneToOneField('Client', related_name='contract_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
-    services         = models.ManyToManyField('Service',related_name='services')
-    service         = models.ForeignKey('Service',related_name='service_client', on_delete=models.CASCADE,null=True, blank=True,db_index=True)
+    service         = models.CharField(max_length=5,null=True, blank=True)
     # subServices     = models.ManyToManyField('SubService',related_name='services')
     belong_to       =  models.ForeignKey('Employee', related_name='contract_getter', on_delete=models.CASCADE,null=True, blank=True)
     created_prev_date = models.DateField(null=True, blank=True)

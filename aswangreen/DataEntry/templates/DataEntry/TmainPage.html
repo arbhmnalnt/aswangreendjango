@@ -84,18 +84,14 @@
                         </thead>
                         <tbody>
                             {% paginate listcount items %}
-                            {%for contract in items%}
+                            {% for contract, service in contract_service_mapping.items %}
                             <tr>
                                 <td style="font-weight:600">{{contract.serialNum}}</td>
                                 <td style="font-weight:600">{{contract.client.name}}</td>
                                 <td style="font-weight:600">{{contract.client.phone}}</td>
                                 <td style="font-weight:600">{{contract.client.area}}</td>
                                 <td style="font-weight:600">
-                                    {% if contract.services.exists %}
-                                        ({%for serv in contract.services.all%} <span class="serv">{{serv.name}}</span>{% endfor %})
-                                    {% else %}
-                                        ({{contract.service.name}})
-                                    {% endif %}
+                                        <p>{{ service }}</p>
                                 </td>
                                 <td style="font-weight:600">{{contract.created_prev_date|date:"d-m-Y"}}</td>
                             </tr>
