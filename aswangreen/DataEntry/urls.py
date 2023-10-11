@@ -27,6 +27,7 @@ urlpatterns = [
     path('getCollectors/' ,getCollectorsAll.as_view()),
     path('createNewCollectOrder/' ,createNewCollectOrder.as_view()),
     path('payRecord/' ,payRecord.as_view()),
+    path('TrackListView/', TrackListView.as_view()),
 
     # path('tempStop/' ,tempStop),
     # contracts tahseal also

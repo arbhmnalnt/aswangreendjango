@@ -59,6 +59,9 @@ admin.site.register(collectionRecord, collectionRecordAdmin)
 class DepartementAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name',)
 
+class TrackAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'depart', 'person', 'created_at')
+
 class EmployeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('eNum', 'name', 'departement','jobTitle','salaryType')
     def get_employees(self, obj):
@@ -71,6 +74,7 @@ class ServiceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class AreaAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ('name', 'counter')
+
 
 class ClientAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     search_fields = ['name', 'serialNum']
@@ -102,6 +106,7 @@ class CollectOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 # Register your models here.
+admin.site.register(Track, TrackAdmin)
 
 admin.site.register(Departement, DepartementAdmin)
 admin.site.register(Employee, EmployeeAdmin)

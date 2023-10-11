@@ -1,4 +1,5 @@
 import json
+from django.contrib.auth.models import User
 from logging import exception
 from sre_parse import CATEGORIES
 from unicodedata import category
@@ -19,7 +20,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout as customLogout
+from DataEntry.views import addTrack
 # Create your views here.
+
 
 def logout(request):
     customLogout(request)
@@ -40,6 +43,8 @@ def login(request):
         # print(f"user => {user}")
         if user is not None:
             auth_login(request, user)
+            first_name = request.user.first_name
+            print(f'user firs name => ', first_name)
             return redirect('/cAccounts/profile')
             # message = f'Hello {user.username}! You have been logged in'
         else:
@@ -63,27 +68,41 @@ def login(request):
 
 
 def profile(request):
+    
     user = request.user
     request.session.setdefault('group', False)
     print(f"user groups => {user.groups.all()}")
-    if user.groups.filter(name="adminAll"):
-        request.session['group'] = "adminAll"
-        return redirect('/adminAll/')
 
-    elif user.groups.filter(name="dataEntryAdmin"):
+    if user.groups.filter(name="dataEntryAdmin"):
+        depart = "تسجيل الدخول كمدخل بيانات"
+        person = f"{user.first_name} {user.last_name}"
+        details = "تم تسجيل الدخول"
+        addTrack(depart, person, details)
         request.session['group'] = "dataEntryAdmin"
         return redirect('/DataEntry/')
 
     elif user.groups.filter(name="allAdmin"):
+        depart = "تسجيل الدخول كمطور"
+        person = f"{user.first_name} {user.last_name}"
+        details = "تم تسجيل الدخول"
+        addTrack(depart, person, details)
         request.session['group'] = "allAdmin"
         return redirect('/DataEntry/')
 
     elif user.groups.filter(name="tahsealAdmin"):
+        depart = "تسجيل الدخول كمسوؤل تحصيل"
+        person = f"{user.first_name} {user.last_name}"
+        details = "تم تسجيل الدخول"
+        addTrack(depart, person, details)
         request.session['group'] = "tahsealAdmin"
         # print("admin here => ")
         return redirect('/DataEntry/TcurrentCollectOrder/')
 
     elif user.groups.filter(name="customerService"):
+        depart = "تسجيل الدخول كمسئول خدمة عملاء"
+        person = f"{user.first_name} {user.last_name}"
+        details = "تم تسجيل الدخول"
+        addTrack(depart, person, details)
         request.session['group'] = "customerService"
         # print("admin here => ")
         return redirect('/cs/')
